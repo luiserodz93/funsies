@@ -28,13 +28,29 @@ The sides are **Limestone** (light) and **Basalt** (dark, with lantern-lit windo
 - Four seasons (Spring, Autumn, Winter, Night) with drifting petals, leaves, snow or fireflies
 - Synthesized sounds, game auto-saves, and it works offline once installed
 
+## Leaf & Letter (hangman)
+
+Hangman in the same stone garden as Arbor & Arch. Everything lives in [`hangman/`](hangman/), again as one HTML file with no build step and no dependencies.
+
+A carved limestone pillar and lintel stand in the courtyard with ivy climbing them. Each wrong letter drops a leaf from the ivy and adds a piece to a small stone figure. Solve the word before the last leaf falls.
+
+**Features**
+
+- Three levels: Seedling (10 leaves, shorter words), Willow (8 leaves, everyday words), Ancient Oak (6 leaves, long words)
+- Play the computer with word categories (Garden, Animals, Countries, Food, Science, Home, or any of them)
+- Play a friend on their own phone: type a secret word and an optional clue, and the game gives you a short code to text them. They enter the code under **New game → Play a friend → I have a code**. No server is involved; the word is scrambled into the code
+- Same phone: one player types the word hidden, then hands the phone over
+- Dig up a letter (costs one leaf) and a two-tap Give up
+- Win, loss and streak record, the same four seasons with drifting petals, leaves, snow or fireflies, synthesized sounds, auto-save, and offline play once installed
+
 ## Put it online with GitHub Pages
 
 1. Merge this branch into `main`. Pages can also serve another branch if you choose it in step 3.
 2. On GitHub, open the repo, then **Settings → Pages**.
 3. Under **Build and deployment**, set Source to **Deploy from a branch**, pick `main` and `/ (root)`, then click **Save**.
-4. After a minute or two the game is live at:
-   **https://luiserodz93.github.io/funsies/chess/**
+4. After a minute or two the games are live at:
+   - Chess: **https://luiserodz93.github.io/funsies/chess/**
+   - Hangman: **https://luiserodz93.github.io/funsies/hangman/**
 
 GitHub Pages on a free account requires the repository to be public.
 
