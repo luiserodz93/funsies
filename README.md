@@ -21,7 +21,7 @@ The sides are **Limestone** (light) and **Basalt** (dark, with lantern-lit windo
 
 - Full chess rules: castling, en passant, promotion, check, checkmate, stalemate, threefold repetition, the 50-move rule and insufficient material
 - Play against the computer at three levels: Seedling, Willow, Ancient Oak
-- Play a friend on their own phone by message: make a move, tap **Send your move**, and text the link. They open it, reply with their move, and send it back. The whole game lives in the link, so no server or account is needed
+- Play a friend live on their own phone: send one invite link, and while you both have the game open, moves appear on each other's screen instantly, with an online indicator. If someone steps away, the game catches up when they return. Moves relay through the free [ntfy.sh](https://ntfy.sh) service on a randomly named channel, so there is no server to run and no account. If the relay is unreachable, each move can still be sent as a link
 - Same phone pass & play, with three board views: Same side, Face to face (phone flat on a table) and Turn board
 - Tap or drag to move, legal-move markers, hints, undo, and a move list
 - Four seasons (Spring, Autumn, Winter, Night) with drifting petals, leaves, snow or fireflies
@@ -43,4 +43,4 @@ GitHub Pages on a free account requires the repository to be public.
 2. Tap **Share**, then **Add to Home Screen**.
 3. It now opens full screen like an app and keeps working without internet.
 
-To play a friend on their own phone, choose **New → Friend by message**. Game links open in Safari, even if you've added the game to your home screen. Sending the `index.html` file itself does not work well on an iPhone, because the Files app previews HTML without running the game.
+To play a friend on their own phone, choose **New → Play a friend**, make your move (or pick Basalt to let them start), and tap **Send** to text them the invite. Game links open in Safari, even if you've added the game to your home screen. Sending the `index.html` file itself does not work well on an iPhone, because the Files app previews HTML without running the game.

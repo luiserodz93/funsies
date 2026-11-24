@@ -137,6 +137,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .caps svg{width:20px; height:20px; margin-left:-6px}
 .caps svg:first-child{margin-left:0}
 .caps .adv{font-size:12px; font-weight:800; color:var(--ink2); margin-left:4px; font-variant-numeric:tabular-nums}
+.ld{display:inline-block; width:8px; height:8px; border-radius:50%; background:#3fae5a; margin-left:7px; vertical-align:middle; box-shadow:0 0 0 3px rgba(63,174,90,.22); animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{box-shadow:0 0 0 5px rgba(63,174,90,.08)}}
 .think{display:inline-flex; gap:3px; margin-left:4px; vertical-align:middle}
 .think i{width:5px; height:5px; border-radius:50%; background:var(--accent); animation:bob 1s infinite ease-in-out}
 .think i:nth-child(2){animation-delay:.15s}.think i:nth-child(3){animation-delay:.3s}
@@ -338,7 +340,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   <p class="lede">Play the computer, a friend on their own phone, or a friend sitting next to you.</p>
   <div class="seg" id="modeSeg">
     <button data-v="ai" id="modeAi">vs Computer</button>
-    <button data-v="link" id="modeLink">Friend by message</button>
+    <button data-v="link" id="modeLink">Play a friend</button>
     <button data-v="pvp" id="modePvp">Same phone</button>
   </div>
   <div id="aiOpts">
@@ -353,8 +355,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   </div>
   <div id="linkOpts">
     <h3>How it works</h3>
-    <p class="note" style="margin-top:0">Make your move, then tap <b>Send your move</b> to text the link by Messages or WhatsApp. Your friend opens it, plays, and sends it back. No account or app needed, and each link holds the whole game.</p>
-    <p class="note" id="linkWarn" hidden><b>This preview can't send game links.</b> Use the GitHub Pages version of the game for this mode.</p>
+    <p class="note" style="margin-top:0">Text your friend one invite link from Messages or WhatsApp. While you both have the game open, moves appear on each other's phone instantly. If one of you steps away, the game catches up when you come back. No account or app needed.</p>
+    <p class="note">Moves travel through the free ntfy.sh relay on a private, randomly named channel.</p>
+    <p class="note" id="linkWarn" hidden><b>This preview can't connect to other phones.</b> Use the GitHub Pages version of the game for this mode.</p>
     <h3>Play as</h3>
     <div class="seg" id="linkSideSeg">
       <button data-v="0">Limestone<br><small>you move first</small></button>
@@ -873,12 +876,16 @@ var Chess = (function () {
 
   /* ---------- state ---------- */
   var settings = { season: "auto", sound: true, ambience: !reduceMotion, moves: true, view: "fixed" };
-  var game = { mode: "pvp", ai: 1, level: 1, result: null, me: 0, id: "", sent: false };
+  var game = { mode: "pvp", ai: 1, level: 1, result: null, me: 0, id: "", sent: false, invited: false, pub: 0 };
   var pos = new C.Pos(), hist = [], keys = [], legal = [];
   var holdFlip = false, selected = -1, thinking = false, token = 0, manualFlip = false, hintMove = 0, drag = null, pending = null;
   var draft = { mode: "ai", level: 1, side: "0", linkSide: "0" };
   var ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
   var canLink = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname);
+  var clientId = (function () {
+    try { var c = localStorage.getItem("arbor-arch-client"); if (!c) { c = newId() + newId(); localStorage.setItem("arbor-arch-client", c); } return c; }
+    catch (e) { return newId() + newId(); }
+  })();
 
   function save() {
     try {
@@ -895,6 +902,7 @@ var Chess = (function () {
       game.mode = g.mode === "ai" || g.mode === "link" ? g.mode : "pvp";
       game.ai = g.ai ? 1 : 0; game.level = Math.min(2, Math.max(0, g.level | 0)); game.result = g.result || null;
       game.me = g.me ? 1 : 0; game.id = typeof g.id === "string" ? g.id : ""; game.sent = !!g.sent;
+      game.invited = !!g.invited; game.pub = g.pub | 0;
     }
     (data.moves || []).every(function (m) {
       var lg = pos.legal();
@@ -1218,7 +1226,7 @@ var Chess = (function () {
 
   function sideName(c) {
     if (game.mode === "ai") return c === game.ai ? LEVELS[game.level].name : "You";
-    if (game.mode === "link") return c === game.me ? "You" : "Friend";
+    if (game.mode === "link") return c === game.me ? "You" : "Friend" + (friendHere() ? '<i class="ld" title="Online"></i>' : "");
     return SIDE[c];
   }
   function renderPlayers() {
@@ -1237,9 +1245,10 @@ var Chess = (function () {
       } else if (pos.turn === c) {
         if (thinking && game.mode === "ai" && c === game.ai) stat = 'Thinking<span class="think"><i></i><i></i><i></i></span>';
         else if (pos.inCheck()) { stat = "In check. Protect the Sanctuary"; alert = true; }
-        else if (game.mode === "link" && c !== game.me) stat = game.sent ? "Their move. Waiting for their link" : "Send them your move below";
+        else if (game.mode === "link" && c !== game.me) stat = friendHere() ? "Their move. Online now" : !game.sent ? (hist.length ? "Send them your move below" : "Send them the invite below") : live.connected ? "Their move. They'll see it when they open the game" : "Their move. Waiting for their link";
         else stat = game.mode === "pvp" ? "To move" : "Your move";
-      } else stat = game.mode === "pvp" ? "Waiting" : SIDE[c];
+      } else if (game.mode === "link" && c !== game.me && live.connected) stat = friendHere() ? "Online now" : game.invited ? "Away" : "Not joined yet";
+      else stat = game.mode === "pvp" ? "Waiting" : SIDE[c];
       var html = '<div class="avatar' + (c ? " b" : "") + '">' + pieceSVG(K | (c << 3)) + "</div>" +
         '<div class="pinfo"><div class="pname">' + sideName(c) + '</div><div class="pstat' + (alert ? " alert" : "") + '">' + stat + "</div></div>" +
         '<div class="caps">' + caps.map(function (t) { return pieceSVG(t | ((c ^ 1) << 3)); }).join("") + (adv > 0 ? '<span class="adv">+' + adv + "</span>" : "") + "</div>";
@@ -1268,7 +1277,7 @@ var Chess = (function () {
   function renderTools() {
     $("undoBtn").disabled = !canUndo();
     $("hintBtn").disabled = !!game.result || thinking || !humanTurn();
-    $("modeLabel").textContent = game.mode === "ai" ? "vs " + LEVELS[game.level].name : game.mode === "link" ? "Friend by message" : "Same phone";
+    $("modeLabel").textContent = game.mode === "ai" ? "vs " + LEVELS[game.level].name : game.mode === "link" ? (hasLive ? (live.connected ? "Live with a friend" : "Friend · connecting") : "Friend by message") : "Same phone";
     var ns = needSend();
     $("sendBtn").hidden = !ns; $("history").hidden = ns;
     if (ns) $("sendLabel").textContent = !hist.length ? "Send invite to your friend" : game.result ? (game.result.type === "resign" ? "Send your resignation" : "Send the final move") : "Send your move";
@@ -1299,29 +1308,42 @@ var Chess = (function () {
     } catch (e) {}
   }
   function newId() { var s = ""; for (var i = 0; i < 8; i++) s += ABC[(Math.random() * 64) | 0]; return s; }
-  function readLink() {
-    var mt = /^#g=([A-Za-z0-9_-]{4,16})\.([A-Za-z0-9_~-]*)(?:\.r([01]))?$/.exec(location.hash);
+  function decodeLink(h) {
+    var mt = /^g=([A-Za-z0-9_-]{4,16})\.([A-Za-z0-9_~-]*)(?:\.r([01]))?$/.exec(h);
     if (!mt) return null;
-    var id = mt[1], code = mt[2], resign = mt[3] == null ? -1 : +mt[3], p = new C.Pos(), ms = [], i = 0;
+    var code = mt[2], p = new C.Pos(), ms = [], i = 0;
     while (i < code.length) {
       var f = ABC.indexOf(code[i]), t = ABC.indexOf(code[i + 1]), pr = 0;
       i += 2;
       if (code[i] === "~") { pr = "..nbrq".indexOf(code[i + 1]); i += 2; }
       var m = p.legal().filter(function (x) { return (x & 63) === f && ((x >> 6) & 63) === t && ((x >> 12) & 7) === pr; })[0];
-      if (!m) { toast("That game link is damaged. Ask your friend to send it again."); return null; }
+      if (!m) return { bad: true };
       ms.push(m); p.make(m);
     }
-    var same = game.mode === "link" && game.id === id, before = same ? hist.length : 0;
-    if (same && ms.length < hist.length) { syncURL(); return { news: 0 }; }
+    return { id: mt[1], ms: ms, resign: mt[3] == null ? -1 : +mt[3] };
+  }
+  function adopt(ms) {
     token++; thinking = false;
     pos = new C.Pos(); hist = []; keys = [];
     ms.forEach(function (m) { record(m, pos.legal()); });
     legal = pos.legal();
-    var me = same ? game.me : resign >= 0 ? resign ^ 1 : pos.turn;
-    game = { mode: "link", ai: me ^ 1, me: me, id: id, level: game.level, sent: true, result: null };
-    game.result = resign >= 0 ? { type: "resign", winner: resign ^ 1 } : checkEnd();
-    selected = -1; hintMove = 0; manualFlip = false;
+    selected = -1; hintMove = 0;
     pieceEls.forEach(function (el) { el.remove(); }); pieceEls.clear();
+    return checkEnd();
+  }
+  function readLink() {
+    if (!/^#g=/.test(location.hash)) return null;
+    var L = decodeLink(location.hash.slice(1));
+    if (!L || L.bad) { toast("That game link is damaged. Ask your friend to send it again."); return null; }
+    var id = L.id, resign = L.resign;
+    var same = game.mode === "link" && game.id === id, before = same ? hist.length : 0;
+    if (same && L.ms.length < hist.length) { syncURL(); return { news: 0 }; }
+    var keep = same ? { me: game.me, pub: game.pub } : null;
+    var res = adopt(L.ms);
+    var me = keep ? keep.me : resign >= 0 ? resign ^ 1 : pos.turn;
+    game = { mode: "link", ai: me ^ 1, me: me, id: id, level: game.level, sent: true, result: res, invited: true, pub: Math.max(keep ? keep.pub : 0, hist.length) };
+    if (resign >= 0) game.result = { type: "resign", winner: resign ^ 1 };
+    manualFlip = false;
     save();
     var last = hist[hist.length - 1];
     return { news: hist.length - before + (resign >= 0 ? 1 : 0), last: last, fresh: !same, resign: resign };
@@ -1339,7 +1361,10 @@ var Chess = (function () {
     var text = !last ? "Let's play chess in Arbor & Arch. You have the first move:" :
       game.result ? (game.result.type === "resign" ? "I resign. Good game! Arbor & Arch:" : "Final move: " + last.san + ". Good game! Arbor & Arch:") :
       "My move: " + last.san + ". Your turn in Arbor & Arch:";
-    var done = function (msg) { game.sent = true; save(); render(); toast(msg || "Sent. Open their reply link when it arrives."); };
+    var done = function (msg) {
+      game.sent = true; game.invited = true; save(); render();
+      toast(msg || (hasLive ? "Sent. Your friend joins as soon as they open it." : "Sent. Open their reply link when it arrives."));
+    };
     var copy = function () {
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text + " " + url).then(function () { done("Link copied. Paste it into a message to your friend."); }, function () { toast(url); });
       else toast(url);
@@ -1370,7 +1395,79 @@ var Chess = (function () {
     return null;
   }
 
-  function applyMove(m) {
+  /* ---------- live play: game states relayed through ntfy.sh (public, account-free pub/sub) ---------- */
+  var RELAY = window.ARBOR_RELAY || "https://ntfy.sh/";
+  var hasLive = canLink && typeof EventSource !== "undefined" && typeof fetch !== "undefined";
+  var live = { es: null, connected: false, friend: "", friendAt: 0, hi: false };
+  function topic() { return "arborarch_" + game.id; }
+  function friendHere() { return game.mode === "link" && live.friend === "here" && Date.now() / 1000 - live.friendAt < 900; }
+  function disconnect() { if (live.es) { live.es.close(); live.es = null; } live.connected = false; live.friend = ""; }
+  function connect() {
+    disconnect();
+    if (game.mode !== "link" || !hasLive || !game.id) return;
+    var es;
+    try { es = new EventSource(RELAY + topic() + "/sse?since=all"); } catch (e) { return; }
+    live.es = es; live.hi = false;
+    es.onopen = function () {
+      if (live.es !== es) return;
+      live.connected = true;
+      if (!live.hi) { live.hi = true; publish("hi").catch(function () {}); }
+      if (game.pub < hist.length && hist.length && hist[hist.length - 1].color === game.me) pushState();
+      renderPlayers(); renderTools();
+    };
+    es.onerror = function () { if (live.es !== es) return; live.connected = false; renderPlayers(); renderTools(); };
+    es.onmessage = function (e) { if (live.es !== es) return; var d; try { d = JSON.parse(e.data); } catch (x) { return; } onRelay(d); };
+  }
+  function publish(t) {
+    if (!hasLive || game.mode !== "link") return Promise.reject(new Error("offline"));
+    var body = JSON.stringify({ v: 1, t: t, from: clientId, g: linkURL().split("#")[1] });
+    return fetch(RELAY + topic(), { method: "POST", body: body, keepalive: t === "bye" }).then(function (r) { if (!r.ok) throw new Error("relay " + r.status); });
+  }
+  function pushState() {
+    var n = hist.length;
+    publish("s").then(function () {
+      game.pub = Math.max(game.pub, n);
+      if (game.invited) game.sent = true;
+      save(); renderTools(); renderPlayers();
+    }, function () { game.sent = false; save(); renderTools(); renderPlayers(); });
+  }
+  function onRelay(d) {
+    if (!d || (d.event && d.event !== "message") || typeof d.message !== "string") return;
+    var p; try { p = JSON.parse(d.message); } catch (x) { return; }
+    if (!p || p.v !== 1 || typeof p.g !== "string") return;
+    mergeRemote(p.g);
+    if (p.from === clientId) return;
+    var age = Date.now() / 1000 - (d.time || 0), wasHere = friendHere();
+    game.invited = true;
+    if (game.pub >= hist.length && !game.result) game.sent = true;
+    if (age < 900) { live.friend = p.t === "bye" ? "away" : "here"; live.friendAt = d.time; }
+    else if (!live.friend) live.friend = "away";
+    if (p.t === "hi" && age < 120) {
+      publish("here").catch(function () {});
+      if (!wasHere) toast("Your friend is here. Moves now sync live.");
+    }
+    save(); renderPlayers(); renderTools();
+  }
+  function mergeRemote(g) {
+    var L = decodeLink(g);
+    if (!L || L.bad || L.id !== game.id) return;
+    var n = hist.length, i;
+    for (i = 0; i < Math.min(n, L.ms.length); i++) if (hist[i].m !== L.ms[i]) return;
+    if (L.ms.length === n + 1 && !game.result) applyMove(L.ms[n], true);
+    else if (L.ms.length > n) {
+      game.result = adopt(L.ms);
+      game.pub = Math.max(game.pub, hist.length); game.sent = true;
+      render(); save();
+      if (game.result) setTimeout(showOver, 700);
+    }
+    if (L.resign >= 0 && !(game.result && game.result.type === "resign")) {
+      game.result = { type: "resign", winner: L.resign ^ 1 }; game.sent = true;
+      render(); save(); SFX.draw();
+      setTimeout(showOver, 400);
+    }
+  }
+
+  function applyMove(m, remote) {
     var from = m & 63, to = (m >> 6) & 63, pr = (m >> 12) & 7, fg = m >> 15;
     var entry = record(m, legal);
     legal = pos.legal();
@@ -1387,7 +1484,11 @@ var Chess = (function () {
       var rel = pieceEls.get(rk[0]); if (rel) { pieceEls.delete(rk[0]); pieceEls.set(rk[1], rel); }
     }
     game.result = checkEnd();
-    if (game.mode === "link") { game.sent = false; syncURL(); }
+    if (game.mode === "link") {
+      game.sent = !!remote || (game.invited && live.connected);
+      if (remote) game.pub = Math.max(game.pub, hist.length);
+      syncURL();
+    }
     holdFlip = game.mode === "pvp" && settings.view === "auto" && !game.result;
     render();
     var c = squareCenter(to);
@@ -1402,6 +1503,7 @@ var Chess = (function () {
     if (pr) burstAt(c.x, c.y, 22, true);
     announce(entry);
     save();
+    if (game.mode === "link" && !remote) pushState();
     if (holdFlip) setTimeout(function () { holdFlip = false; selected = -1; render(); }, 650);
     maybeAI();
   }
@@ -1414,7 +1516,7 @@ var Chess = (function () {
   function canUndo() {
     if (!hist.length) return false;
     if (game.mode === "ai") return hist.some(function (h) { return h.color !== game.ai; });
-    if (game.mode === "link") return !game.sent && hist[hist.length - 1].color === game.me && !(game.result && game.result.type === "resign");
+    if (game.mode === "link") return !game.sent && hist.length > game.pub && hist[hist.length - 1].color === game.me && !(game.result && game.result.type === "resign");
     return true;
   }
   function undoOne() { pos.unmake(); hist.pop(); keys.pop(); if (keys.length === 1 && !hist.length) keys = []; }
@@ -1648,8 +1750,9 @@ var Chess = (function () {
   function newGame(mode, level, human) {
     token++; thinking = false;
     pos = new C.Pos(); hist = []; keys = []; legal = pos.legal();
-    game = { mode: mode, ai: human ^ 1, level: level, result: null, me: human, id: mode === "link" ? newId() : "", sent: false };
+    game = { mode: mode, ai: human ^ 1, level: level, result: null, me: human, id: mode === "link" ? newId() + newId().slice(0, 4) : "", sent: false, invited: false, pub: 0 };
     syncURL();
+    if (mode === "link") connect(); else disconnect();
     if (mode === "link") setTimeout(function () { toast(human === 0 ? "Make your first move, then send it." : "Send the invite. Your friend moves first."); }, 500);
     selected = -1; hintMove = 0; manualFlip = false;
     pieceEls.forEach(function (el) { el.remove(); }); pieceEls.clear();
@@ -1687,7 +1790,7 @@ var Chess = (function () {
     var loser = game.mode === "ai" ? game.ai ^ 1 : game.mode === "link" ? game.me : pos.turn;
     token++; thinking = false;
     game.result = { type: "resign", winner: loser ^ 1 };
-    if (game.mode === "link") { game.sent = false; syncURL(); }
+    if (game.mode === "link") { game.sent = false; syncURL(); pushState(); }
     closeSheets(); render(); save(); SFX.draw();
     setTimeout(showOver, 300);
   });
@@ -1736,12 +1839,18 @@ var Chess = (function () {
 
   /* ---------- boot ---------- */
   window.addEventListener("resize", function () { resizeFx(); });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) kickFx(); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) kickFx();
+    if (game.mode !== "link" || !hasLive) return;
+    if (document.hidden) { publish("bye").catch(function () {}); disconnect(); }
+    else connect();
+  });
   resizeFx();
   var restored = load();
   legal = pos.legal();
   var incoming = readLink();
   if (!incoming) syncURL();
+  connect();
   applySeason();
   render();
   if (incoming) announceLink(incoming);
@@ -1750,6 +1859,7 @@ var Chess = (function () {
   window.addEventListener("hashchange", function () {
     var r = readLink();
     if (!r) return;
+    connect();
     closeSheets(); render(); announceLink(r);
   });
 
