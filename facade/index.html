@@ -240,8 +240,8 @@ body.is3d .tool{opacity:.55}
 .card .cbtns .danger{color:var(--check)}
 .card .cbtns .danger[data-armed]{background:var(--check); color:#fff; border-color:var(--check)}
 .help{margin:0; padding-left:0; list-style:none; counter-reset:h; display:grid; gap:12px; font-size:14px; line-height:1.5; color:var(--ink2)}
-.help li{counter-increment:h; display:grid; grid-template-columns:26px 1fr}
-.help li::before{content:counter(h, decimal-leading-zero); font-family:var(--font-mono); font-size:11px; color:var(--ink3); padding-top:3px}
+.help li{counter-increment:h; position:relative; padding-left:26px}
+.help li::before{content:counter(h, decimal-leading-zero); position:absolute; left:0; top:3px; font-family:var(--font-mono); font-size:11px; line-height:1.5; color:var(--ink3)}
 .help b{font-weight:600; color:var(--ink)}
 .linkbox{width:100%; border:1px dashed var(--ink3); background:transparent; border-radius:8px; padding:10px; font-family:var(--font-mono); font-size:12px; word-break:break-all; max-height:90px; overflow:auto; -webkit-user-select:all; user-select:all}
 .toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--panel-solid); padding:10px 16px; border-radius:10px; font-weight:500; font-size:13.5px; line-height:1.4; box-shadow:0 12px 30px -12px var(--shadow); max-width:calc(100vw - 32px); width:max-content; text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere; pointer-events:none}
@@ -3963,7 +3963,7 @@ body.is3d .tool{opacity:.55}
   try { const c = JSON.parse(localStorage.getItem(STORE + "-clip") || "null"); if (c && Array.isArray(c.parts) && c.parts.length <= 2000) clip = { mode: c.mode === "plan" ? "plan" : "front", parts: c.parts }; } catch (e) {}
   renderDock();
   readLink();
-  if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => openSheet("helpSheet"), 300); }
+  if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => toast("Welcome. Pick a part below and tap the board to place it. The ? button explains everything."), 400); }
   window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG, get v3() { return v3; } };
 
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
