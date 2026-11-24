@@ -88,6 +88,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{height:100%}
 body{
   margin:0; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px;
@@ -186,6 +187,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .tool svg{width:22px; height:22px}
 .tool:disabled{opacity:.4; cursor:default}
 .tool:not(:disabled):active{transform:scale(.96)}
+.send{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:44px; border:0; border-radius:12px; background:var(--accent); color:var(--accent-ink); font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 8px 20px -10px var(--accent); animation:nudge 2.4s ease-in-out infinite}
+.send svg{width:20px; height:20px}
+@keyframes nudge{0%,80%,100%{transform:none}88%{transform:translateY(-2px)}}
 .history{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; padding:2px 0; min-height:28px; align-items:center; font-variant-numeric:tabular-nums; -webkit-mask-image:linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent); mask-image:linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent); padding-inline:10px}
 .history::-webkit-scrollbar{display:none}
 .history .n{color:var(--ink2); font-size:12px; font-weight:700; margin-left:6px}
@@ -319,6 +323,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <button class="tool" id="guideBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10c0-4 3.6-7 8-7s8 3 8 7v11"/><path d="M9 21v-8a3 3 0 0 1 6 0v8"/><path d="M2 21h20"/></svg><span>Pieces</span></button>
     </nav>
 
+    <button class="send" id="sendBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10 14"/><path d="M21 3 14 21l-4-7-7-4 18-7Z"/></svg><span id="sendLabel">Send your move</span></button>
     <div class="history" id="history" aria-label="Move list"></div>
   </div>
 </div>
@@ -330,10 +335,11 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 <section class="sheet" id="newSheet" hidden role="dialog" aria-labelledby="newTitle">
   <div class="grab"></div>
   <h2 id="newTitle">New game</h2>
-  <p class="lede">Share one phone with a friend, or play against the garden itself.</p>
+  <p class="lede">Play the computer, a friend on their own phone, or a friend sitting next to you.</p>
   <div class="seg" id="modeSeg">
-    <button data-v="pvp" id="modePvp">Pass &amp; play</button>
     <button data-v="ai" id="modeAi">vs Computer</button>
+    <button data-v="link" id="modeLink">Friend by message</button>
+    <button data-v="pvp" id="modePvp">Same phone</button>
   </div>
   <div id="aiOpts">
     <h3>Opponent</h3>
@@ -343,6 +349,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <button data-v="0" id="side0">Limestone<br><small>moves first</small></button>
       <button data-v="1" id="side1">Basalt</button>
       <button data-v="r" id="sideR">Surprise me</button>
+    </div>
+  </div>
+  <div id="linkOpts">
+    <h3>How it works</h3>
+    <p class="note" style="margin-top:0">Make your move, then tap <b>Send your move</b> to text the link by Messages or WhatsApp. Your friend opens it, plays, and sends it back. No account or app needed, and each link holds the whole game.</p>
+    <p class="note" id="linkWarn" hidden><b>This preview can't send game links.</b> Use the GitHub Pages version of the game for this mode.</p>
+    <h3>Play as</h3>
+    <div class="seg" id="linkSideSeg">
+      <button data-v="0">Limestone<br><small>you move first</small></button>
+      <button data-v="1">Basalt<br><small>friend moves first</small></button>
     </div>
   </div>
   <div id="pvpOpts">
@@ -355,7 +371,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     <p class="note viewNote"></p>
   </div>
   <button class="primary" id="startBtn">Start game</button>
-  <button class="secondary" data-close>Keep playing this one</button>
+  <button class="secondary" data-close>Not now</button>
 </section>
 
 <!-- Menu -->
@@ -857,10 +873,12 @@ var Chess = (function () {
 
   /* ---------- state ---------- */
   var settings = { season: "auto", sound: true, ambience: !reduceMotion, moves: true, view: "fixed" };
-  var game = { mode: "pvp", ai: 1, level: 1, result: null };
+  var game = { mode: "pvp", ai: 1, level: 1, result: null, me: 0, id: "", sent: false };
   var pos = new C.Pos(), hist = [], keys = [], legal = [];
   var holdFlip = false, selected = -1, thinking = false, token = 0, manualFlip = false, hintMove = 0, drag = null, pending = null;
-  var draft = { mode: "pvp", level: 1, side: "0" };
+  var draft = { mode: "ai", level: 1, side: "0", linkSide: "0" };
+  var ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  var canLink = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname);
 
   function save() {
     try {
@@ -872,7 +890,12 @@ var Chess = (function () {
     try { data = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
     if (!data) return false;
     if (data.settings) for (var k in settings) if (k in data.settings) settings[k] = data.settings[k];
-    if (data.game) { game.mode = data.game.mode === "ai" ? "ai" : "pvp"; game.ai = data.game.ai ? 1 : 0; game.level = Math.min(2, Math.max(0, data.game.level | 0)); game.result = data.game.result || null; }
+    if (data.game) {
+      var g = data.game;
+      game.mode = g.mode === "ai" || g.mode === "link" ? g.mode : "pvp";
+      game.ai = g.ai ? 1 : 0; game.level = Math.min(2, Math.max(0, g.level | 0)); game.result = g.result || null;
+      game.me = g.me ? 1 : 0; game.id = typeof g.id === "string" ? g.id : ""; game.sent = !!g.sent;
+    }
     (data.moves || []).every(function (m) {
       var lg = pos.legal();
       if (lg.indexOf(m) < 0) return false;
@@ -1135,6 +1158,7 @@ var Chess = (function () {
   function flipped() {
     var f;
     if (game.mode === "ai") f = game.ai === 0;
+    else if (game.mode === "link") f = game.me === 1;
     else if (settings.view === "auto") f = (holdFlip ? pos.turn ^ 1 : pos.turn) === 1;
     else f = false;
     return manualFlip ? !f : f;
@@ -1194,6 +1218,7 @@ var Chess = (function () {
 
   function sideName(c) {
     if (game.mode === "ai") return c === game.ai ? LEVELS[game.level].name : "You";
+    if (game.mode === "link") return c === game.me ? "You" : "Friend";
     return SIDE[c];
   }
   function renderPlayers() {
@@ -1212,8 +1237,9 @@ var Chess = (function () {
       } else if (pos.turn === c) {
         if (thinking && game.mode === "ai" && c === game.ai) stat = 'Thinking<span class="think"><i></i><i></i><i></i></span>';
         else if (pos.inCheck()) { stat = "In check. Protect the Sanctuary"; alert = true; }
-        else stat = game.mode === "ai" ? "Your move" : "To move";
-      } else stat = game.mode === "ai" ? SIDE[c] : "Waiting";
+        else if (game.mode === "link" && c !== game.me) stat = game.sent ? "Their move. Waiting for their link" : "Send them your move below";
+        else stat = game.mode === "pvp" ? "To move" : "Your move";
+      } else stat = game.mode === "pvp" ? "Waiting" : SIDE[c];
       var html = '<div class="avatar' + (c ? " b" : "") + '">' + pieceSVG(K | (c << 3)) + "</div>" +
         '<div class="pinfo"><div class="pname">' + sideName(c) + '</div><div class="pstat' + (alert ? " alert" : "") + '">' + stat + "</div></div>" +
         '<div class="caps">' + caps.map(function (t) { return pieceSVG(t | ((c ^ 1) << 3)); }).join("") + (adv > 0 ? '<span class="adv">+' + adv + "</span>" : "") + "</div>";
@@ -1224,7 +1250,12 @@ var Chess = (function () {
   }
   function renderHistory() {
     var el = $("history");
-    if (!hist.length) { el.innerHTML = '<span class="empty">' + (game.mode === "ai" && game.ai === 0 ? "The garden opens the game." : "Limestone opens. Tap a piece, then a seed.") + "</span>"; return; }
+    if (!hist.length) {
+      var e0 = game.mode === "ai" && game.ai === 0 ? "The computer opens the game." :
+        game.mode === "link" ? (game.me === 1 ? "Your friend plays Limestone and moves first." : "You move first. Tap a piece, then a seed.") :
+        "Limestone opens. Tap a piece, then a seed.";
+      el.innerHTML = '<span class="empty">' + e0 + "</span>"; return;
+    }
     var h = "";
     hist.forEach(function (x, i) {
       if (i % 2 === 0) h += '<span class="n">' + (i / 2 + 1) + ".</span>";
@@ -1237,12 +1268,85 @@ var Chess = (function () {
   function renderTools() {
     $("undoBtn").disabled = !canUndo();
     $("hintBtn").disabled = !!game.result || thinking || !humanTurn();
-    $("modeLabel").textContent = game.mode === "ai" ? "vs " + LEVELS[game.level].name : "Pass & play";
+    $("modeLabel").textContent = game.mode === "ai" ? "vs " + LEVELS[game.level].name : game.mode === "link" ? "Friend by message" : "Same phone";
+    var ns = needSend();
+    $("sendBtn").hidden = !ns; $("history").hidden = ns;
+    if (ns) $("sendLabel").textContent = !hist.length ? "Send invite to your friend" : game.result ? (game.result.type === "resign" ? "Send your resignation" : "Send the final move") : "Send your move";
   }
   function render() { renderSquares(); reconcile(); renderPlayers(); renderHistory(); renderTools(); }
 
   /* ---------- game flow ---------- */
-  function humanTurn() { return game.mode === "pvp" || pos.turn !== game.ai; }
+  function humanTurn() {
+    if (game.mode === "link") return pos.turn === game.me;
+    return game.mode === "pvp" || pos.turn !== game.ai;
+  }
+  function needSend() { return game.mode === "link" && !game.sent && (pos.turn !== game.me || !!game.result); }
+
+  /* ---------- friend-by-message links: the whole game lives in the URL hash ---------- */
+  function encMoves() {
+    return hist.map(function (h) { var m = h.m, pr = (m >> 12) & 7; return ABC[m & 63] + ABC[(m >> 6) & 63] + (pr ? "~" + "..nbrq"[pr] : ""); }).join("");
+  }
+  function linkURL() {
+    var s = "g=" + game.id + "." + encMoves();
+    if (game.result && game.result.type === "resign") s += ".r" + (game.result.winner ^ 1);
+    return location.href.split("#")[0] + "#" + s;
+  }
+  function syncURL() {
+    if (!canLink) return;
+    try {
+      if (game.mode === "link") history.replaceState(null, "", linkURL());
+      else if (/^#g=/.test(location.hash)) history.replaceState(null, "", location.href.split("#")[0]);
+    } catch (e) {}
+  }
+  function newId() { var s = ""; for (var i = 0; i < 8; i++) s += ABC[(Math.random() * 64) | 0]; return s; }
+  function readLink() {
+    var mt = /^#g=([A-Za-z0-9_-]{4,16})\.([A-Za-z0-9_~-]*)(?:\.r([01]))?$/.exec(location.hash);
+    if (!mt) return null;
+    var id = mt[1], code = mt[2], resign = mt[3] == null ? -1 : +mt[3], p = new C.Pos(), ms = [], i = 0;
+    while (i < code.length) {
+      var f = ABC.indexOf(code[i]), t = ABC.indexOf(code[i + 1]), pr = 0;
+      i += 2;
+      if (code[i] === "~") { pr = "..nbrq".indexOf(code[i + 1]); i += 2; }
+      var m = p.legal().filter(function (x) { return (x & 63) === f && ((x >> 6) & 63) === t && ((x >> 12) & 7) === pr; })[0];
+      if (!m) { toast("That game link is damaged. Ask your friend to send it again."); return null; }
+      ms.push(m); p.make(m);
+    }
+    var same = game.mode === "link" && game.id === id, before = same ? hist.length : 0;
+    if (same && ms.length < hist.length) { syncURL(); return { news: 0 }; }
+    token++; thinking = false;
+    pos = new C.Pos(); hist = []; keys = [];
+    ms.forEach(function (m) { record(m, pos.legal()); });
+    legal = pos.legal();
+    var me = same ? game.me : resign >= 0 ? resign ^ 1 : pos.turn;
+    game = { mode: "link", ai: me ^ 1, me: me, id: id, level: game.level, sent: true, result: null };
+    game.result = resign >= 0 ? { type: "resign", winner: resign ^ 1 } : checkEnd();
+    selected = -1; hintMove = 0; manualFlip = false;
+    pieceEls.forEach(function (el) { el.remove(); }); pieceEls.clear();
+    save();
+    var last = hist[hist.length - 1];
+    return { news: hist.length - before + (resign >= 0 ? 1 : 0), last: last, fresh: !same, resign: resign };
+  }
+  function announceLink(r) {
+    if (!r) return;
+    if (r.resign >= 0 && r.resign !== game.me) { toast("Your friend resigned. You win!"); return; }
+    if (game.result) { setTimeout(showOver, 700); return; }
+    if (!hist.length) { toast(game.me === 0 ? "Your friend invited you. You play Limestone and move first." : "Waiting for your friend's first move."); return; }
+    if (r.news && r.last && r.last.color !== game.me) toast("Your friend played " + r.last.san + ". Your move.");
+    else if (r.fresh && pos.turn !== game.me) toast("This is the link you sent. Waiting for your friend.");
+  }
+  function sendLink() {
+    var url = linkURL(), last = hist[hist.length - 1];
+    var text = !last ? "Let's play chess in Arbor & Arch. You have the first move:" :
+      game.result ? (game.result.type === "resign" ? "I resign. Good game! Arbor & Arch:" : "Final move: " + last.san + ". Good game! Arbor & Arch:") :
+      "My move: " + last.san + ". Your turn in Arbor & Arch:";
+    var done = function (msg) { game.sent = true; save(); render(); toast(msg || "Sent. Open their reply link when it arrives."); };
+    var copy = function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text + " " + url).then(function () { done("Link copied. Paste it into a message to your friend."); }, function () { toast(url); });
+      else toast(url);
+    };
+    if (navigator.share) navigator.share({ title: "Arbor & Arch", text: text, url: url }).then(function () { done(); }, function (e) { if (!e || e.name !== "AbortError") copy(); });
+    else copy();
+  }
   function record(m, lg) {
     var from = m & 63, to = (m >> 6) & 63, fg = m >> 15, us = pos.turn;
     var capSq = (fg & 1) ? to + (us ? -8 : 8) : to;
@@ -1283,6 +1387,7 @@ var Chess = (function () {
       var rel = pieceEls.get(rk[0]); if (rel) { pieceEls.delete(rk[0]); pieceEls.set(rk[1], rel); }
     }
     game.result = checkEnd();
+    if (game.mode === "link") { game.sent = false; syncURL(); }
     holdFlip = game.mode === "pvp" && settings.view === "auto" && !game.result;
     render();
     var c = squareCenter(to);
@@ -1309,6 +1414,7 @@ var Chess = (function () {
   function canUndo() {
     if (!hist.length) return false;
     if (game.mode === "ai") return hist.some(function (h) { return h.color !== game.ai; });
+    if (game.mode === "link") return !game.sent && hist[hist.length - 1].color === game.me && !(game.result && game.result.type === "resign");
     return true;
   }
   function undoOne() { pos.unmake(); hist.pop(); keys.pop(); if (keys.length === 1 && !hist.length) keys = []; }
@@ -1322,6 +1428,7 @@ var Chess = (function () {
     } else undoOne();
     game.result = null; selected = -1; hintMove = 0;
     legal = pos.legal();
+    syncURL();
     tock(0.5, 0.7);
     render(); save();
     maybeAI();
@@ -1478,8 +1585,9 @@ var Chess = (function () {
   function overCopy() {
     var r = game.result; if (!r) return { title: "", text: "" };
     var w = r.winner;
-    var name = function (c) { return game.mode === "ai" ? (c === game.ai ? LEVELS[game.level].name : "You") : SIDE[c]; };
+    var name = function (c) { return game.mode === "ai" ? (c === game.ai ? LEVELS[game.level].name : "You") : game.mode === "link" ? (c === game.me ? "You" : "Your friend") : SIDE[c]; };
     if (r.type === "mate") {
+      if (game.mode === "link") return w === game.me ? { title: "Checkmate!", text: "You win. Send the final move so your friend can see it." } : { title: "Checkmate", text: "Your friend wins this one. Start a rematch from New." };
       if (game.mode === "ai") return w === game.ai ? { title: "Checkmate", text: LEVELS[game.level].name + " wins this time. The garden grows back. Try again?" } : { title: "Checkmate!", text: "You toppled " + LEVELS[game.level].name + ". The whole courtyard is in bloom." };
       return { title: "Checkmate!", text: SIDE[w] + " wins. " + SIDE[w ^ 1] + "'s Sanctuary is surrounded." };
     }
@@ -1494,12 +1602,18 @@ var Chess = (function () {
     $("overCrest").innerHTML = '<div class="crest">' + (w === -1 ? pieceSVG(Q) : pieceSVG(K | (w << 3))) + "</div>";
     openSheet("overSheet");
   }
-  $("againBtn").addEventListener("click", function () { closeSheets(); newGame(game.mode, game.level, game.mode === "ai" ? (game.ai ^ 1) : 0); });
+  $("againBtn").addEventListener("click", function () { closeSheets(); newGame(game.mode, game.level, game.mode === "ai" ? (game.ai ^ 1) : game.mode === "link" ? game.me : 0); });
 
   /* new game sheet */
   function paintNew() {
     $("modePvp").setAttribute("aria-pressed", draft.mode === "pvp");
     $("modeAi").setAttribute("aria-pressed", draft.mode === "ai");
+    $("modeLink").setAttribute("aria-pressed", draft.mode === "link");
+    $("linkOpts").hidden = draft.mode !== "link";
+    $("linkWarn").hidden = canLink;
+    $("startBtn").disabled = draft.mode === "link" && !canLink;
+    $("startBtn").style.opacity = $("startBtn").disabled ? ".45" : "";
+    document.querySelectorAll("#linkSideSeg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.v === draft.linkSide); });
     $("aiOpts").hidden = draft.mode !== "ai";
     $("pvpOpts").hidden = draft.mode !== "pvp";
     $("levels").innerHTML = LEVELS.map(function (l, i) {
@@ -1514,23 +1628,29 @@ var Chess = (function () {
   }
   $("modeSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { draft.mode = b.dataset.v; paintNew(); } });
   $("levels").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { draft.level = +b.dataset.i; paintNew(); } });
+  $("linkSideSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { draft.linkSide = b.dataset.v; paintNew(); } });
+  $("sendBtn").addEventListener("click", sendLink);
   $("sideSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { draft.side = b.dataset.v; paintNew(); } });
   document.querySelectorAll(".viewSeg").forEach(function (s) {
     s.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; settings.view = b.dataset.v; manualFlip = false; paintView(); render(); save(); });
   });
   $("newBtn").addEventListener("click", function () {
     draft.mode = game.mode; draft.level = game.level; draft.side = game.mode === "ai" ? String(game.ai ^ 1) : draft.side;
+    if (game.mode === "link") draft.linkSide = String(game.me);
     paintNew(); openSheet("newSheet");
   });
   $("startBtn").addEventListener("click", function () {
-    var human = draft.side === "r" ? (Math.random() < 0.5 ? 0 : 1) : +draft.side;
+    if (draft.mode === "link" && !canLink) return;
+    var human = draft.mode === "link" ? +draft.linkSide : draft.side === "r" ? (Math.random() < 0.5 ? 0 : 1) : +draft.side;
     closeSheets();
     newGame(draft.mode, draft.level, human);
   });
   function newGame(mode, level, human) {
     token++; thinking = false;
     pos = new C.Pos(); hist = []; keys = []; legal = pos.legal();
-    game = { mode: mode, ai: human ^ 1, level: level, result: null };
+    game = { mode: mode, ai: human ^ 1, level: level, result: null, me: human, id: mode === "link" ? newId() : "", sent: false };
+    syncURL();
+    if (mode === "link") setTimeout(function () { toast(human === 0 ? "Make your first move, then send it." : "Send the invite. Your friend moves first."); }, 500);
     selected = -1; hintMove = 0; manualFlip = false;
     pieceEls.forEach(function (el) { el.remove(); }); pieceEls.clear();
     render(); save();
@@ -1564,13 +1684,15 @@ var Chess = (function () {
   });
   $("resignBtn").addEventListener("click", function () {
     if (game.result || !hist.length) return;
-    var loser = game.mode === "ai" ? game.ai ^ 1 : pos.turn;
+    var loser = game.mode === "ai" ? game.ai ^ 1 : game.mode === "link" ? game.me : pos.turn;
     token++; thinking = false;
     game.result = { type: "resign", winner: loser ^ 1 };
+    if (game.mode === "link") { game.sent = false; syncURL(); }
     closeSheets(); render(); save(); SFX.draw();
     setTimeout(showOver, 300);
   });
   $("shareBtn").addEventListener("click", function () {
+    if (game.mode === "link" && canLink) { closeSheets(); sendLink(); return; }
     var url = location.href.split("#")[0];
     if (navigator.share) {
       navigator.share({ title: "Arbor & Arch", text: "Play chess in a stone garden with me.", url: url }).catch(function () {});
@@ -1618,10 +1740,18 @@ var Chess = (function () {
   resizeFx();
   var restored = load();
   legal = pos.legal();
+  var incoming = readLink();
+  if (!incoming) syncURL();
   applySeason();
   render();
-  if (!restored) setTimeout(function () { toast("Tap a piece, then one of its seeds to move."); }, 700);
+  if (incoming) announceLink(incoming);
+  else if (!restored) setTimeout(function () { paintNew(); openSheet("newSheet"); }, 450);
   maybeAI();
+  window.addEventListener("hashchange", function () {
+    var r = readLink();
+    if (!r) return;
+    closeSheets(); render(); announceLink(r);
+  });
 
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
     navigator.serviceWorker.register("sw.js").catch(function () {});

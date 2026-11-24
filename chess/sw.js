@@ -1,5 +1,5 @@
 /* Offline support: serve the cached game, refresh the cache in the background. */
-const CACHE = "arbor-arch-v1";
+const CACHE = "arbor-arch-v2";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {

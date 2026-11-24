@@ -20,8 +20,9 @@ The sides are **Limestone** (light) and **Basalt** (dark, with lantern-lit windo
 **Features**
 
 - Full chess rules: castling, en passant, promotion, check, checkmate, stalemate, threefold repetition, the 50-move rule and insufficient material
-- Pass & play on one phone, with three board views: Same side, Face to face (phone flat on a table) and Turn board
 - Play against the computer at three levels: Seedling, Willow, Ancient Oak
+- Play a friend on their own phone by message: make a move, tap **Send your move**, and text the link. They open it, reply with their move, and send it back. The whole game lives in the link, so no server or account is needed
+- Same phone pass & play, with three board views: Same side, Face to face (phone flat on a table) and Turn board
 - Tap or drag to move, legal-move markers, hints, undo, and a move list
 - Four seasons (Spring, Autumn, Winter, Night) with drifting petals, leaves, snow or fireflies
 - Synthesized sounds, game auto-saves, and it works offline once installed
@@ -42,4 +43,4 @@ GitHub Pages on a free account requires the repository to be public.
 2. Tap **Share**, then **Add to Home Screen**.
 3. It now opens full screen like an app and keeps working without internet.
 
-To play with someone else, send them the same link. Sending the `index.html` file itself does not work well on an iPhone, because the Files app previews HTML without running the game.
+To play a friend on their own phone, choose **New → Friend by message**. Game links open in Safari, even if you've added the game to your home screen. Sending the `index.html` file itself does not work well on an iPhone, because the Files app previews HTML without running the game.
