@@ -23,6 +23,14 @@ Three games set in the same stone courtyard garden, built to play on an iPhone. 
 
 The sides are **Limestone** (light) and **Basalt** (dark, with lantern-lit windows).
 
+**Three views of one house:** the Front draws by default as a realistic elevation (brick, siding and shingle textures, sunlight, eave shadows and foliage); switch the menu's Front view style to Drafting for clean line work. **3D** builds the house from both drawings: plan rooms become walls, plan doors and windows cut openings, and the front supplies materials, heights, the roof shape, chimney, steps and plants. Drag with one finger to orbit, pinch to zoom, drag with two fingers to pan, and turn the roof off to look inside at the rooms and furniture. three.js (MIT) is bundled in `facade/vendor/` and loads only when 3D opens.
+
+**Materials:** tap a part twice to change its style, color and texture (for walls: brick, stone, siding, board and batten, stucco or shingle; for roofs: shingle, slate, tile or metal).
+
+**Scale:** a scale bar sits at the top left of the board and in saved pictures, and a 5′ 9″ person stands next to the front door in the Front and 3D views (turn the figure off in the menu).
+
+**Gravity:** in the Front view nothing floats. A wall, roof, door, step or plant placed, drawn, moved or resized in mid air falls onto whatever holds it up: the ground, a wall top, a step, a flat roof or a trim band. Turn it off with the Gravity chip under the board to hang parts freely.
+
 **Features**
 
 - Full chess rules: castling, en passant, promotion, check, checkmate, stalemate, threefold repetition, the 50-move rule and insufficient material
@@ -75,7 +83,7 @@ A quiet drafting studio for designing a house two ways: the **Front** (the facad
 - Undo and redo, pinch to zoom, two-finger pan, zoom buttons and fit to screen
 - Day, dusk and night skies for the front (windows light up at night)
 - Designs auto-save on the phone, with a gallery, copies and three starter houses (the Garden cottage comes with a matching floor plan)
-- Save a picture (PNG) or an SVG of either view, finished with a drafting title block (name, view and date), or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
+- Save a picture (PNG) or an SVG of either view, finished with a drafting title block (name, view, date and scale bar), or a PNG of the 3D view, or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
 - Works in portrait and landscape on any iPhone size. Turned sideways, the tools move to a rail on the right so the board keeps its height
 
 ## Put it online with GitHub Pages
