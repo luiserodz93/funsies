@@ -6,9 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.firebaseio.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#cfdcc4">
+<meta name="theme-color" content="#f3f1ec">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Design house facades in a stone garden: snap-to-grid precision with paint-box freedom.">
+<meta name="description" content="Design house elevations and floor plans with drafting precision.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,44 +18,44 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a drafting table in the stone garden. The header and the tool tray sit inside the safe areas
+/* Layout: a quiet drafting studio. The header and the tool tray sit inside the safe areas
    (Dynamic Island, home bar); the drawing board fills everything between them. */
 :root{
-  --bg1:#edf2e4; --bg2:#c9d9bd; --ink:#26301f; --ink2:#5a6852;
-  --panel:rgba(255,253,245,.72); --panel-line:rgba(52,74,40,.16); --panel-solid:#f8f5ea;
-  --light:#efe6cf; --frame1:#bea983; --frame2:#8c7454; --grout:rgba(60,48,30,.16);
-  --accent:#b8466a; --accent-ink:#fff8f6; --vine:#4f7d3a; --blue:#2f5d7c; --link:#2f7d8c;
-  --check:rgba(214,60,40,.9); --shadow:rgba(40,52,28,.28);
-  --font-display:"Fraunces", "Iowan Old Style", Georgia, serif;
-  --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bg1:#f3f1ec; --bg2:#e9e6df; --ink:#1d1e20; --ink2:#6b6a66; --ink3:#9a9892;
+  --panel:rgba(252,251,248,.86); --panel-line:rgba(29,30,32,.12); --panel-solid:#fbfaf7; --hover:rgba(29,30,32,.05);
+  --accent:#2f5f8f; --accent-ink:#ffffff; --sel:#2f5f8f; --link:#3d7a86;
+  --check:#b4432f; --shadow:rgba(20,20,18,.18);
+  --paper:#f7f6f2; --sky1:#e9edef; --sky2:#f6f5f1;
+  --font-display:"Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-ui:"Inter Tight", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg1:#13211f; --bg2:#0b1413; --ink:#e9efe3; --ink2:#a8b8a6;
-    --panel:rgba(26,40,37,.8); --panel-line:rgba(200,230,200,.14); --panel-solid:#1b2a27;
-    --light:#c9c2a6; --frame1:#33433d; --frame2:#1c2724; --grout:rgba(0,0,0,.22);
-    --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0; --link:#7fc8d4;
-    --check:rgba(240,110,84,.95); --shadow:rgba(0,0,0,.45);
+    --bg1:#18191b; --bg2:#121314; --ink:#ecebe7; --ink2:#a3a29d; --ink3:#73726e;
+    --panel:rgba(32,33,36,.88); --panel-line:rgba(236,235,231,.12); --panel-solid:#1f2023; --hover:rgba(236,235,231,.06);
+    --accent:#8db3da; --accent-ink:#0f1720; --sel:#8db3da; --link:#7fc0c9;
+    --check:#e07a62; --shadow:rgba(0,0,0,.5);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg1:#13211f; --bg2:#0b1413; --ink:#e9efe3; --ink2:#a8b8a6;
-  --panel:rgba(26,40,37,.8); --panel-line:rgba(200,230,200,.14); --panel-solid:#1b2a27;
-  --light:#c9c2a6; --frame1:#33433d; --frame2:#1c2724; --grout:rgba(0,0,0,.22);
-  --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0; --link:#7fc8d4;
-  --check:rgba(240,110,84,.95); --shadow:rgba(0,0,0,.45);
+  --bg1:#18191b; --bg2:#121314; --ink:#ecebe7; --ink2:#a3a29d; --ink3:#73726e;
+  --panel:rgba(32,33,36,.88); --panel-line:rgba(236,235,231,.12); --panel-solid:#1f2023; --hover:rgba(236,235,231,.06);
+  --accent:#8db3da; --accent-ink:#0f1720; --sel:#8db3da; --link:#7fc0c9;
+  --check:#e07a62; --shadow:rgba(0,0,0,.5);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
 html,body{height:100%}
-body{margin:0; overflow:hidden; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px;
-  -webkit-tap-highlight-color:transparent; overscroll-behavior:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none}
-body::before{content:""; position:fixed; inset:0; z-index:-2; background:radial-gradient(120% 80% at 50% 0%, var(--bg1) 0%, var(--bg2) 100%)}
+body{margin:0; overflow:hidden; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px; letter-spacing:-.005em;
+  -webkit-tap-highlight-color:transparent; overscroll-behavior:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  -webkit-font-smoothing:antialiased}
+body::before{content:""; position:fixed; inset:0; z-index:-2; background:var(--bg1)}
 button,input{font:inherit; color:inherit}
 button{touch-action:manipulation}
 input{-webkit-user-select:text; user-select:text}
@@ -65,139 +65,163 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent); outlin
   padding-top:max(6px, env(safe-area-inset-top, 0px));
   padding-left:env(safe-area-inset-left, 0px); padding-right:env(safe-area-inset-right, 0px)}
 
-header.top{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 12px 8px; flex:none}
-.brand{display:flex; align-items:center; gap:9px; min-width:0; border:0; background:none; padding:0; cursor:pointer; text-align:left}
-.brand svg{width:34px; height:34px; flex:none}
-.brand h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:21px; letter-spacing:-.01em; line-height:1; white-space:nowrap}
-.brand h1 em{font-style:italic; font-weight:500; color:var(--accent)}
-.brand small{display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); margin-top:4px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:46vw}
+header.top{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 14px 10px; flex:none}
+.brand{display:flex; align-items:center; gap:10px; min-width:0; border:0; background:none; padding:0; cursor:pointer; text-align:left}
+.brand svg{width:30px; height:30px; flex:none}
+.brand h1{margin:0; font-family:var(--font-display); font-weight:400; font-size:23px; letter-spacing:0; line-height:1; white-space:nowrap}
+.brand h1 em{font-style:italic; color:var(--ink2)}
+.brand small{display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-top:5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:46vw}
 .brand > div{min-width:0}
-.hbtns{display:flex; gap:7px; flex:none}
-.iconbtn{position:relative; width:40px; height:40px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; padding:0; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.iconbtn svg{width:21px; height:21px}
-.iconbtn:disabled{opacity:.35; cursor:default}
+.hbtns{display:flex; gap:2px; flex:none}
+.iconbtn{position:relative; width:40px; height:40px; border-radius:10px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; flex:none; padding:0}
+.iconbtn:active{background:var(--hover)}
+.iconbtn svg{width:20px; height:20px; stroke-width:1.6}
+.iconbtn:disabled{opacity:.3; cursor:default}
 
 /* The drawing board */
-#stage{position:relative; flex:1; min-height:0; margin:0 8px; border-radius:16px; overflow:hidden; touch-action:none;
-  box-shadow:0 0 0 6px var(--frame1), 0 0 0 7px var(--frame2), 0 14px 30px -12px var(--shadow);
-  background:linear-gradient(180deg,#dceaf3,#f4efe3)}
-#stage[data-sky="dusk"]{background:linear-gradient(180deg,#7d6fa0,#f1b48a)}
-#stage[data-sky="night"]{background:linear-gradient(180deg,#0d1626,#24344c)}
-#stage[data-sky="plan"]{background:#f7f4ea}
-.viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:3px; padding:3px; border-radius:12px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); box-shadow:0 6px 16px -10px var(--shadow)}
-.viewseg button{border:0; background:transparent; padding:7px 13px; border-radius:9px; font-weight:800; font-size:12.5px; cursor:pointer; color:var(--ink2)}
-.viewseg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
-.apill{position:absolute; left:10px; top:58px; z-index:2; border:1px solid var(--panel-line); background:var(--panel); border-radius:10px; padding:5px 10px; font-size:12px; font-weight:800; color:var(--ink2); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); font-variant-numeric:tabular-nums}
+#stage{position:relative; flex:1; min-height:0; margin:0 10px; border-radius:6px; overflow:hidden; touch-action:none;
+  box-shadow:0 0 0 1px var(--panel-line), 0 18px 40px -28px var(--shadow);
+  background:linear-gradient(180deg,var(--sky1),var(--sky2))}
+#stage[data-sky="dusk"]{background:linear-gradient(180deg,#5f6577,#d9c3b0)}
+#stage[data-sky="night"]{background:linear-gradient(180deg,#14181f,#262c36)}
+#stage[data-sky="plan"]{background:var(--paper)}
+.viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
+.viewseg button{border:0; background:transparent; padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
+.viewseg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
+.apill{position:absolute; left:10px; top:52px; z-index:2; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:5px 9px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
 .nudge{display:grid; grid-template-columns:repeat(3, 48px); grid-template-rows:repeat(2, 40px); gap:6px; justify-content:center}
-.nudge button{border:1.5px solid var(--panel-line); background:transparent; border-radius:10px; font-weight:800; font-size:18px; cursor:pointer}
+.nudge button{border:1px solid var(--panel-line); background:transparent; border-radius:8px; font-weight:500; font-size:16px; cursor:pointer}
 .nudge .up{grid-column:2} .nudge .lf{grid-column:1; grid-row:2} .nudge .dn{grid-column:2; grid-row:2} .nudge .rt{grid-column:3; grid-row:2}
 .acts.three{grid-template-columns:1fr 1fr 1fr}
 .libgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
-.libitem{border:1.5px solid var(--panel-line); background:var(--panel); border-radius:12px; padding:6px; display:flex; flex-direction:column; gap:3px; cursor:pointer; min-width:0; text-align:center}
-.libitem img{width:100%; aspect-ratio:1; object-fit:contain; border-radius:8px; background:#f7f4ea; display:block}
-.libitem b{font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.libitem small{font-size:11px; color:var(--ink2); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.libitem[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 1.5px var(--accent)}
+.libitem{border:1px solid var(--panel-line); background:transparent; border-radius:8px; padding:6px 6px 8px; display:flex; flex-direction:column; gap:3px; cursor:pointer; min-width:0; text-align:center}
+.libitem img{width:100%; aspect-ratio:1; object-fit:contain; border-radius:4px; background:var(--paper); display:block}
+.libitem b{font-size:12.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.libitem small{font-family:var(--font-mono); font-size:10px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.libitem[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 1px var(--ink)}
 #cv{position:absolute; inset:0; width:100%; height:100%; display:block}
-.corner{position:absolute; right:10px; top:10px; z-index:2; display:grid; gap:8px}
-.mini{width:38px; height:38px; border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; padding:0; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.mini svg{width:20px; height:20px}
-.snaps{position:absolute; left:10px; bottom:10px; z-index:2; display:flex; gap:6px; flex-wrap:wrap; max-width:calc(100% - 20px)}
-.chip{border:1px solid var(--panel-line); background:var(--panel); border-radius:9px; padding:6px 9px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; color:var(--ink2); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.chip[aria-pressed="true"]{color:var(--accent-ink); background:var(--accent); border-color:var(--accent)}
-.readout{position:absolute; z-index:3; pointer-events:none; background:var(--ink); color:var(--bg1); border-radius:10px; padding:6px 10px; font-weight:800; font-size:13px; white-space:nowrap; font-variant-numeric:tabular-nums; box-shadow:0 8px 20px -8px var(--shadow)}
+.corner{position:absolute; right:10px; top:10px; z-index:2; display:grid; gap:0; border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
+.mini{width:38px; height:38px; border-radius:0; border:0; border-bottom:1px solid var(--panel-line); background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
+.corner .mini:last-child, .corner .mini:nth-last-child(2):has(+ [hidden]){border-bottom:0}
+.mini:active{background:var(--hover)}
+.mini svg{width:18px; height:18px; stroke-width:1.6}
+.snaps{position:absolute; left:10px; bottom:10px; z-index:2; display:flex; gap:0; flex-wrap:wrap; max-width:calc(100% - 20px); border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
+.chip{border:0; border-right:1px solid var(--panel-line); background:transparent; border-radius:0; padding:7px 10px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; color:var(--ink3); position:relative}
+.chip:last-child{border-right:0}
+.chip[aria-pressed="true"]{color:var(--ink)}
+.chip[aria-pressed="true"]::before{content:""; display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-right:6px; vertical-align:1px}
+.readout{position:absolute; z-index:3; pointer-events:none; background:var(--ink); color:var(--panel-solid); border-radius:5px; padding:5px 9px; font-family:var(--font-mono); font-weight:500; font-size:12px; white-space:nowrap; font-variant-numeric:tabular-nums; box-shadow:0 8px 20px -10px var(--shadow)}
 
 /* Tool tray */
-.dock{flex:none; padding:8px 8px max(8px, env(safe-area-inset-bottom, 0px))}
-.ctx{display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:5px 5px 5px 12px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.ctxinfo{flex:1; min-width:0; line-height:1.15}
-.ctxinfo b{display:block; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.ctxinfo span{display:block; font-size:12px; color:var(--ink2); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
-.ctxbtns{display:flex; gap:4px; flex:none}
-.ctxbtns button{width:38px; height:38px; border-radius:10px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
-.ctxbtns button:active{background:var(--panel-line)}
-.ctxbtns svg{width:20px; height:20px}
+.dock{flex:none; padding:10px 10px max(8px, env(safe-area-inset-bottom, 0px))}
+.ctx{position:absolute; left:10px; right:10px; bottom:10px; z-index:3; max-width:560px; margin:0 auto; display:flex; align-items:center; gap:8px; padding:4px 4px 4px 12px; border-radius:10px; background:var(--panel-solid); border:1px solid var(--panel-line); box-shadow:0 10px 28px -16px var(--shadow)}
+#stage:has(#ctx:not([hidden])) .snaps{bottom:66px}
+.ctxinfo{flex:1; min-width:0; line-height:1.2}
+.ctxinfo b{display:block; font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ctxinfo span{display:block; font-family:var(--font-mono); font-size:11px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
+.ctxbtns{display:flex; gap:0; flex:none}
+.ctxbtns button{width:38px; height:38px; border-radius:8px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
+.ctxbtns button:active{background:var(--hover)}
+.ctxbtns svg{width:19px; height:19px; stroke-width:1.6}
 .ctxbtns .danger{color:var(--check)}
-.tools{display:grid; grid-template-columns:repeat(7, 1fr); gap:5px}
-.tool{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:50px; padding:0 1px; border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); cursor:pointer; font-size:10.5px; font-weight:800; color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); min-width:0}
-.tool svg{width:22px; height:22px; flex:none}
+.tools{display:grid; grid-template-columns:repeat(7, 1fr); gap:0; border-radius:10px; border:1px solid var(--panel-line); background:var(--panel-solid); overflow:hidden}
+.tool{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; height:52px; padding:0 1px; border-radius:0; border:0; border-right:1px solid var(--panel-line); border-bottom:1px solid var(--panel-line); background:transparent; cursor:pointer; font-size:10px; font-weight:500; letter-spacing:.01em; color:var(--ink2); min-width:0}
+.tool:nth-child(7n){border-right:0}
+.tool:nth-last-child(-n+7){border-bottom:0}
+.tool svg{width:20px; height:20px; flex:none; stroke-width:1.5; color:var(--ink)}
 .tool span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
-.tool[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); box-shadow:0 6px 14px -8px var(--accent)}
-.tool .dot{position:absolute; right:6px; top:6px; width:10px; height:10px; border-radius:50%; box-shadow:0 0 0 1.5px var(--panel-solid)}
-@media (max-height:520px){
-  .tools{grid-template-columns:repeat(14, 1fr)}
-  .tool{height:42px} .tool span{display:none}
-  header.top{padding-bottom:4px} .brand small{display:none}
+.tool[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
+.tool[aria-pressed="true"] svg{color:var(--panel-solid)}
+.tool .dot{position:absolute; right:7px; top:7px; width:7px; height:7px; border-radius:50%; box-shadow:0 0 0 1px var(--panel-line)}
+/* Landscape phones: the tools move to a rail on the right so the board keeps its height. */
+.vh{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+@media (orientation:landscape) and (max-height:600px){
+  .app{display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto minmax(0,1fr); padding-bottom:max(8px, env(safe-area-inset-bottom, 0px))}
+  header.top{grid-column:1 / -1; padding:2px 14px 6px}
+  .brand small{display:none}
+  #stage{grid-column:1; grid-row:2; margin:0 0 0 10px}
+  .dock{grid-column:2; grid-row:2; padding:0 10px; display:flex; flex-direction:column; min-height:0}
+  .tools{flex:1; grid-template-columns:repeat(2, 50px); grid-auto-rows:minmax(0,1fr); min-height:0}
+  .tool{height:auto; min-height:0; border-right:0; border-bottom:1px solid var(--panel-line)}
+  .tool:nth-child(odd){border-right:1px solid var(--panel-line)}
+  .tool:nth-child(7n){border-right:0} .tool:nth-child(7n):nth-child(odd){border-right:1px solid var(--panel-line)}
+  .tool:nth-last-child(-n+7){border-bottom:1px solid var(--panel-line)}
+  .tool:nth-last-child(-n+2){border-bottom:0}
+  .tool span{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+  .sheet{width:min(100%, 560px); max-height:calc(100% - 4px)}
 }
-
 /* Sheets */
-.scrim{position:fixed; inset:0; background:rgba(10,16,10,.38); z-index:40; animation:fade .2s}
+.scrim{position:fixed; inset:0; background:rgba(12,12,11,.32); z-index:40; animation:fade .2s}
 @keyframes fade{from{opacity:0}}
 .sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0 auto; width:min(100%, 520px); max-height:calc(100% - 8px - env(safe-area-inset-top, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
-  background:var(--panel-solid); color:var(--ink); border-radius:22px 22px 0 0; box-shadow:0 -10px 40px -10px var(--shadow);
+  background:var(--panel-solid); color:var(--ink); border-radius:14px 14px 0 0; box-shadow:0 0 0 1px var(--panel-line), 0 -16px 40px -16px var(--shadow);
   padding:10px max(20px, env(safe-area-inset-left, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-right, 0px));
   animation:rise .28s cubic-bezier(.2,.8,.3,1); -webkit-user-select:none; user-select:none}
 @keyframes rise{from{transform:translateY(40px); opacity:0}}
-.sheet .grab{width:40px; height:5px; border-radius:3px; background:var(--panel-line); margin:0 auto 12px}
-.sheet h2{font-family:var(--font-display); font-weight:700; font-size:25px; margin:0 0 4px; letter-spacing:-.01em; text-wrap:balance}
-.sheet .lede{color:var(--ink2); margin:0 0 12px; font-size:14px; line-height:1.45}
-.sheet h3{font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin:18px 0 8px; font-weight:800}
-.seg{display:flex; background:var(--panel-line); border-radius:12px; padding:3px; gap:3px}
-.seg button{flex:1; border:0; background:transparent; padding:9px 4px; border-radius:9px; font-weight:700; font-size:13px; cursor:pointer; line-height:1.2; min-width:0}
-.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); box-shadow:0 2px 8px -2px var(--shadow)}
+.sheet .grab{width:36px; height:4px; border-radius:2px; background:var(--panel-line); margin:0 auto 14px}
+.sheet h2{font-family:var(--font-display); font-weight:400; font-size:30px; margin:0 0 4px; letter-spacing:0; line-height:1.1; text-wrap:balance}
+.sheet .lede{color:var(--ink2); margin:0 0 14px; font-size:14px; line-height:1.5}
+.sheet h3{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); margin:22px 0 8px; font-weight:500; padding-top:12px; border-top:1px solid var(--panel-line)}
+.seg{display:flex; border:1px solid var(--panel-line); border-radius:8px; padding:2px; gap:2px}
+.seg button{flex:1; border:0; background:transparent; padding:8px 4px; border-radius:6px; font-weight:500; font-size:13px; cursor:pointer; line-height:1.2; min-width:0; color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
 .chips{display:flex; flex-wrap:wrap; gap:6px}
-.chips button{border:1.5px solid var(--panel-line); background:transparent; border-radius:999px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer}
-.chips button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.swatches{display:grid; grid-template-columns:repeat(7, 1fr); gap:7px}
-.sw{aspect-ratio:1; border-radius:10px; border:0; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); position:relative; padding:0}
-.sw[aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(0,0,0,.18), 0 0 0 2.5px var(--panel-solid), 0 0 0 4.5px var(--accent)}
-.sw.custom{display:grid; place-items:center; background:conic-gradient(#e06060,#e0c060,#60c060,#60c0e0,#6060e0,#e060c0,#e06060); overflow:hidden}
+.chips button{border:1px solid var(--panel-line); background:transparent; border-radius:6px; padding:7px 11px; font-weight:500; font-size:13px; cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--panel-solid)}
+.swatches{display:grid; grid-template-columns:repeat(7, 1fr); gap:6px}
+.sw{aspect-ratio:1; border-radius:4px; border:0; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(0,0,0,.14); position:relative; padding:0}
+.sw[aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(0,0,0,.14), 0 0 0 2px var(--panel-solid), 0 0 0 3px var(--ink)}
+.sw.custom{display:grid; place-items:center; background:conic-gradient(#b8705a,#c9b27a,#8a9a78,#6f8ea3,#7b7393,#a8788a,#b8705a); overflow:hidden}
 .sw.custom input{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; border:0; padding:0}
-.fields{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.fields{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 .fld{display:grid; gap:4px}
-.fld span{font-size:12px; font-weight:700; color:var(--ink2)}
-.fld input, .field input{width:100%; min-width:0; border:1.5px solid var(--panel-line); background:var(--panel); border-radius:11px; padding:10px 11px; font-weight:700; font-size:16px; font-variant-numeric:tabular-nums}
-.fld input:focus, .field input:focus{border-color:var(--accent); outline:none}
+.fld span{font-size:12px; font-weight:500; color:var(--ink2)}
+.fld input, .field input{width:100%; min-width:0; border:1px solid var(--panel-line); background:transparent; border-radius:6px; padding:9px 10px; font-family:var(--font-mono); font-weight:400; font-size:16px; font-variant-numeric:tabular-nums}
+.field input{font-family:var(--font-ui); font-weight:500}
+.fld input:focus, .field input:focus{border-color:var(--ink); outline:none}
 .fld.wide{grid-column:1 / -1}
 .field{display:grid; gap:6px; margin-top:4px}
-.field label{font-size:12.5px; font-weight:700; color:var(--ink2)}
-.note{font-size:12.5px; color:var(--ink2); margin:8px 2px 0; line-height:1.45}
-.acts{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-.acts button, .links button{border:1.5px solid var(--panel-line); background:transparent; border-radius:12px; padding:11px 8px; font-weight:700; font-size:14px; cursor:pointer}
+.field label{font-size:12px; font-weight:500; color:var(--ink2)}
+.note{font-size:12.5px; color:var(--ink2); margin:8px 2px 0; line-height:1.5}
+.acts{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.acts button, .links button{border:1px solid var(--panel-line); background:transparent; border-radius:8px; padding:10px 8px; font-weight:500; font-size:13.5px; cursor:pointer}
+.acts button:active, .links button:active{background:var(--hover)}
 .acts .danger, .links .danger{color:var(--check)}
-.links{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.links{display:grid; grid-template-columns:1fr 1fr; gap:6px}
 .links.three{grid-template-columns:1fr 1fr 1fr}
-.primary{width:100%; margin-top:18px; border:0; border-radius:14px; padding:14px; font-weight:800; font-size:16px; background:var(--accent); color:var(--accent-ink); cursor:pointer; box-shadow:0 8px 20px -10px var(--accent)}
-.secondary{width:100%; margin-top:10px; border:1.5px solid var(--panel-line); border-radius:14px; padding:12px; font-weight:700; font-size:15px; background:transparent; cursor:pointer}
+.primary{width:100%; margin-top:20px; border:0; border-radius:10px; padding:14px; font-weight:600; font-size:15px; letter-spacing:.01em; background:var(--ink); color:var(--panel-solid); cursor:pointer}
+.secondary{width:100%; margin-top:8px; border:1px solid var(--panel-line); border-radius:10px; padding:12px; font-weight:500; font-size:14.5px; background:transparent; cursor:pointer}
 .rep{display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:end}
-.row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--panel-line)}
+.row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--panel-line)}
 .row:last-child{border-bottom:0}
-.row label{font-weight:700}
-.row small{display:block; color:var(--ink2); font-weight:600; font-size:12px; margin-top:2px}
-.switch{width:50px; height:30px; border-radius:15px; border:0; background:var(--panel-line); position:relative; cursor:pointer; flex:none; transition:background .2s; padding:0}
-.switch::after{content:""; position:absolute; left:3px; top:3px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s}
-.switch[aria-checked="true"]{background:var(--accent)}
-.switch[aria-checked="true"]::after{transform:translateX(20px)}
-.lyr{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--panel-line)}
+.row label{font-weight:500}
+.row small{display:block; color:var(--ink2); font-weight:400; font-size:12px; margin-top:2px; line-height:1.4}
+.switch{width:44px; height:26px; border-radius:13px; border:0; background:var(--panel-line); position:relative; cursor:pointer; flex:none; transition:background .2s; padding:0}
+.switch::after{content:""; position:absolute; left:3px; top:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--ink)}
+.switch[aria-checked="true"]::after{transform:translateX(18px); background:var(--panel-solid)}
+.lyr{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px; align-items:center; padding:11px 0; border-bottom:1px solid var(--panel-line)}
 .lyr:last-child{border-bottom:0}
-.lyr b{display:block}
-.lyr small{color:var(--ink2); font-weight:600; font-size:12px}
-.tog{border:1.5px solid var(--panel-line); background:transparent; border-radius:10px; padding:7px 10px; font-weight:800; font-size:12px; cursor:pointer; min-width:64px}
+.lyr b{display:block; font-weight:500}
+.lyr small{color:var(--ink2); font-size:12px}
+.tog{border:1px solid var(--panel-line); background:transparent; border-radius:6px; padding:6px 10px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; min-width:70px}
 .tog[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid); border-color:var(--ink)}
 .cards{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.card{border:1.5px solid var(--panel-line); background:var(--panel); border-radius:14px; padding:8px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:6px; min-width:0}
-.card.cur{border-color:var(--accent)}
-.card img{width:100%; aspect-ratio:4/3; object-fit:contain; border-radius:9px; background:linear-gradient(180deg,#dceaf3,#f4efe3); display:block}
-.card b{font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.card small{font-size:12px; color:var(--ink2); font-weight:600}
+.card{border:1px solid var(--panel-line); background:transparent; border-radius:10px; padding:8px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:6px; min-width:0}
+.card.cur{border-color:var(--ink)}
+.card img{width:100%; aspect-ratio:4/3; object-fit:contain; border-radius:4px; background:linear-gradient(180deg,#e9edef,#f6f5f1); display:block}
+.card b{font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.card small{font-family:var(--font-mono); font-size:10.5px; color:var(--ink2)}
 .card .cbtns{display:flex; gap:6px}
-.card .cbtns button{flex:1; border:1px solid var(--panel-line); background:transparent; border-radius:9px; padding:6px 0; font-size:12px; font-weight:800; cursor:pointer}
+.card .cbtns button{flex:1; border:1px solid var(--panel-line); background:transparent; border-radius:6px; padding:6px 0; font-size:12px; font-weight:500; cursor:pointer}
 .card .cbtns .danger{color:var(--check)}
 .card .cbtns .danger[data-armed]{background:var(--check); color:#fff; border-color:var(--check)}
-.help{margin:0; padding-left:18px; display:grid; gap:8px; font-size:14px; line-height:1.45}
-.help b{font-weight:800}
-.linkbox{width:100%; border:1.5px dashed var(--accent); background:var(--panel); border-radius:12px; padding:10px; font-size:13px; font-weight:600; word-break:break-all; max-height:90px; overflow:auto; -webkit-user-select:all; user-select:all}
-.toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--bg1); padding:10px 16px; border-radius:12px; font-weight:700; font-size:14px; box-shadow:0 8px 24px -8px var(--shadow); max-width:calc(100vw - 32px); width:max-content; text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere; pointer-events:none}
+.help{margin:0; padding-left:0; list-style:none; counter-reset:h; display:grid; gap:12px; font-size:14px; line-height:1.5; color:var(--ink2)}
+.help li{counter-increment:h; display:grid; grid-template-columns:26px 1fr}
+.help li::before{content:counter(h, decimal-leading-zero); font-family:var(--font-mono); font-size:11px; color:var(--ink3); padding-top:3px}
+.help b{font-weight:600; color:var(--ink)}
+.linkbox{width:100%; border:1px dashed var(--ink3); background:transparent; border-radius:8px; padding:10px; font-family:var(--font-mono); font-size:12px; word-break:break-all; max-height:90px; overflow:auto; -webkit-user-select:all; user-select:all}
+.toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--panel-solid); padding:10px 16px; border-radius:10px; font-weight:500; font-size:13.5px; line-height:1.4; box-shadow:0 12px 30px -12px var(--shadow); max-width:calc(100vw - 32px); width:max-content; text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere; pointer-events:none}
 @keyframes drop{from{transform:translate(-50%,-10px); opacity:0}}
 @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important} }
 </style>
@@ -206,7 +230,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 <div class="app">
   <header class="top">
     <button class="brand" id="brandBtn" aria-label="Open menu">
-      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 19 20 7l15 12" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><rect x="10" y="18" width="20" height="15" fill="var(--light)" stroke="var(--frame2)" stroke-width="1.5"/><rect x="17.5" y="24" width="5" height="9" fill="var(--frame2)"/><rect x="12.5" y="21" width="4" height="4" fill="var(--blue)"/><rect x="23.5" y="21" width="4" height="4" fill="var(--blue)"/><path d="M4 33.5h32" stroke="var(--vine)" stroke-width="2.5" stroke-linecap="round"/><path d="M9 33c-1-3 1-5 3-5 0 2-1 4-3 5z" fill="var(--vine)"/></svg>
+      <svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M7 33V18L20 8l13 10v15"/><path d="M4 33h32"/><path d="M17 33v-9h6v9"/><path d="M11 21h4v4h-4zM25 21h4v4h-4z" stroke-width="1.1"/><path d="M20 8v-3" stroke-width="1.1" stroke-dasharray="1.5 1.5"/></svg>
       <div><h1>Brick <em>&amp;</em> Blueprint</h1><small id="dname">My first house</small></div>
     </button>
     <div class="hbtns">
@@ -220,9 +244,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   <main id="stage" data-sky="day" aria-label="Drawing board">
     <svg id="cv" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e8f2"/><stop offset="1" stop-color="#7c9fb6"/></linearGradient>
-        <linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c79b"/><stop offset="1" stop-color="#806f9c"/></linearGradient>
-        <linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a6"/><stop offset="1" stop-color="#f0ac52"/></linearGradient>
+        <linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe5e8"/><stop offset="1" stop-color="#9aabb7"/></linearGradient>
+        <linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6cdb6"/><stop offset="1" stop-color="#77748a"/></linearGradient>
+        <linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2dfae"/><stop offset="1" stop-color="#cf9a58"/></linearGradient>
       </defs>
       <g id="grid"></g>
       <g id="art"><defs id="defs"></defs><g id="artBody"></g></g>
@@ -244,9 +268,6 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <button class="chip" id="multiChip" aria-pressed="false">Multi</button>
     </div>
     <div id="readout" class="readout" hidden></div>
-  </main>
-
-  <footer class="dock">
     <div class="ctx" id="ctx" hidden>
       <div class="ctxinfo"><b id="ctxName"></b><span id="ctxSize"></span></div>
       <div class="ctxbtns">
@@ -260,6 +281,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
         <button id="cDel" class="danger" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
       </div>
     </div>
+  </main>
+
+  <footer class="dock">
     <div class="tools" id="tools" role="toolbar" aria-label="Tools"></div>
   </footer>
 </div>
@@ -331,26 +355,26 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   ];
   const LAYER_IDS = LAYERS.map(l => l.id);
   const TYPES = {
-    wall: { name: "Wall", kind: "rect", layer: "structure", w: 731.5, h: 274.3, color: "#c9a27e", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "shingle", "plain"] },
-    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#5b4a42", tex: "shingle", style: "gable", styles: ["gable", "hip", "flat", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "plain"] },
-    window: { name: "Window", kind: "rect", layer: "openings", w: 91.4, h: 152.4, color: "#f4efe4", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters"] },
-    door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3f6b5a", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage"] },
-    trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#efe8da", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame"] },
-    plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#5f8a45", style: "shrub", styles: ["shrub", "tree", "hedge", "flowers", "ivy"] },
-    steps: { name: "Steps", kind: "rect", layer: "structure", w: 160, h: 51, color: "#b9b2a4", style: "steps", styles: ["steps", "stoop"] },
-    chimney: { name: "Chimney", kind: "rect", layer: "structure", w: 60, h: 180, color: "#8e4a39", tex: "brick", texs: ["brick", "stone", "stucco", "plain"] },
-    room: { name: "Room", kind: "rect", layer: "structure", mode: "plan", w: 426.7, h: 365.8, color: "#e2cfa8", tex: "wood", texs: ["wood", "ftile", "carpet", "stone", "concrete", "plain"] },
-    pwall: { name: "Wall", kind: "line", layer: "structure", mode: "plan", color: "#3a3631" },
-    pdoor: { name: "Door", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 91.4, h: 91.4, color: "#8a6a4a", style: "swing", styles: ["swing", "pair", "sliding"] },
-    pwindow: { name: "Window", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 121.9, h: 15.2, color: "#6f8fa6" },
-    stairs: { name: "Stairs", kind: "rect", layer: "structure", mode: "plan", rot: true, w: 100, h: 300, color: "#d9cfbd", style: "straight", styles: ["straight", "spiral"] },
-    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#c9b79c", style: "sofa", styles: ["sofa", "armchair", "bed", "table", "desk", "wardrobe", "rug", "tv"] },
-    fixture: { name: "Fixture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 40, h: 70, color: "#f4f2ec", style: "toilet", styles: ["toilet", "sink", "bath", "shower", "stove", "fridge", "counter", "dishwasher", "washer", "dryer"] },
-    pplant: { name: "Plant", kind: "rect", layer: "details", mode: "plan", bare: true, w: 60, h: 60, color: "#5f8a45", style: "pot", styles: ["pot", "tree"] },
-    label: { name: "Label", kind: "label", layer: "details", mode: "both", w: 200, h: 30, color: "#3a2f22" },
-    line: { name: "Line", kind: "line", layer: "sketch", mode: "both", color: "#26301f" },
-    pen: { name: "Pen stroke", kind: "pen", layer: "sketch", mode: "both", color: "#26301f" },
-    dim: { name: "Dimension", kind: "dim", layer: "dims", mode: "both", color: "#2f5d7c" }
+    wall: { name: "Wall", kind: "rect", layer: "structure", w: 731.5, h: 274.3, color: "#c8b8a2", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "shingle", "plain"] },
+    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#4a4b4d", tex: "shingle", style: "gable", styles: ["gable", "hip", "flat", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "plain"] },
+    window: { name: "Window", kind: "rect", layer: "openings", w: 91.4, h: 152.4, color: "#f1efe9", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters"] },
+    door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3e4a4f", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage"] },
+    trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#ece8df", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame"] },
+    plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#7d8f6e", style: "shrub", styles: ["shrub", "tree", "hedge", "flowers", "ivy"] },
+    steps: { name: "Steps", kind: "rect", layer: "structure", w: 160, h: 51, color: "#bdb7ad", style: "steps", styles: ["steps", "stoop"] },
+    chimney: { name: "Chimney", kind: "rect", layer: "structure", w: 60, h: 180, color: "#8a6f60", tex: "brick", texs: ["brick", "stone", "stucco", "plain"] },
+    room: { name: "Room", kind: "rect", layer: "structure", mode: "plan", w: 426.7, h: 365.8, color: "#e6dccb", tex: "wood", texs: ["wood", "ftile", "carpet", "stone", "concrete", "plain"] },
+    pwall: { name: "Wall", kind: "line", layer: "structure", mode: "plan", color: "#2a2a28" },
+    pdoor: { name: "Door", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 91.4, h: 91.4, color: "#2a2a28", style: "swing", styles: ["swing", "pair", "sliding"] },
+    pwindow: { name: "Window", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 121.9, h: 15.2, color: "#5d7b91" },
+    stairs: { name: "Stairs", kind: "rect", layer: "structure", mode: "plan", rot: true, w: 100, h: 300, color: "#e4dfd5", style: "straight", styles: ["straight", "spiral"] },
+    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#d6cfc3", style: "sofa", styles: ["sofa", "armchair", "bed", "table", "desk", "wardrobe", "rug", "tv"] },
+    fixture: { name: "Fixture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 40, h: 70, color: "#f7f6f2", style: "toilet", styles: ["toilet", "sink", "bath", "shower", "stove", "fridge", "counter", "dishwasher", "washer", "dryer"] },
+    pplant: { name: "Plant", kind: "rect", layer: "details", mode: "plan", bare: true, w: 60, h: 60, color: "#7d8f6e", style: "pot", styles: ["pot", "tree"] },
+    label: { name: "Label", kind: "label", layer: "details", mode: "both", w: 200, h: 30, color: "#2a2a28" },
+    line: { name: "Line", kind: "line", layer: "sketch", mode: "both", color: "#2a2a28" },
+    pen: { name: "Pen stroke", kind: "pen", layer: "sketch", mode: "both", color: "#2a2a28" },
+    dim: { name: "Dimension", kind: "dim", layer: "dims", mode: "both", color: "#2f5f8f" }
   };
   const SIZES = { // default sizes for some styles
     plant: { shrub: [150, 90], tree: [260, 480], hedge: [300, 100], flowers: [110, 45], ivy: [120, 300] },
@@ -377,9 +401,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     wood: "Wood", ftile: "Tile", carpet: "Carpet", concrete: "Concrete",
     brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", plain: "Smooth"
   };
-  const PALETTE = ["#f4efe4", "#e9dcc3", "#d9c7a8", "#c9a27e", "#b5654a", "#8e4a39", "#7a3b2e",
-    "#5b4a42", "#3d3f42", "#4c5560", "#2f5d7c", "#6f8fa6", "#3f6b5a", "#5f8a45",
-    "#9bb26b", "#d6b25e", "#e7a33e", "#c8553d", "#d9668a", "#26301f"];
+  const PALETTE = ["#f5f3ee", "#e8e2d6", "#d8cdbb", "#c8b8a2", "#b39a7c", "#a0705a", "#8a5444",
+    "#6e5a4c", "#4a4b4d", "#2a2a28", "#5b6670", "#2f5f8f", "#7f97a8", "#4f6658",
+    "#7d8f6e", "#a9b391", "#c9b27a", "#b98a4e", "#9c4f3f", "#8a7a92"];
   const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "wood", "ftile", "carpet", "concrete", "plain"];
   const LINKABLE = { window: 1, door: 1, pwindow: 1, pdoor: 1 };
   const modeOf = t => TYPES[t].mode || "front";
@@ -610,7 +634,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (shape === "arched") { const r = Math.min(W / 2, H); return `M${f(X)} ${f(T + H)}V${f(T + r)}A${f(W / 2)} ${f(r)} 0 0 1 ${f(X + W)} ${f(T + r)}V${f(T + H)}Z`; }
     return `M${f(X)} ${f(T)}h${f(W)}v${f(H)}h${f(-W)}z`;
   }
-  function wallSVG(p, o) { const { X, T, W, H } = bx(p); return R(X, T, W, H, o.pat(p.tex, p.color), stk(shade(p.color, -0.42), 1.5)); }
+  function wallSVG(p, o) { const { X, T, W, H } = bx(p); return R(X, T, W, H, o.pat(p.tex, p.color), stk(o.sky === "night" ? shade(p.color, -0.5) : "#2a2a28", 2)); }
   function roofSVG(p, o) {
     const { X, T, W, H, B } = bx(p), c = p.color, fill = o.pat(p.tex, c), edge = shade(c, -0.45), fas = shade(c, -0.25), st = stk(edge, 1.5);
     let pts, extra = "";
@@ -647,14 +671,14 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     else if (st === "casement") m = R(iX + iW / 2 - fr / 2, iT, fr, iH, fc);
     else if (st === "arched") { const r = Math.min(iW / 2, iH); m = R(iX + iW / 2 - mw / 2, iT, mw, iH, fc) + R(iX, iT + r - mw / 2, iW, mw, fc); }
     else if (st === "round") m = R(iX + iW / 2 - mw / 2, iT, mw, iH, fc) + R(iX, iT + iH / 2 - mw / 2, iW, mw, fc);
-    const shine = o.sky === "night" ? "" : `<path d="M${f(iX + iW * 0.12)} ${f(iT + iH * 0.75)}L${f(iX + iW * 0.5)} ${f(iT + iH * 0.08)}" stroke="rgba(255,255,255,.35)" stroke-width="${f(Math.max(2, iW * 0.09))}"/>`;
+    const shine = o.sky === "night" ? "" : `<path d="M${f(iX + iW * 0.12)} ${f(iT + iH * 0.75)}L${f(iX + iW * 0.5)} ${f(iT + iH * 0.08)}" stroke="rgba(255,255,255,.22)" stroke-width="${f(Math.max(1.5, iW * 0.05))}"/>`;
     out += `<clipPath id="k${p.id}"><path d="${inner}"/></clipPath><g clip-path="url(#k${p.id})">${shine}${m}</g>`;
     return out;
   }
   function doorSVG(p, o) {
-    const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.38), lt = shade(c, 0.1), fr = clamp(W * 0.05, 3, 8), cas = "#ece4d3", ce = shade(cas, -0.35);
+    const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.38), lt = shade(c, 0.1), fr = clamp(W * 0.05, 3, 8), cas = "#eeebe4", ce = shade(cas, -0.35);
     const st = stk(e, 1), cst = stk(ce, 1);
-    const knob = (x, y) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(clamp(W * 0.035, 2.5, 5))}" fill="#d4b062" stroke="#8a6d2c" stroke-width=".8"/>`;
+    const knob = (x, y) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(clamp(W * 0.035, 2.5, 5))}" fill="#b8a170" stroke="#6e5a33" stroke-width=".8"/>`;
     const pan = (x, y, w, h) => R(x, y, w, h, lt, st);
     const gl = (x, y, w, h) => R(x, y, w, h, o.glass, st);
     let out = "";
@@ -738,52 +762,63 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const { X, T, W, H } = bx(p), c = p.color, e = shade(c, -0.42), ch = Math.max(8, H * 0.06);
     return R(X, T, W, H, o.pat(p.tex, c), stk(e, 1.5)) + R(X - W * 0.12, T, W * 1.24, ch, shade(c, -0.25), stk(e, 1)) + R(X + W * 0.3, T - ch * 1.2, W * 0.4, ch * 1.2, "#8a6a55", stk(e, 1));
   }
+  /* Entourage in drafting style: scalloped outlines, light washes and a few texture strokes. */
+  function cloud(cx, cy, rx, ry, n, rnd, a0) {
+    let d = "", pts = [];
+    for (let i = 0; i < n; i++) { const a = (a0 || 0) + i / n * Math.PI * 2, k = 0.92 + rnd() * 0.1; pts.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]); }
+    pts.forEach((q, i) => {
+      const nq = pts[(i + 1) % n], mx = (q[0] + nq[0]) / 2, my = (q[1] + nq[1]) / 2, ox = mx - cx, oy = my - cy, b = 0.22 + rnd() * 0.08;
+      d += (i ? "" : `M${f(q[0])} ${f(q[1])}`) + `Q${f(mx + ox * b)} ${f(my + oy * b)} ${f(nq[0])} ${f(nq[1])}`;
+    });
+    return d + "Z";
+  }
   function plantSVG(p) {
-    const { X, T, W, H, B } = bx(p), c = p.color, dk = shade(c, -0.22), lt = shade(c, 0.16), rnd = mulberry(p.id * 977 + 13);
-    const tones = [dk, c, lt];
-    const el = (cx, cy, rx, ry, fill) => `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(rx)}" ry="${f(ry)}" fill="${fill}"/>`;
-    let out = "";
+    const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.5), rnd = mulberry(p.id * 977 + 13);
+    const wash = `fill="${shade(c, 0.5)}" stroke="${e}" stroke-width="1.1" stroke-linejoin="round"`, tex = `fill="none" stroke="${e}" stroke-width=".7" stroke-linecap="round" opacity=".55"`;
+    const ticks = (cx, cy, rx, ry, n) => { let d = ""; for (let i = 0; i < n; i++) { const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 0.75, x = cx + Math.cos(a) * rx * r, y = cy + Math.sin(a) * ry * r, l = Math.min(rx, ry) * 0.12; d += `M${f(x - l)} ${f(y + l * 0.3)}Q${f(x)} ${f(y - l * 0.6)} ${f(x + l)} ${f(y + l * 0.3)}`; } return `<path d="${d}" ${tex}/>`; };
     switch (p.style) {
       case "tree": {
-        out += P(`M${f(X + W * 0.45)} ${f(B)}L${f(X + W * 0.47)} ${f(T + H * 0.45)}L${f(X + W * 0.53)} ${f(T + H * 0.45)}L${f(X + W * 0.55)} ${f(B)}Z`, "#6b4a33");
-        [[0.5, 0.3, 0.42, 0.28], [0.28, 0.42, 0.26, 0.2], [0.72, 0.42, 0.26, 0.2], [0.4, 0.18, 0.25, 0.17], [0.62, 0.2, 0.24, 0.16], [0.5, 0.48, 0.3, 0.14]].forEach((q, i) => { out += el(X + W * q[0], T + H * q[1], W * q[2], H * q[3], tones[i % 3]); });
-        return out;
+        const tw = Math.max(3, W * 0.035), cx = X + W / 2, cy = T + H * 0.36, rx = W * 0.47, ry = H * 0.35;
+        let s = `<path d="M${f(cx - tw)} ${f(B)}L${f(cx - tw * 0.6)} ${f(cy + ry * 0.4)}M${f(cx + tw)} ${f(B)}L${f(cx + tw * 0.6)} ${f(cy + ry * 0.4)}M${f(cx)} ${f(cy + ry * 0.55)}L${f(cx - rx * 0.35)} ${f(cy)}M${f(cx)} ${f(cy + ry * 0.7)}L${f(cx + rx * 0.4)} ${f(cy + ry * 0.05)}" fill="none" stroke="${e}" stroke-width="1.1" stroke-linecap="round"/>`;
+        s += `<path d="${cloud(cx, cy, rx, ry, 13, rnd)}" ${wash}/>`;
+        return s + ticks(cx, cy, rx, ry, 18);
       }
       case "hedge": {
-        const n = Math.max(2, Math.ceil(W / 45)), bw = W / n, r = Math.min(H * 0.28, bw * 0.62);
-        out += R(X, T + r * 0.8, W, H - r * 0.8, dk, `rx="${f(Math.min(r, 12))}"`);
-        for (let i = 0; i < n; i++) out += el(X + bw * (i + 0.5), T + r, bw * 0.62, r, i % 2 ? c : lt);
-        return out;
+        const r = Math.min(H * 0.3, 30), n = Math.max(3, Math.round(W / 35)); let d = `M${f(X)} ${f(B)}V${f(T + r)}`;
+        for (let i = 0; i < n; i++) { const x0 = X + W * i / n, x1 = X + W * (i + 1) / n; d += `Q${f((x0 + x1) / 2)} ${f(T - r * 0.3 + rnd() * r * 0.3)} ${f(x1)} ${f(T + r * (0.8 + rnd() * 0.3))}`; }
+        d += `V${f(B)}Z`;
+        return `<path d="${d}" ${wash}/>` + ticks(X + W / 2, T + H * 0.55, W * 0.5, H * 0.4, Math.round(W / 14));
       }
       case "flowers": {
-        const bxH = H * 0.42, cols = ["#d9668a", "#f2c14e", "#f4eef8", "#c8553d", "#a47ad1"], n = Math.max(3, Math.round(W / 16));
-        for (let i = 0; i < n; i++) out += el(X + W * (i + 0.5) / n, B - bxH - H * 0.12, W / n * 0.7, H * 0.16, tones[i % 3]);
-        for (let i = 0; i < n; i++) out += `<circle cx="${f(X + W * (i + 0.5) / n + (rnd() - 0.5) * 4)}" cy="${f(T + H * 0.12 + rnd() * H * 0.25)}" r="${f(clamp(Math.min(W / n * 0.35, H * 0.12), 1.5, 8))}" fill="${cols[(rnd() * cols.length) | 0]}"/>`;
-        return out + R(X, B - bxH, W, bxH, "#8a5a3b", stk("#5a3a25", 1));
+        const bxH = H * 0.42, my = B - bxH, cols = ["#b98a8a", "#d8c48e", "#f3efe6", "#a98fa8"]; let s = "";
+        s += `<path d="${cloud(X + W / 2, my - H * 0.12, W * 0.48, H * 0.22, Math.max(5, Math.round(W / 16)), rnd, Math.PI)}" ${wash}/>`;
+        const n = Math.max(3, Math.round(W / 14));
+        for (let i = 0; i < n; i++) s += `<circle cx="${f(X + W * (i + 0.5) / n + (rnd() - 0.5) * 4)}" cy="${f(T + H * 0.12 + rnd() * H * 0.22)}" r="${f(clamp(W / n * 0.22, 1.2, 5))}" fill="${cols[(rnd() * cols.length) | 0]}" stroke="${e}" stroke-width=".5"/>`;
+        return s + R(X, my, W, bxH, "#efece6", stk("#2a2a28", 1)) + `<path d="M${f(X)} ${f(my + bxH * 0.25)}H${f(X + W)}" stroke="#2a2a28" stroke-width=".6"/>`;
       }
       case "ivy": {
-        const n = Math.max(2, Math.round(W / 40));
-        for (let s = 0; s < n; s++) {
-          const x0 = X + W * (s + 0.5) / n, amp = Math.min(W / n * 0.35, 18), top = T + H * (0.05 + rnd() * 0.3);
+        const n = Math.max(2, Math.round(W / 40)); let s = "";
+        for (let k = 0; k < n; k++) {
+          const x0 = X + W * (k + 0.5) / n, amp = Math.min(W / n * 0.35, 18), top = T + H * (0.05 + rnd() * 0.3), steps = Math.max(3, Math.round((B - top) / 22));
           let d = `M${f(x0)} ${f(B)}`, leaves = "";
-          const steps = Math.max(3, Math.round((B - top) / 24));
-          for (let k = 1; k <= steps; k++) {
-            const y = B - (B - top) * k / steps, x = x0 + Math.sin(k * 1.3 + s) * amp;
+          for (let i = 1; i <= steps; i++) {
+            const y = B - (B - top) * i / steps, x = x0 + Math.sin(i * 1.3 + k) * amp, side = i % 2 ? 1 : -1, ls = clamp(W / n * 0.16, 2.5, 8);
             d += `L${f(x)} ${f(y)}`;
-            const side = k % 2 ? 1 : -1, ls = clamp(W / n * 0.18, 3, 9);
-            leaves += `<ellipse cx="${f(x + side * ls)}" cy="${f(y)}" rx="${f(ls)}" ry="${f(ls * 0.6)}" fill="${tones[k % 3]}" transform="rotate(${side * 30} ${f(x + side * ls)} ${f(y)})"/>`;
+            leaves += `<ellipse cx="${f(x + side * ls)}" cy="${f(y)}" rx="${f(ls)}" ry="${f(ls * 0.55)}" transform="rotate(${side * 30} ${f(x + side * ls)} ${f(y)})" ${wash}/>`;
           }
-          out += `<path d="${d}" fill="none" stroke="#5c4a2e" stroke-width="1.5" stroke-linejoin="round"/>` + leaves;
+          s += `<path d="${d}" fill="none" stroke="${e}" stroke-width=".9" stroke-linejoin="round"/>` + leaves;
         }
-        return out;
+        return s;
       }
-      default:
-        [[0.22, 0.68, 0.24, 0.34], [0.5, 0.5, 0.3, 0.46], [0.78, 0.68, 0.24, 0.34], [0.36, 0.38, 0.2, 0.3], [0.64, 0.4, 0.2, 0.3], [0.5, 0.78, 0.36, 0.24]].forEach((q, i) => { out += el(X + W * q[0], T + H * q[1], W * q[2], H * q[3], tones[i % 3]); });
-        return out;
+      default: {
+        const cx = X + W / 2, cy = T + H * 0.55, rx = W * 0.48, ry = H * 0.5;
+        let d = cloud(cx, cy, rx, ry, Math.max(7, Math.round(W / 22)), rnd, Math.PI);
+        return `<clipPath id="k${p.id}"><rect x="${f(X - 5)}" y="${f(T - 10)}" width="${f(W + 10)}" height="${f(H + 10)}"/></clipPath><g clip-path="url(#k${p.id})"><path d="${d}" ${wash}/>${ticks(cx, cy, rx, ry, Math.round(W / 12))}</g>`;
+      }
     }
   }
   function labelSVG(p) {
-    return `<text x="${f(p.x)}" y="${f(-(p.y + p.h * 0.22))}" font-size="${f(p.h)}" fill="${p.color}" font-family="Fraunces, Georgia, serif" font-weight="700">${esc(p.text)}</text>`;
+    return `<text x="${f(p.x)}" y="${f(-(p.y + p.h * 0.22))}" font-size="${f(p.h)}" fill="${p.color}" font-family="Inter Tight, system-ui, sans-serif" font-weight="500" letter-spacing="0">${esc(p.text)}</text>`;
   }
   function lineSVG(p) {
     return `<line x1="${f(p.x1)}" y1="${f(-p.y1)}" x2="${f(p.x2)}" y2="${f(-p.y2)}" stroke="${p.color}" stroke-width="${f(p.lw)}" stroke-linecap="${p.t === "pwall" ? "square" : "round"}"${p.dash ? ` stroke-dasharray="${f(p.lw * 3)} ${f(p.lw * 2.5)}"` : ""}/>`;
@@ -796,7 +831,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   }
   function penSVG(p) { return `<path d="${penPath(p.pts)}" fill="none" stroke="${p.color}" stroke-width="${f(p.lw)}" stroke-linecap="round" stroke-linejoin="round"/>`; }
   function dimSVG(p, o) {
-    const g = dimGeom(p), ts = o.ts, c = o.sky === "night" && p.color === "#2f5d7c" ? "#9cc3e0" : p.color, sw = f(ts * 0.07);
+    const g = dimGeom(p), ts = o.ts, c = o.sky === "night" && (p.color === "#2f5f8f" || p.color === "#2f5d7c") ? "#8db3da" : p.color, sw = f(ts * 0.07);
     const sg = p.off >= 0 ? 1 : -1, gap = ts * 0.25, ext = ts * 0.35;
     const L = (a, b) => `M${f(a.x)} ${f(-a.y)}L${f(b.x)} ${f(-b.y)}`;
     let d = L(g.A, g.B);
@@ -809,15 +844,15 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     let ang = Math.atan2(g.uy, g.ux) * 180 / Math.PI, side = 1;
     if (ang > 90.5 || ang < -89.5) { ang -= 180; side = -1; }
     const mx = (g.A.x + g.B.x) / 2 + g.nx * ts * 0.55 * side, my = (g.A.y + g.B.y) / 2 + g.ny * ts * 0.55 * side;
-    return `<path d="${d}" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" fill="none"/><text x="${f(mx)}" y="${f(-my)}" font-size="${f(ts)}" text-anchor="middle" dominant-baseline="middle" fill="${c}" font-family="Manrope, system-ui, sans-serif" font-weight="800" transform="rotate(${f(-ang)} ${f(mx)} ${f(-my)})" stroke="${o.halo}" stroke-width="${f(ts * 0.22)}" paint-order="stroke" stroke-linejoin="round">${esc(fmtLen(g.L))}</text>`;
+    return `<path d="${d}" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" fill="none"/><text x="${f(mx)}" y="${f(-my)}" font-size="${f(ts)}" text-anchor="middle" dominant-baseline="middle" fill="${c}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="500" transform="rotate(${f(-ang)} ${f(mx)} ${f(-my)})" stroke="${o.halo}" stroke-width="${f(ts * 0.22)}" paint-order="stroke" stroke-linejoin="round">${esc(fmtLen(g.L))}</text>`;
   }
   /* Floor plan symbols. Rotatable ones draw in their own frame: length L across, depth Dp down, back edge at the top. */
-  const PAPER = "#f7f4ea", INK = "#3a3631";
+  const PAPER = "#f7f6f2", INK = "#2a2a28";
   function fmtArea(cm2) { return S().units === "ft" ? Math.round(cm2 / 929.0304) + " ft²" : (cm2 / 10000).toFixed(1) + " m²"; }
   function roomSVG(p, o) {
-    const { X, T, W, H } = bx(p), fs = clamp(Math.min(W, H) / 7, 12, 40), cx = X + W / 2, cy = T + H / 2, halo = `stroke="${shade(p.color, 0.5)}" stroke-width="${f(fs * 0.28)}" paint-order="stroke" stroke-linejoin="round"`;
-    o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.1)}" text-anchor="middle" font-size="${f(fs)}" font-family="Fraunces, Georgia, serif" font-weight="700" fill="${INK}" ${halo}>${esc(p.text || "Room")}</text>` +
-      `<text x="${f(cx)}" y="${f(cy + fs * 0.85)}" text-anchor="middle" font-size="${f(fs * 0.68)}" font-family="Manrope, system-ui, sans-serif" font-weight="800" fill="#5a5148" ${halo}>${esc(fmtArea(p.w * p.h))}</text>`;
+    const { X, T, W, H } = bx(p), name = (p.text || "Room").toUpperCase(), fs = clamp(Math.min(W / (name.length * 0.78 + 2), H / 6), 9, 30), cx = X + W / 2, cy = T + H / 2, halo = `stroke="${shade(p.color, 0.55)}" stroke-width="${f(fs * 0.3)}" paint-order="stroke" stroke-linejoin="round"`;
+    o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.05)}" text-anchor="middle" font-size="${f(fs)}" font-family="Inter Tight, system-ui, sans-serif" font-weight="600" letter-spacing="${f(fs * 0.12)}" fill="${INK}" ${halo}>${esc(name)}</text>` +
+      `<text x="${f(cx)}" y="${f(cy + fs * 1.1)}" text-anchor="middle" font-size="${f(fs * 0.78)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="400" fill="#5e5c57" ${halo}>${esc(fmtArea(p.w * p.h))}</text>`;
     return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 15.24));
   }
   function pdoorSVG(p, o, L, Dp) {
@@ -831,7 +866,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     return R(0, 0, L, Dp, PAPER) + R(0, 0, L, Dp, "none", stk(INK, 1.5)) + `<path d="M0 ${f(Dp / 2)}H${f(L)}" stroke="${p.color}" stroke-width="2.5"/>` + R(0, 0, 3, Dp, INK) + R(L - 3, 0, 3, Dp, INK);
   }
   function stairsSVG(p, o, L, Dp) {
-    const c = p.color, e = shade(c, -0.5);
+    const c = p.color, e = INK;
     if (p.style === "spiral") {
       const r = Math.min(L, Dp) / 2, cx = L / 2, cy = Dp / 2; let d = "";
       for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; d += `M${f(cx + Math.cos(a) * r * 0.2)} ${f(cy + Math.sin(a) * r * 0.2)}L${f(cx + Math.cos(a) * r)} ${f(cy + Math.sin(a) * r)}`; }
@@ -843,7 +878,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     return R(0, 0, L, Dp, c, stk(e, 1.5)) + `<path d="${d}" stroke="${e}" stroke-width="1"/><path d="M${f(L / 2)} ${f(Dp - 8)}V${f(8)}M${f(L / 2 - ah)} ${f(8 + ah * 1.4)}L${f(L / 2)} 8L${f(L / 2 + ah)} ${f(8 + ah * 1.4)}" fill="none" stroke="${e}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
   function furnSVG(p, o, L, Dp) {
-    const c = p.color, e = shade(c, -0.42), lt = shade(c, 0.22), st = stk(e, 1.2);
+    const c = p.color, e = INK, lt = shade(c, 0.3), st = stk(e, 0.9);
     switch (p.style) {
       case "bed": { let s = R(0, 0, L, Dp, c, st + ' rx="4"'); if (L < 120) s += R(L * 0.15, Dp * 0.05, L * 0.7, Dp * 0.14, lt, st + ' rx="6"'); else s += R(L * 0.07, Dp * 0.05, L * 0.39, Dp * 0.14, lt, st + ' rx="6"') + R(L * 0.54, Dp * 0.05, L * 0.39, Dp * 0.14, lt, st + ' rx="6"'); return s + R(0, Dp * 0.27, L, Dp * 0.73, shade(c, 0.1), st) + R(0, Dp * 0.27, L, Dp * 0.09, lt, st); }
       case "table": {
@@ -855,7 +890,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       case "desk": return R(0, 0, L, Dp * 0.62, c, st) + `<circle cx="${f(L / 2)}" cy="${f(Dp * 0.8)}" r="${f(Math.min(L, Dp) * 0.2)}" fill="${lt}" stroke="${e}" stroke-width="1.2"/>`;
       case "wardrobe": return R(0, 0, L, Dp, c, st) + `<path d="M0 0L${f(L)} ${f(Dp)}M${f(L)} 0L0 ${f(Dp)}" stroke="${e}" stroke-width=".8"/>`;
       case "rug": return R(0, 0, L, Dp, c, st + ' rx="4"') + R(L * 0.07, Dp * 0.1, L * 0.86, Dp * 0.8, "none", stk(lt, 3)) + R(L * 0.16, Dp * 0.24, L * 0.68, Dp * 0.52, "none", stk(shade(c, -0.2), 2));
-      case "tv": return R(0, 0, L, Dp, c, st) + R(L * 0.12, Dp * 0.12, L * 0.76, Dp * 0.2, "#26301f");
+      case "tv": return R(0, 0, L, Dp, c, st) + R(L * 0.12, Dp * 0.12, L * 0.76, Dp * 0.2, INK);
       default: {
         const a = Math.min(L * 0.15, 20); let s = R(0, 0, L, Dp, c, st + ' rx="6"') + R(a, Dp * 0.3, L - 2 * a, Dp * 0.7, lt, st);
         const n = p.style === "sofa" ? Math.max(2, Math.round((L - 2 * a) / 70)) : 1;
@@ -865,8 +900,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     }
   }
   function fixtureSVG(p, o, L, Dp) {
-    const c = p.color, e = shade(c, -0.55), lt = shade(c, -0.08), st = stk(e, 1.2), m = Math.min(L, Dp);
-    const txt = t => `<text x="${f(L / 2)}" y="${f(Dp / 2)}" text-anchor="middle" dominant-baseline="middle" font-size="${f(m * 0.24)}" font-family="Manrope, system-ui, sans-serif" font-weight="800" fill="${e}">${t}</text>`;
+    const c = p.color, e = INK, lt = shade(c, -0.05), st = stk(e, 0.9), m = Math.min(L, Dp);
+    const txt = t => `<text x="${f(L / 2)}" y="${f(Dp / 2)}" text-anchor="middle" dominant-baseline="middle" font-size="${f(m * 0.2)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="500" letter-spacing="${f(m * 0.02)}" fill="${e}">${t}</text>`;
     const circ = (x, y, r, fill, sw) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fill}" stroke="${e}" stroke-width="${sw || 1.2}"/>`;
     switch (p.style) {
       case "sink": return R(0, 0, L, Dp, c, st) + `<ellipse cx="${f(L / 2)}" cy="${f(Dp * 0.56)}" rx="${f(L * 0.36)}" ry="${f(Dp * 0.32)}" fill="${lt}" stroke="${e}" stroke-width="1.2"/>` + circ(L / 2, Dp * 0.56, 2, e) + R(L / 2 - 2, Dp * 0.06, 4, Dp * 0.16, e);
@@ -882,18 +917,21 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     }
   }
   function pplantSVG(p) {
-    const { X, T, W, H } = bx(p), c = p.color, tones = [shade(c, -0.22), c, shade(c, 0.18)], cx = X + W / 2, cy = T + H / 2;
-    const el = (x, y, rx, ry, fill) => `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rx)}" ry="${f(ry)}" fill="${fill}"/>`;
-    if (p.style === "tree") { let s = el(cx, cy, W * 0.5, H * 0.5, tones[0]); [[0.32, 0.35], [0.66, 0.32], [0.38, 0.68], [0.68, 0.66], [0.5, 0.5]].forEach((q, i) => { s += el(X + W * q[0], T + H * q[1], W * 0.24, H * 0.24, tones[1 + i % 2]); }); return s + `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(W, H) * 0.04)}" fill="#6b4a33"/>`; }
-    let s = `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(W, H) * 0.32)}" fill="#b5654a" stroke="#7a3b2e" stroke-width="1.5"/>`;
-    for (let i = 0; i < 7; i++) { const a = i * Math.PI * 2 / 7, x = cx + Math.cos(a) * W * 0.26, y = cy + Math.sin(a) * H * 0.26; s += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(W * 0.2)}" ry="${f(H * 0.09)}" fill="${tones[i % 3]}" transform="rotate(${f(a * 180 / Math.PI)} ${f(x)} ${f(y)})"/>`; }
+    const { X, T, W, H } = bx(p), c = p.color, e = shade(c, -0.5), cx = X + W / 2, cy = T + H / 2, rnd = mulberry(p.id * 131 + 7);
+    const wash = `fill="${shade(c, 0.55)}" fill-opacity=".85" stroke="${e}" stroke-width="1.1" stroke-linejoin="round"`;
+    if (p.style === "tree") {
+      let d = ""; for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2 + rnd() * 0.3; d += `M${f(cx)} ${f(cy)}L${f(cx + Math.cos(a) * W * 0.36)} ${f(cy + Math.sin(a) * H * 0.36)}`; }
+      return `<path d="${cloud(cx, cy, W * 0.48, H * 0.48, 14, rnd)}" ${wash}/><path d="${d}" stroke="${e}" stroke-width=".7" opacity=".6"/><circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(W, H) * 0.03)}" fill="${e}"/>`;
+    }
+    let s = `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(W, H) * 0.3)}" fill="#efece6" stroke="#2a2a28" stroke-width="1"/>`;
+    for (let i = 0; i < 7; i++) { const a = i * Math.PI * 2 / 7, x = cx + Math.cos(a) * W * 0.24, y = cy + Math.sin(a) * H * 0.24; s += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(W * 0.2)}" ry="${f(H * 0.08)}" transform="rotate(${f(a * 180 / Math.PI)} ${f(x)} ${f(y)})" ${wash}/>`; }
     return s;
   }
   const DRAW = { room: roomSVG, pdoor: pdoorSVG, pwindow: pwindowSVG, stairs: stairsSVG, furn: furnSVG, fixture: fixtureSVG, pplant: pplantSVG, pwall: lineSVG, wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
   const SKY = {
-    day: { top: "#dceaf3", bot: "#f4efe3", grass: "#8aa860", soil: "#d8cdb5", halo: "rgba(255,255,255,.85)", glass: "url(#gDay)" },
-    dusk: { top: "#7d6fa0", bot: "#f1b48a", grass: "#6f8752", soil: "#b9a58f", halo: "rgba(255,240,225,.85)", glass: "url(#gDusk)" },
-    night: { top: "#0d1626", bot: "#24344c", grass: "#2e4430", soil: "#2a2f33", halo: "rgba(13,22,38,.85)", glass: "url(#gNight)" }
+    day: { top: "#e9edef", bot: "#f6f5f1", soil: "#efece6", line: "#2a2a28", hatch: "rgba(42,42,40,.28)", halo: "rgba(246,245,241,.9)", glass: "url(#gDay)" },
+    dusk: { top: "#5f6577", bot: "#d9c3b0", soil: "#c9bcb0", line: "#2b2a2e", hatch: "rgba(43,42,46,.3)", halo: "rgba(240,230,220,.85)", glass: "url(#gDusk)" },
+    night: { top: "#14181f", bot: "#262c36", soil: "#1b1f25", line: "#9aa3ad", hatch: "rgba(154,163,173,.25)", halo: "rgba(20,24,31,.85)", glass: "url(#gNight)" }
   };
   function artSVG(parts, sky, layers, mode, noGround) {
     const pats = new Map(), sk = SKY[sky] || SKY.day;
@@ -903,7 +941,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       ts: b ? clamp(Math.max(b.x1 - b.x0, b.y1 - Math.min(b.y0, 0)) / 42, 10, 60) : 20,
       pat(tex, c) { if (!tex || tex === "plain") return c; const id = "p_" + tex + "_" + c.slice(1); if (!pats.has(id)) pats.set(id, patDef(tex, c, id)); return `url(#${id})`; }
     };
-    let body = mode === "plan" || noGround ? "" : R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 18, sk.grass) + `<path d="M-100000 0H100000" stroke="${shade(sk.grass, -0.35)}" stroke-width="1.5"/>`;
+    /* Ground in section: a band of earth hatching under a heavy ground line. */
+    if (mode !== "plan" && !noGround) pats.set("earth", `<pattern id="earth" patternUnits="userSpaceOnUse" width="14" height="14"><path d="M-2 2L2 -2M0 14L14 0M12 16L16 12" stroke="${sk.hatch}" stroke-width="1"/></pattern>`);
+    let body = mode === "plan" || noGround ? "" : R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 45, "url(#earth)") + `<path d="M-100000 0H100000" stroke="${sk.line}" stroke-width="3"/>`;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
       const T = TYPES[p.t]; let s;
@@ -918,16 +958,26 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   }
 
   /* ---------- export ---------- */
-  const STATIC_DEFS = `<linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e8f2"/><stop offset="1" stop-color="#7c9fb6"/></linearGradient><linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c79b"/><stop offset="1" stop-color="#806f9c"/></linearGradient><linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a6"/><stop offset="1" stop-color="#f0ac52"/></linearGradient>`;
-  function exportSVG(d, pad, mode) {
+  const STATIC_DEFS = `<linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe5e8"/><stop offset="1" stop-color="#9aabb7"/></linearGradient><linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6cdb6"/><stop offset="1" stop-color="#77748a"/></linearGradient><linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2dfae"/><stop offset="1" stop-color="#cf9a58"/></linearGradient>`;
+  function exportSVG(d, pad, mode, titled) {
     mode = mode || d.mode;
     const plan = mode === "plan", parts = (plan ? d.plan : d.front).filter(p => !d.layers[p.layer].hide);
     const b = bounds(parts) || { x0: 0, y0: 0, x1: 800, y1: 400 };
     pad = pad == null ? Math.max(60, (b.x1 - b.x0) * 0.06) : pad;
-    const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad, bot = plan ? b.y0 - pad : Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
+    const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad; let bot = plan ? b.y0 - pad : Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
+    if (titled) bot -= clamp(Math.min(x1 - x0, top - bot) * 0.022, 9, 40) * 6;
     const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null, mode);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk.top}"/><stop offset="1" stop-color="${sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, plan ? PAPER : "url(#sky)")}${a.body}</svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk.top}"/><stop offset="1" stop-color="${sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, plan ? PAPER : "url(#sky)")}${a.body}${titled ? titleBlock(d, plan, x0, -top, W, H, sk) : ""}</svg>`;
     return { svg, W, H };
+  }
+  /* A small drafting title block in the lower right of saved pictures: design name, view and date. */
+  function titleBlock(d, plan, X, Y, W, H, sk) {
+    const fs = clamp(Math.min(W, H) * 0.022, 9, 40), bw = fs * 20, bh = fs * 4.2, bx0 = X + W - bw - fs, by = Y + H - bh - fs * 0.8;
+    const ink = plan || d.sky !== "night" ? "#2a2a28" : "#e6e3dc", bg = plan ? PAPER : d.sky === "night" ? "#14181f" : "#f6f5f1";
+    const date = new Date().toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" }).toUpperCase();
+    return `<g font-family="IBM Plex Mono, ui-monospace, monospace" fill="${ink}">${R(bx0, by, bw, bh, bg, `stroke="${ink}" stroke-width="${f(fs * 0.08)}"`)}<path d="M${f(bx0)} ${f(by + bh * 0.58)}H${f(bx0 + bw)}" stroke="${ink}" stroke-width="${f(fs * 0.05)}"/>` +
+      `<text x="${f(bx0 + fs * 0.7)}" y="${f(by + bh * 0.4)}" font-size="${f(fs * 1.15)}" font-family="Inter Tight, system-ui, sans-serif" font-weight="600" letter-spacing="${f(fs * 0.08)}">${esc(d.name.toUpperCase())}</text>` +
+      `<text x="${f(bx0 + fs * 0.7)}" y="${f(by + bh * 0.83)}" font-size="${f(fs * 0.72)}" letter-spacing="${f(fs * 0.1)}">${plan ? "FLOOR PLAN" : "FRONT ELEVATION"}  ·  ${esc(date)}</text></g>`;
   }
   const svgURL = svg => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   function thumbURL(d) { const m = d[d.mode].length || !(d.front.length || d.plan.length) ? d.mode : d.front.length ? "front" : "plan"; return svgURL(exportSVG(d, null, m).svg); }
@@ -942,7 +992,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 3000);
   }
   async function savePNG() {
-    const { svg, W, H } = exportSVG(D);
+    const { svg, W, H } = exportSVG(D, null, null, true);
     const k = Math.min(4, 2400 / Math.max(W, H)), cw = Math.round(W * k), ch = Math.round(H * k);
     const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
     try {
@@ -957,7 +1007,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     } catch (e) { toast("The picture couldn't be made on this phone. Try Save SVG instead."); }
     finally { URL.revokeObjectURL(url); }
   }
-  function saveSVGFile() { shareOrDownload(new Blob([exportSVG(D).svg], { type: "image/svg+xml" }), fileName("svg")); track("export", { kind: "svg" }); }
+  function saveSVGFile() { shareOrDownload(new Blob([exportSVG(D, null, null, true).svg], { type: "image/svg+xml" }), fileName("svg")); track("export", { kind: "svg" }); }
 
   /* Share links carry the whole design in the address (after #), compressed when the browser can. Nothing is uploaded. */
   function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
@@ -989,74 +1039,74 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   /* ---------- templates ---------- */
   const TEMPLATES = {
     cottage: { name: "Garden cottage", sky: "day", parts: [
-      { t: "chimney", x: 560, y: 380, w: 60, h: 230, color: "#8e4a39", tex: "brick" },
-      { t: "wall", x: 0, y: 0, w: 800, h: 300, color: "#b5654a", tex: "brick" },
-      { t: "roof", x: -50, y: 300, w: 900, h: 270, color: "#5b4a42", tex: "shingle", style: "gable" },
-      { t: "door", x: 350, y: 0, w: 100, h: 210, color: "#3f6b5a", style: "panel" },
-      { t: "window", x: 95, y: 90, w: 150, h: 140, color: "#3f6b5a", style: "shutters" },
-      { t: "window", x: 555, y: 90, w: 150, h: 140, color: "#3f6b5a", style: "shutters" },
-      { t: "window", x: 360, y: 360, w: 80, h: 80, color: "#f4efe4", style: "round" },
-      { t: "plant", x: 105, y: 0, w: 130, h: 70, color: "#5f8a45", style: "shrub" },
-      { t: "plant", x: 565, y: 0, w: 130, h: 70, color: "#5f8a45", style: "shrub" },
-      { t: "plant", x: -300, y: 0, w: 260, h: 480, color: "#5f8a45", style: "tree" }],
+      { t: "chimney", x: 560, y: 380, w: 60, h: 230, color: "#8a5444", tex: "brick" },
+      { t: "wall", x: 0, y: 0, w: 800, h: 300, color: "#a0705a", tex: "brick" },
+      { t: "roof", x: -50, y: 300, w: 900, h: 270, color: "#4a4b4d", tex: "shingle", style: "gable" },
+      { t: "door", x: 350, y: 0, w: 100, h: 210, color: "#3e4a4f", style: "panel" },
+      { t: "window", x: 95, y: 90, w: 150, h: 140, color: "#3e4a4f", style: "shutters" },
+      { t: "window", x: 555, y: 90, w: 150, h: 140, color: "#3e4a4f", style: "shutters" },
+      { t: "window", x: 360, y: 360, w: 80, h: 80, color: "#f1efe9", style: "round" },
+      { t: "plant", x: 105, y: 0, w: 130, h: 70, color: "#7d8f6e", style: "shrub" },
+      { t: "plant", x: 565, y: 0, w: 130, h: 70, color: "#7d8f6e", style: "shrub" },
+      { t: "plant", x: -300, y: 0, w: 260, h: 480, color: "#7d8f6e", style: "tree" }],
       plan: [
-      { t: "room", x: 0, y: 0, w: 450, h: 350, color: "#d9b98c", tex: "wood", text: "Living room" },
-      { t: "room", x: 450, y: 0, w: 350, h: 350, color: "#e9e4da", tex: "ftile", text: "Kitchen" },
-      { t: "room", x: 0, y: 350, w: 450, h: 300, color: "#cfc6d9", tex: "carpet", text: "Bedroom" },
-      { t: "room", x: 450, y: 350, w: 200, h: 300, color: "#dfe8ec", tex: "ftile", text: "Bath" },
-      { t: "room", x: 650, y: 350, w: 150, h: 300, color: "#d9b98c", tex: "wood", text: "Closet" },
-      { t: "furn", x: 70, y: 60, w: 240, h: 170, color: "#b8466a", style: "rug" },
-      { t: "furn", x: 60, y: 245, w: 210, h: 90, color: "#7a8f7a", style: "sofa" },
-      { t: "furn", x: 330, y: 190, w: 85, h: 85, color: "#7a8f7a", style: "armchair", rot: 3 },
-      { t: "fixture", x: 732, y: 20, w: 60, h: 240, color: "#e8e2d4", style: "counter", rot: 1 },
-      { t: "fixture", x: 732, y: 262, w: 60, h: 60, color: "#f4f2ec", style: "stove", rot: 1 },
-      { t: "fixture", x: 600, y: 270, w: 70, h: 70, color: "#f4f2ec", style: "fridge" },
-      { t: "furn", x: 490, y: 90, w: 160, h: 140, color: "#c9b79c", style: "table" },
-      { t: "furn", x: 40, y: 440, w: 160, h: 200, color: "#d8cbb5", style: "bed" },
-      { t: "furn", x: 310, y: 580, w: 120, h: 60, color: "#c9b79c", style: "wardrobe" },
-      { t: "fixture", x: 465, y: 567, w: 170, h: 75, color: "#f4f2ec", style: "bath" },
-      { t: "fixture", x: 570, y: 450, w: 70, h: 40, color: "#f4f2ec", style: "toilet", rot: 1 },
-      { t: "fixture", x: 460, y: 440, w: 45, h: 60, color: "#f4f2ec", style: "sink", rot: 3 },
-      { t: "pdoor", x: 355, y: 0, w: 90, h: 90, color: "#3f6b5a", style: "swing" },
-      { t: "pdoor", x: 330, y: 350, w: 80, h: 80, color: "#8a6a4a", style: "swing", rot: 2 },
-      { t: "pdoor", x: 470, y: 350, w: 80, h: 80, color: "#8a6a4a", style: "swing" },
-      { t: "pdoor", x: 690, y: 350, w: 70, h: 70, color: "#8a6a4a", style: "swing" },
+      { t: "room", x: 0, y: 0, w: 450, h: 350, color: "#ddd0b8", tex: "wood", text: "Living room" },
+      { t: "room", x: 450, y: 0, w: 350, h: 350, color: "#ebe8e1", tex: "ftile", text: "Kitchen" },
+      { t: "room", x: 0, y: 350, w: 450, h: 300, color: "#dedad3", tex: "carpet", text: "Bedroom" },
+      { t: "room", x: 450, y: 350, w: 200, h: 300, color: "#e3e6e6", tex: "ftile", text: "Bath" },
+      { t: "room", x: 650, y: 350, w: 150, h: 300, color: "#ddd0b8", tex: "wood", text: "Closet" },
+      { t: "furn", x: 70, y: 60, w: 240, h: 170, color: "#a9a194", style: "rug" },
+      { t: "furn", x: 60, y: 245, w: 210, h: 90, color: "#8d9488", style: "sofa" },
+      { t: "furn", x: 330, y: 190, w: 85, h: 85, color: "#8d9488", style: "armchair", rot: 3 },
+      { t: "fixture", x: 732, y: 20, w: 60, h: 240, color: "#ece9e2", style: "counter", rot: 1 },
+      { t: "fixture", x: 732, y: 262, w: 60, h: 60, color: "#f7f6f2", style: "stove", rot: 1 },
+      { t: "fixture", x: 600, y: 270, w: 70, h: 70, color: "#f7f6f2", style: "fridge" },
+      { t: "furn", x: 490, y: 90, w: 160, h: 140, color: "#cfc3b0", style: "table" },
+      { t: "furn", x: 40, y: 440, w: 160, h: 200, color: "#e2dbcf", style: "bed" },
+      { t: "furn", x: 310, y: 580, w: 120, h: 60, color: "#cfc3b0", style: "wardrobe" },
+      { t: "fixture", x: 465, y: 567, w: 170, h: 75, color: "#f7f6f2", style: "bath" },
+      { t: "fixture", x: 570, y: 450, w: 70, h: 40, color: "#f7f6f2", style: "toilet", rot: 1 },
+      { t: "fixture", x: 460, y: 440, w: 45, h: 60, color: "#f7f6f2", style: "sink", rot: 3 },
+      { t: "pdoor", x: 355, y: 0, w: 90, h: 90, color: "#3e4a4f", style: "swing" },
+      { t: "pdoor", x: 330, y: 350, w: 80, h: 80, color: "#2a2a28", style: "swing", rot: 2 },
+      { t: "pdoor", x: 470, y: 350, w: 80, h: 80, color: "#2a2a28", style: "swing" },
+      { t: "pdoor", x: 690, y: 350, w: 70, h: 70, color: "#2a2a28", style: "swing" },
       { t: "pwindow", x: 110, y: -7.5, w: 120, h: 15 },
       { t: "pwindow", x: 570, y: -7.5, w: 120, h: 15 },
       { t: "pwindow", x: 150, y: 642.5, w: 120, h: 15 },
       { t: "pwindow", x: 520, y: 642.5, w: 80, h: 15 },
       { t: "pplant", x: 20, y: 20, w: 50, h: 50, style: "pot" }] },
     townhouse: { name: "City townhouse", sky: "dusk", parts: [
-      { t: "wall", x: 0, y: 0, w: 650, h: 940, color: "#d9c7a8", tex: "stucco" },
-      { t: "trim", x: 0, y: 0, w: 40, h: 920, color: "#efe8da", style: "quoins" },
-      { t: "trim", x: 610, y: 0, w: 40, h: 920, color: "#efe8da", style: "quoins", fx: true },
-      { t: "roof", x: -20, y: 960, w: 690, h: 210, color: "#4c5560", tex: "slate", style: "mansard" },
-      { t: "trim", x: -15, y: 920, w: 680, h: 40, color: "#efe8da", style: "cornice" },
-      { t: "trim", x: 0, y: 320, w: 650, h: 20, color: "#efe8da", style: "band" },
-      { t: "window", x: 280, y: 1010, w: 90, h: 110, color: "#efe8da", style: "arched" },
-      { t: "steps", x: 245, y: 0, w: 160, h: 51, color: "#b9b2a4", style: "stoop" },
-      { t: "door", x: 275, y: 51, w: 100, h: 230, color: "#2f5d7c", style: "arched" },
-      { t: "window", x: 80, y: 90, w: 110, h: 180, color: "#efe8da", style: "double" },
-      { t: "window", x: 460, y: 90, w: 110, h: 180, color: "#efe8da", style: "double" },
-      { t: "window", x: 80, y: 420, w: 110, h: 190, color: "#efe8da", style: "arched" },
-      { t: "window", x: 270, y: 420, w: 110, h: 190, color: "#efe8da", style: "arched" },
-      { t: "window", x: 460, y: 420, w: 110, h: 190, color: "#efe8da", style: "arched" },
-      { t: "window", x: 80, y: 690, w: 110, h: 170, color: "#efe8da", style: "double" },
-      { t: "window", x: 270, y: 690, w: 110, h: 170, color: "#efe8da", style: "double" },
-      { t: "window", x: 460, y: 690, w: 110, h: 170, color: "#efe8da", style: "double" },
-      { t: "plant", x: 80, y: 690, w: 110, h: 40, color: "#5f8a45", style: "flowers" },
-      { t: "plant", x: 460, y: 690, w: 110, h: 40, color: "#5f8a45", style: "flowers" }] },
+      { t: "wall", x: 0, y: 0, w: 650, h: 940, color: "#d8cdbb", tex: "stucco" },
+      { t: "trim", x: 0, y: 0, w: 40, h: 920, color: "#ece8df", style: "quoins" },
+      { t: "trim", x: 610, y: 0, w: 40, h: 920, color: "#ece8df", style: "quoins", fx: true },
+      { t: "roof", x: -20, y: 960, w: 690, h: 210, color: "#4a4b4d", tex: "slate", style: "mansard" },
+      { t: "trim", x: -15, y: 920, w: 680, h: 40, color: "#ece8df", style: "cornice" },
+      { t: "trim", x: 0, y: 320, w: 650, h: 20, color: "#ece8df", style: "band" },
+      { t: "window", x: 280, y: 1010, w: 90, h: 110, color: "#ece8df", style: "arched" },
+      { t: "steps", x: 245, y: 0, w: 160, h: 51, color: "#bdb7ad", style: "stoop" },
+      { t: "door", x: 275, y: 51, w: 100, h: 230, color: "#2f3b45", style: "arched" },
+      { t: "window", x: 80, y: 90, w: 110, h: 180, color: "#ece8df", style: "double" },
+      { t: "window", x: 460, y: 90, w: 110, h: 180, color: "#ece8df", style: "double" },
+      { t: "window", x: 80, y: 420, w: 110, h: 190, color: "#ece8df", style: "arched" },
+      { t: "window", x: 270, y: 420, w: 110, h: 190, color: "#ece8df", style: "arched" },
+      { t: "window", x: 460, y: 420, w: 110, h: 190, color: "#ece8df", style: "arched" },
+      { t: "window", x: 80, y: 690, w: 110, h: 170, color: "#ece8df", style: "double" },
+      { t: "window", x: 270, y: 690, w: 110, h: 170, color: "#ece8df", style: "double" },
+      { t: "window", x: 460, y: 690, w: 110, h: 170, color: "#ece8df", style: "double" },
+      { t: "plant", x: 80, y: 690, w: 110, h: 40, color: "#7d8f6e", style: "flowers" },
+      { t: "plant", x: 460, y: 690, w: 110, h: 40, color: "#7d8f6e", style: "flowers" }] },
     modern: { name: "Modern house", sky: "day", parts: [
-      { t: "wall", x: 0, y: 0, w: 1000, h: 320, color: "#e9e5dc", tex: "board" },
-      { t: "wall", x: 450, y: 320, w: 550, h: 300, color: "#3d3f42", tex: "siding" },
-      { t: "roof", x: -20, y: 320, w: 470, h: 22, color: "#3d3f42", tex: "plain", style: "flat" },
-      { t: "roof", x: 430, y: 620, w: 590, h: 22, color: "#26301f", tex: "plain", style: "flat" },
-      { t: "window", x: 70, y: 60, w: 300, h: 220, color: "#3d3f42", style: "single" },
-      { t: "door", x: 440, y: 0, w: 110, h: 240, color: "#8a6a4a", style: "glass" },
-      { t: "door", x: 630, y: 0, w: 300, h: 240, color: "#8a6a4a", style: "garage" },
-      { t: "window", x: 520, y: 380, w: 410, h: 180, color: "#26301f", style: "casement" },
-      { t: "plant", x: -280, y: 0, w: 240, h: 460, color: "#5f8a45", style: "tree" },
-      { t: "plant", x: 60, y: 0, w: 320, h: 60, color: "#5f8a45", style: "hedge" }] }
+      { t: "wall", x: 0, y: 0, w: 1000, h: 320, color: "#eceae4", tex: "board" },
+      { t: "wall", x: 450, y: 320, w: 550, h: 300, color: "#3a3b3d", tex: "siding" },
+      { t: "roof", x: -20, y: 320, w: 470, h: 22, color: "#3a3b3d", tex: "plain", style: "flat" },
+      { t: "roof", x: 430, y: 620, w: 590, h: 22, color: "#2a2a28", tex: "plain", style: "flat" },
+      { t: "window", x: 70, y: 60, w: 300, h: 220, color: "#3a3b3d", style: "single" },
+      { t: "door", x: 440, y: 0, w: 110, h: 240, color: "#9b7a58", style: "glass" },
+      { t: "door", x: 630, y: 0, w: 300, h: 240, color: "#9b7a58", style: "garage" },
+      { t: "window", x: 520, y: 380, w: 410, h: 180, color: "#2a2a28", style: "casement" },
+      { t: "plant", x: -280, y: 0, w: 240, h: 460, color: "#7d8f6e", style: "tree" },
+      { t: "plant", x: 60, y: 0, w: 320, h: 60, color: "#7d8f6e", style: "hedge" }] }
   };
 
   /* ---------- view ---------- */
@@ -1143,7 +1193,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       }
       handles.forEach(h => { s += `<circle cx="${f(h[1])}" cy="${f(h[2])}" r="${h[0] === 2 && k === "dim" ? 8 : 7}" fill="var(--panel-solid)" stroke="var(--accent)" stroke-width="2.5"/>`; });
     }
-    u.innerHTML = `<style>.szt{font:800 12px Manrope,system-ui,sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--panel-solid);stroke-width:4px;stroke-linejoin:round}</style>` + s;
+    u.innerHTML = `<style>.szt{font:500 11px "IBM Plex Mono",ui-monospace,monospace;fill:var(--ink);paint-order:stroke;stroke:var(--panel-solid);stroke-width:4px;stroke-linejoin:round}</style>` + s;
   }
   function renderView() {
     $("art").setAttribute("transform", `matrix(${view.s} 0 0 ${view.s} ${view.tx} ${view.ty})`);
@@ -2289,7 +2339,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     else if (e.key === "Escape") { if (!$("scrim").hidden) closeSheets(); else { selectPart(null); tool = "select"; render(); } }
   });
   let rsT = 0;
-  window.addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { const ow = stageW, oh = stageH; measure(); view.tx += (stageW - ow) / 2; view.ty += (stageH - oh) / 2; renderView(); }, 60); });
+  const onResize = () => { clearTimeout(rsT); rsT = setTimeout(() => { const ow = stageW, oh = stageH; measure(); if (Math.abs(stageW - ow) < 1 && Math.abs(stageH - oh) < 1) return; if ((ow > oh) !== (stageW > stageH)) { fit(); return; } view.tx += (stageW - ow) / 2; view.ty += (stageH - oh) / 2; renderView(); }, 60); };
+  window.addEventListener("resize", onResize);
+  if (window.ResizeObserver) new ResizeObserver(onResize).observe(stage);
 
   /* ---------- boot ---------- */
   load();
@@ -2302,7 +2354,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   renderDock();
   readLink();
   if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => openSheet("helpSheet"), 300); }
-  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS };
+  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG };
 
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
     navigator.serviceWorker.register("sw.js").catch(noop);

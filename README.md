@@ -50,7 +50,7 @@ A carved limestone pillar and lintel stand in the courtyard with ivy climbing th
 
 ## Brick & Blueprint (house designer)
 
-A drafting board in the garden for designing a house two ways: the **Front** (the facade) and the **Plan** (the floor plan), switched at the top left of the board. Both belong to the same design. It mixes CAD precision (real sizes, a snapping grid, snap to other parts, typed dimensions, layers) with paint-box freedom (colors, textures, freehand pen and a paint bucket). It's a free sandbox: no scores or goals.
+A quiet drafting studio for designing a house two ways: the **Front** (the facade) and the **Plan** (the floor plan), switched at the top left of the board. Both belong to the same design. It mixes CAD precision (real sizes, a snapping grid, snap to other parts, typed dimensions, layers) with paint-box freedom (colors, textures, freehand pen and a paint bucket). It's a free sandbox: no scores or goals.
 
 **Front parts:** walls (brick, stone, siding, board and batten, stucco, shingle), roofs (gable, hip, flat, shed, mansard, gambrel), windows, doors, trim (cornice, band, column, pilaster, quoins, surround), plants (shrub, tree, hedge, flower box, ivy), steps and chimneys.
 
@@ -75,8 +75,8 @@ A drafting board in the garden for designing a house two ways: the **Front** (th
 - Undo and redo, pinch to zoom, two-finger pan, zoom buttons and fit to screen
 - Day, dusk and night skies for the front (windows light up at night)
 - Designs auto-save on the phone, with a gallery, copies and three starter houses (the Garden cottage comes with a matching floor plan)
-- Save a picture (PNG) or an SVG of either view, or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
-- Works in portrait and landscape
+- Save a picture (PNG) or an SVG of either view, finished with a drafting title block (name, view and date), or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
+- Works in portrait and landscape on any iPhone size. Turned sideways, the tools move to a rail on the right so the board keeps its height
 
 ## Put it online with GitHub Pages
 
