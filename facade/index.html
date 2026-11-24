@@ -223,6 +223,13 @@ body.is3d .tool{opacity:.55}
 .tog{border:1px solid var(--panel-line); background:transparent; border-radius:6px; padding:6px 10px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; min-width:70px}
 .tog[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid); border-color:var(--ink)}
 .cards{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.styles{display:grid; gap:8px}
+.styles button{display:grid; grid-template-columns:auto 1fr; gap:4px 10px; align-items:start; text-align:left; border:1px solid var(--panel-line); background:transparent; border-radius:8px; padding:10px; cursor:pointer; color:inherit; font:inherit}
+.styles button[aria-pressed="true"]{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.styles .sw{grid-row:span 2; display:grid; grid-template-columns:1fr 1fr; width:38px; height:38px; border-radius:6px; overflow:hidden; border:1px solid var(--panel-line)}
+.styles b{font-size:14px; font-weight:500}
+.styles small{font-size:12px; color:var(--ink2); line-height:1.35}
+.styles .sw i{display:block}
 .card{border:1px solid var(--panel-line); background:transparent; border-radius:10px; padding:8px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:6px; min-width:0}
 .card.cur{border-color:var(--ink)}
 .card img{width:100%; aspect-ratio:4/3; object-fit:contain; border-radius:4px; background:linear-gradient(180deg,#e9edef,#f6f5f1); display:block}
@@ -314,6 +321,7 @@ body.is3d .tool{opacity:.55}
 <section class="sheet" id="paintSheet" hidden aria-label="Paint"></section>
 <section class="sheet" id="menuSheet" hidden aria-label="Menu"></section>
 <section class="sheet" id="lotSheet" hidden aria-label="Lot size"></section>
+<section class="sheet" id="styleSheet" hidden aria-label="Building style"></section>
 <section class="sheet" id="layersSheet" hidden aria-label="Layers"></section>
 <section class="sheet" id="designsSheet" hidden aria-label="Your designs"></section>
 <section class="sheet" id="newSheet" hidden aria-label="New design"></section>
@@ -329,7 +337,8 @@ body.is3d .tool{opacity:.55}
     <li><b>Snap.</b> Grid snaps to the grid size. Snap lines parts up with the edges and centers of other parts and the ground (dashed guides show it). Ortho keeps lines and dimensions straight.</li>
     <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
     <li><b>Front and Plan.</b> The switch at the top left flips between the front of the house and its floor plan. Each has its own tools, and rooms show their floor area as you size them. They are linked: a ground-floor window or door placed on the front wall also goes into the plan's front wall (the bottom edge of the rooms), and the other way round. Moving or resizing it in one view moves it in the other, and dotted lines show where the other view's walls and openings fall.</li>
-    <li><b>Lot.</b> Menu, then Lot, sets the property: a common US lot size or your own width and depth, with setbacks. The plan shows property lines, setbacks, the sidewalk and street; the front shows the property lines; 3D shows the yard. The badge at the top left shows the lot area and how much of it the house covers.</li>
+    <li><b>Building style.</b> Menu, then Building style, picks how the house is built: in Puerto Rico a concrete house (stucco, flat roof with a parapet, jalousies, rejas, a marquesina), a criollo house or a wood casa de campo on posts; on the US mainland Craftsman, Colonial, Ranch, Modern farmhouse or Modern. New parts start in that style, Restyle this house changes what's drawn, and the Library and New design have parts and starter houses for each. Rooms named Marquesina, Balcón, Terraza, Porch or Carport stay open in 3D.</li>
+    <li><b>Lot.</b> Menu, then Lot, sets the property: a common US lot or a Puerto Rico urbanización or your own width and depth, with setbacks. The plan shows property lines, setbacks, the sidewalk and street; the front shows the property lines; 3D shows the yard. The badge at the top left shows the lot area and how much of it the house covers.</li>
     <li><b>Library.</b> Ready-made windows, doors, roofs, trim and plants for the front, and doors, windows, appliances, bathroom fixtures and furniture for the plan. Pick one, then tap the board to place it.</li>
     <li><b>Measure.</b> Measure drags a dimension between two points. Drag its middle handle to move it away from the wall.</li>
     <li><b>Move around.</b> Pinch to zoom and drag with two fingers, or use the + and − buttons. The corner button fits the drawing to the screen.</li>
@@ -375,13 +384,14 @@ body.is3d .tool{opacity:.55}
   ];
   const LAYER_IDS = LAYERS.map(l => l.id);
   const TYPES = {
-    wall: { name: "Wall", kind: "rect", layer: "structure", w: 731.5, h: 274.3, color: "#c8b8a2", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "shingle", "plain"] },
-    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#4a4b4d", tex: "shingle", style: "gable", styles: ["gable", "hip", "flat", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "plain"] },
-    window: { name: "Window", kind: "rect", layer: "openings", w: 91.4, h: 152.4, color: "#f1efe9", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters"] },
-    door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3e4a4f", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage"] },
-    trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#ece8df", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame"] },
-    plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#7d8f6e", style: "shrub", styles: ["shrub", "tree", "hedge", "flowers", "ivy"] },
+    wall: { name: "Wall", kind: "rect", layer: "structure", w: 731.5, h: 274.3, color: "#c8b8a2", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "block", "concrete", "shingle", "plain"] },
+    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#4a4b4d", tex: "shingle", style: "gable", styles: ["gable", "side", "hip", "flat", "parapet", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "concrete", "plain"] },
+    window: { name: "Window", kind: "rect", layer: "openings", w: 91.4, h: 152.4, color: "#f1efe9", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters", "jalousie", "louver"] },
+    door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3e4a4f", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage", "criollo", "gate"] },
+    trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#ece8df", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame", "post", "tapered", "railing", "reja"] },
+    plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#7d8f6e", style: "shrub", styles: ["shrub", "tree", "palm", "hedge", "flowers", "ivy"] },
     steps: { name: "Steps", kind: "rect", layer: "structure", w: 160, h: 51, color: "#bdb7ad", style: "steps", styles: ["steps", "stoop"] },
+    equip: { name: "Equipment", kind: "rect", layer: "details", bare: true, w: 110, h: 140, color: "#2f3133", style: "tank", styles: ["tank", "solar", "ac"] },
     chimney: { name: "Chimney", kind: "rect", layer: "structure", w: 60, h: 180, color: "#8a6f60", tex: "brick", texs: ["brick", "stone", "stucco", "plain"] },
     room: { name: "Room", kind: "rect", layer: "structure", mode: "plan", w: 426.7, h: 365.8, color: "#e6dccb", tex: "wood", texs: ["wood", "ftile", "carpet", "stone", "concrete", "plain"] },
     pwall: { name: "Wall", kind: "line", layer: "structure", mode: "plan", color: "#2a2a28" },
@@ -397,11 +407,12 @@ body.is3d .tool{opacity:.55}
     dim: { name: "Dimension", kind: "dim", layer: "dims", mode: "both", color: "#2f5f8f" }
   };
   const SIZES = { // default sizes for some styles
-    plant: { shrub: [150, 90], tree: [260, 480], hedge: [300, 100], flowers: [110, 45], ivy: [120, 300] },
-    trim: { band: [800, 20], cornice: [840, 40], column: [40, 300], pilaster: [35, 300], quoins: [40, 300], frame: [150, 180] },
-    door: { garage: [260, 220], double: [160, 220], french: [160, 220] },
-    window: { round: [80, 80], arched: [100, 170] },
-    roof: { flat: [840, 25] },
+    plant: { shrub: [150, 90], tree: [260, 480], palm: [300, 640], hedge: [300, 100], flowers: [110, 45], ivy: [120, 300] },
+    trim: { band: [800, 20], cornice: [840, 40], column: [40, 300], pilaster: [35, 300], quoins: [40, 300], frame: [150, 180], post: [22, 260], tapered: [50, 236], railing: [300, 100], reja: [136, 166] },
+    equip: { tank: [110, 140], solar: [210, 110], ac: [85, 60] },
+    door: { garage: [260, 220], double: [160, 220], french: [160, 220], criollo: [130, 270], gate: [91.4, 213] },
+    window: { round: [80, 80], arched: [100, 170], jalousie: [120, 120], louver: [110, 150] },
+    roof: { flat: [840, 25], parapet: [840, 60] },
     pdoor: { swing: [91.4, 91.4], pair: [152.4, 76.2], sliding: [182.9, 15.2] },
     stairs: { straight: [91.4, 304.8], spiral: [152.4, 152.4] },
     furn: { sofa: [213.4, 91.4], armchair: [86.4, 86.4], bed: [152.4, 203.2], table: [198.1, 162.6], desk: [137.2, 71.1], wardrobe: [121.9, 61], rug: [243.8, 167.6], tv: [182.9, 45.7] },
@@ -409,17 +420,17 @@ body.is3d .tool{opacity:.55}
     pplant: { pot: [61, 61], tree: [304.8, 304.8] }
   };
   const NAMES = {
-    gable: "Gable", hip: "Hip", flat: "Flat", shed: "Shed", mansard: "Mansard", gambrel: "Gambrel",
-    double: "Double hung", single: "Picture", casement: "Casement", arched: "Arched", round: "Round", shutters: "Shuttered",
-    panel: "Panel", glass: "Glass top", french: "French", garage: "Garage",
-    band: "Band", cornice: "Cornice", column: "Column", pilaster: "Pilaster", quoins: "Quoins", frame: "Surround",
-    shrub: "Shrub", tree: "Tree", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
+    gable: "Gable", side: "Side gable", parapet: "Flat with parapet", hip: "Hip", flat: "Flat", shed: "Shed", mansard: "Mansard", gambrel: "Gambrel",
+    double: "Double hung", single: "Picture", casement: "Casement", arched: "Arched", round: "Round", shutters: "Shuttered", jalousie: "Jalousie", louver: "Louvered",
+    panel: "Panel", glass: "Glass top", french: "French", garage: "Garage", criollo: "Criollo", gate: "Reja",
+    band: "Band", cornice: "Cornice", column: "Column", pilaster: "Pilaster", quoins: "Quoins", frame: "Surround", post: "Post", tapered: "Tapered column", railing: "Railing", reja: "Reja grille",
+    shrub: "Shrub", tree: "Tree", palm: "Palm", tank: "Water tank", solar: "Solar water heater", ac: "Mini-split AC", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
     steps: "Steps", stoop: "Stoop",
     swing: "Swing", pair: "Double", sliding: "Sliding", straight: "Straight", spiral: "Spiral",
     sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console",
     toilet: "Toilet", sink: "Sink", bath: "Bathtub", shower: "Shower", stove: "Stove", fridge: "Fridge", counter: "Counter", dishwasher: "Dishwasher", washer: "Washer", dryer: "Dryer", pot: "Potted plant",
     wood: "Wood", ftile: "Tile", carpet: "Carpet", concrete: "Concrete",
-    brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", plain: "Smooth"
+    brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", block: "Concrete block", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", plain: "Smooth"
   };
   const PALETTE = ["#f5f3ee", "#e8e2d6", "#d8cdbb", "#c8b8a2", "#b39a7c", "#a0705a", "#8a5444",
     "#6e5a4c", "#4a4b4d", "#2a2a28", "#5b6670", "#2f5f8f", "#7f97a8", "#4f6658",
@@ -497,6 +508,7 @@ body.is3d .tool{opacity:.55}
     d.sky = ["day", "dusk", "night"].indexOf(o.sky) >= 0 ? o.sky : "day";
     if (num(o.lx) != null) d.lx = num(o.lx);
     const lot = cleanLot(o.lot); if (lot) d.lot = lot;
+    if (typeof o.style === "string" && Object.prototype.hasOwnProperty.call(STYLES, o.style)) d.style = o.style;
     if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
     return d;
   }
@@ -639,6 +651,7 @@ body.is3d .tool{opacity:.55}
       case "siding": w = 60; h = 15; b = R(0, 0, 60, 15, c) + R(0, 0, 60, 1.6, l1) + R(0, 12.6, 60, 2.4, d2); break;
       case "board": w = 30; h = 60; b = R(0, 0, 30, 60, c) + R(0, 0, 5, 60, l1) + R(5, 0, 1.2, 60, d2); break;
       case "stucco": w = 40; h = 40; b = R(0, 0, 40, 40, c) + [[5, 7], [17, 3], [31, 11], [9, 22], [24, 19], [36, 30], [14, 34], [28, 37], [3, 31]].map((q, i) => `<circle cx="${q[0]}" cy="${q[1]}" r="${i % 2 ? 0.9 : 0.7}" fill="${i % 3 ? d1 : l1}"/>`).join(""); break;
+      case "block": w = 81.2; h = 40.6; b = R(0, 0, w, h, m) + R(0.7, 0.7, 39.2, 18.9, c) + R(41.3, 0.7, 39.2, 18.9, d1) + R(-19.9, 21, 39.2, 18.9, l1) + R(20.1, 21, 39.2, 18.9, c) + R(60.1, 21, 39.2, 18.9, d1); break;
       case "shingle": w = 40; h = 24; b = R(0, 0, 40, 24, d2) + R(0.5, 0, 19, 11.4, c) + R(20.5, 0, 19, 11.4, d1) + R(-9.5, 12, 19, 11.4, l1) + R(10.5, 12, 19, 11.4, c) + R(30.5, 12, 19, 11.4, l1); break;
       case "tile": w = 24; h = 16; b = R(0, 0, 24, 16, d2) + `<path d="M0 0h24v9a6 6 0 0 1-12 0a6 6 0 0 1-12 0z" fill="${c}"/><path d="M2 2h8M14 2h8" stroke="${l1}" stroke-width="1.5"/>`; break;
       case "slate": w = 40; h = 20; b = R(0, 0, 40, 20, d2) + R(0.5, 0.5, 19, 9, c) + R(20.5, 0.5, 19, 9, d1) + R(-9.5, 10.5, 19, 9, l1) + R(10.5, 10.5, 19, 9, c) + R(30.5, 10.5, 19, 9, l1); break;
@@ -662,6 +675,8 @@ body.is3d .tool{opacity:.55}
     let pts, extra = "";
     switch (p.style) {
       case "flat": return R(X, T, W, H, shade(c, 0.05), st) + R(X - 4, T, W + 8, Math.min(H * 0.35, 10), fas, st);
+      case "parapet": { const cap = Math.min(H * 0.2, 8); return R(X, T, W, H, fill, st) + R(X - 3, T, W + 6, cap, shade(c, 0.12), st) + R(X + W * 0.06, B - 3, 8, 7, edge) + R(X + W * 0.94 - 8, B - 3, 8, 7, edge); }
+      case "side": pts = [[X, B], [X + W * 0.03, T], [X + W * 0.97, T], [X + W, B]]; extra = `<path d="M${f(X + W * 0.03)} ${f(T)}H${f(X + W * 0.97)}" ${stk(edge, 2.5)} fill="none"/>`; break;
       case "hip": pts = [[X, B], [X + W * 0.28, T], [X + W * 0.72, T], [X + W, B]]; break;
       case "shed": pts = [[X, B], [X, B - H * 0.35], [X + W, T], [X + W, B]]; break;
       case "mansard": pts = [[X, B], [X + W * 0.07, T + H * 0.3], [X + W * 0.18, T], [X + W * 0.82, T], [X + W * 0.93, T + H * 0.3], [X + W, B]]; extra = `<path d="M${f(X + W * 0.07)} ${f(T + H * 0.3)}H${f(X + W * 0.93)}" ${stk(edge, 2)} fill="none"/>`; break;
@@ -672,6 +687,7 @@ body.is3d .tool{opacity:.55}
     return P(poly(pts), fill, st) + extra + R(X, B - fh, W, fh, fas, stk(edge, 1));
   }
   function windowSVG(p, o) {
+    if (p.style === "jalousie" || p.style === "louver") return slatWindow(p, o, false);
     let { X, T, W, H, B } = bx(p), st = p.style, out = "";
     let fc = p.color;
     if (st === "shutters") {
@@ -698,6 +714,7 @@ body.is3d .tool{opacity:.55}
     return out;
   }
   function doorSVG(p, o) {
+    if (p.style === "criollo" || p.style === "gate") return specialDoor(p, o, false);
     const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.38), lt = shade(c, 0.1), fr = clamp(W * 0.05, 3, 8), cas = "#eeebe4", ce = shade(cas, -0.35);
     const st = stk(e, 1), cst = stk(ce, 1);
     const knob = (x, y) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(clamp(W * 0.035, 2.5, 5))}" fill="#b8a170" stroke="#6e5a33" stroke-width=".8"/>`;
@@ -768,9 +785,143 @@ body.is3d .tool{opacity:.55}
         for (let i = 0; i < n; i++) out += R(X, T + i * bh + 0.75, i % 2 ? W * 0.62 : W, bh - 1.5, i % 2 ? c : lt, st);
         return out;
       }
+      case "post": return R(X + W * 0.1, T + H * 0.04, W * 0.8, H * 0.92, c, st) + R(X, T, W, H * 0.04, dk, st) + R(X, B - H * 0.04, W, H * 0.04, dk, st);
+      case "tapered": {
+        /* Craftsman porch column: a tapered shaft on a stone pier. */
+        const ph = H * 0.4, top = W * 0.62, cap = H * 0.05, pier = mix(c, "#8f8a80", 0.85);
+        return R(X, B - ph, W, ph, pier, st) + P(poly([[X + W * 0.12, B - ph], [X + (W - top) / 2, T + cap], [X + (W + top) / 2, T + cap], [X + W * 0.88, B - ph]]), c, st) + R(X + (W - top) / 2 - W * 0.06, T, top + W * 0.12, cap, c, st) + R(X - W * 0.04, B - ph, W * 1.08, H * 0.025, shade(pier, 0.1), st);
+      }
+      case "railing": return railingSVG(p, false);
+      case "reja": return grilleSVG(X, T, W, H, c, false, false);
       case "frame": { const t = clamp(Math.min(W, H) * 0.12, 4, 20); return P(`M${f(X)} ${f(T)}h${f(W)}v${f(H)}h${f(-W)}zM${f(X + t)} ${f(T + t)}v${f(H - 2 * t)}h${f(W - 2 * t)}v${f(-(H - 2 * t))}z`, c, st + ' fill-rule="evenodd"'); }
       default: return R(X, T, W, H, c, st) + R(X, T, W, Math.min(H * 0.25, 4), lt);
     }
+  }
+  /* ---------- Puerto Rico and Craftsman details ---------- */
+  /* Jalousie (glass slats in an aluminum frame) and louvered (solid slats) windows. */
+  function slatWindow(p, o, real) {
+    const { X, T, W, H, B } = bx(p), fc = p.color, jal = p.style === "jalousie", fr = clamp(Math.min(W, H) * 0.05, 2.5, 6);
+    const iX = X + fr, iT = T + fr, iW = W - 2 * fr, iH = H - 2 * fr, n = Math.max(4, Math.round(iH / (jal ? 10.5 : 8.5))), sh = iH / n;
+    const two = W > 110, cols = two ? 2 : 1, cw = (iW - (two ? fr : 0)) / cols;
+    let s = real ? R(X - 2, T - 2, W + 4, H + 4, "#000", 'opacity=".22"') : "";
+    s += R(X, T, W, H, fc, real ? "" : stk(shade(fc, -0.38), 1));
+    for (let k = 0; k < cols; k++) {
+      const cx = iX + k * (cw + fr);
+      s += R(cx, iT, cw, iH, jal ? (real ? (o.sky === "night" ? "#6b4a24" : "#2c3238") : o.glass) : shade(fc, -0.5));
+      for (let i = 0; i < n; i++) {
+        const y = iT + i * sh;
+        if (jal) s += real ? R(cx, y + 0.5, cw, sh * 0.8, o.sky === "night" ? "#e7b866" : "url(#gGlassR)", 'opacity=".92"') + R(cx, y + 0.5, cw, 1, "#fff", 'opacity=".45"') + R(cx, y + sh * 0.8, cw, sh * 0.2, "#000", 'opacity=".3"') + R(cx - 1, y + sh * 0.3, 2.4, sh * 0.35, shade(fc, -0.25)) + R(cx + cw - 1.4, y + sh * 0.3, 2.4, sh * 0.35, shade(fc, -0.25))
+          : `<path d="M${f(cx)} ${f(y + sh)}H${f(cx + cw)}" stroke="${shade(fc, -0.35)}" stroke-width=".8"/>`;
+        else s += R(cx, y + sh * 0.08, cw, sh * 0.8, fc, real ? "" : stk(shade(fc, -0.35), 0.6)) + (real ? R(cx, y + sh * 0.08, cw, 1, "#fff", 'opacity=".3"') + R(cx, y + sh * 0.88, cw, sh * 0.12, "#000", 'opacity=".45"') : "");
+      }
+    }
+    if (two) s += R(iX + cw, iT, fr, iH, fc);
+    s += R(X - fr, B, W + 2 * fr, Math.max(3.5, fr), shade(fc, -0.08), real ? "" : stk(shade(fc, -0.4), 0.8));
+    if (real) s += R(X - fr, B, W + 2 * fr, 7, "url(#gEave)") + R(X, T, W, H, "url(#gLight)");
+    return s;
+  }
+  /* A reja: the painted steel security grille over Puerto Rican windows, doors and carports. */
+  function grilleSVG(X, T, W, H, c, real, door) {
+    const t = clamp(Math.min(W, H) * 0.035, 2.5, 5), bw = Math.max(1.4, t * 0.55), n = Math.max(3, Math.round(W / 11)), sp = W / n;
+    let d = "", m = "";
+    for (let i = 1; i < n; i++) d += `M${f(X + sp * i)} ${f(T)}V${f(T + H)}`;
+    (door ? [0.33, 0.66] : [0.5]).forEach(r => { d += `M${f(X)} ${f(T + H * r)}H${f(X + W)}`; });
+    const my = T + H * (door ? 0.33 : 0.5), dh = Math.min(sp * 0.9, H * 0.12);
+    for (let i = 0; i < n; i++) { const cx = X + sp * (i + 0.5); m += `M${f(cx)} ${f(my - dh)}L${f(cx + sp / 2)} ${f(my)}L${f(cx)} ${f(my + dh)}L${f(cx - sp / 2)} ${f(my)}Z`; }
+    const frame = (col, w) => R(X + t / 2, T + t / 2, W - t, H - t, "none", `stroke="${col}" stroke-width="${f(w)}"`);
+    const shadow = real ? `<g transform="translate(2.5 2.5)" opacity=".26"><path d="${d}${m}" stroke="#000" stroke-width="${f(bw)}" fill="none"/>${frame("#000", t)}</g>` : "";
+    return shadow + `<path d="${d}" stroke="${c}" stroke-width="${f(bw)}" fill="none"/><path d="${m}" stroke="${c}" stroke-width="${f(bw * 0.8)}" fill="none"/>` + frame(c, t) +
+      (real ? `<path d="${d}" stroke="#fff" stroke-opacity=".16" stroke-width="${f(bw * 0.35)}" transform="translate(-.4 -.4)"/>` : "");
+  }
+  function railingSVG(p, real) {
+    const { X, T, W, H, B } = bx(p), c = p.color, rh = clamp(H * 0.08, 3, 8), n = Math.max(3, Math.round(W / 12)), sp = W / n, bw = clamp(sp * 0.16, 1.2, 3);
+    let d = ""; for (let i = 1; i < n; i++) d += `M${f(X + sp * i)} ${f(T + rh)}V${f(B - rh)}`;
+    const body = `<path d="${d}" stroke="${c}" stroke-width="${f(bw)}"/>` + R(X, T, W, rh, c) + R(X, B - rh, W, rh, c) + R(X, T, bw * 1.8, H, c) + R(X + W - bw * 1.8, T, bw * 1.8, H, c);
+    if (!real) return body + R(X, T, W, rh, "none", stk(shade(c, -0.4), 0.8));
+    return `<g transform="translate(2.5 3)" opacity=".24"><path d="${d}" stroke="#000" stroke-width="${f(bw)}"/>${R(X, T, W, rh, "#000")}</g>` + body + R(X, T, W, 1, "#fff", 'opacity=".35"');
+  }
+  /* Criollo double doors (tall louvered leaves under a transom) and a wood door behind a reja gate. */
+  function specialDoor(p, o, real) {
+    const { X, T, W, H, B } = bx(p), c = p.color, fr = clamp(W * 0.05, 3, 8), cas = "#eeebe4", e = shade(c, -0.4), edge = real ? "" : stk(e, 1);
+    let s = real ? R(X - fr - 1.5, T - fr - 1.5, W + 2 * fr + 3, H + fr + 1.5, "#000", 'opacity=".18"') : "";
+    s += R(X - fr, T - fr, W + 2 * fr, H + fr, cas, real ? "" : stk(shade(cas, -0.35), 1));
+    if (p.style === "criollo") {
+      const th = H * 0.18, ly = T + th, lh = H - th;
+      s += R(X, T, W, th, real ? (o.sky === "night" ? "#e7b866" : "url(#gGlassR)") : o.glass, edge);
+      let bars = ""; for (let i = 1; i < 6; i++) bars += `M${f(X + W * i / 6)} ${f(T)}V${f(T + th)}`;
+      s += `<path d="${bars}" stroke="${c}" stroke-width="${f(Math.max(1.5, W * 0.015))}"/>` + R(X, T + th - 3, W, 3, c);
+      [0, 1].forEach(i => {
+        const lx = X + i * W / 2, lw = W / 2, px = lx + lw * 0.14, pw = lw * 0.72, l1 = ly + lh * 0.06, l1h = lh * 0.52, n = Math.max(6, Math.round(l1h / 7));
+        s += R(lx, ly, lw, lh, c, edge) + R(px, l1, pw, l1h, shade(c, -0.35));
+        for (let k = 0; k < n; k++) { const y = l1 + l1h * k / n; s += R(px, y + 0.6, pw, l1h / n * 0.62, shade(c, 0.06)) + (real ? R(px, y + 0.6, pw, 0.8, "#fff", 'opacity=".22"') : ""); }
+        s += R(px, ly + lh * 0.64, pw, lh * 0.3, shade(c, 0.05), real ? 'stroke="#000" stroke-opacity=".3" stroke-width="1"' : stk(e, 1));
+        s += `<circle cx="${f(i ? lx + lw * 0.1 : lx + lw * 0.9)}" cy="${f(ly + lh * 0.6)}" r="${f(clamp(W * 0.02, 2, 4))}" fill="${real ? "url(#gKnob)" : "#b8a170"}"/>`;
+      });
+      s += R(X + W / 2 - 0.7, ly, 1.4, lh, "#000", 'opacity=".45"');
+    } else {
+      const wood = "#7a5a40";
+      s += R(X, T, W, H, real ? shade(wood, -0.15) : shade(wood, 0.45), edge) + (real ? grain(X, T, W, H, 0.5) : "");
+      s += R(X + W * 0.14, T + H * 0.06, W * 0.72, H * 0.4, real ? shade(wood, -0.05) : shade(wood, 0.55), real ? 'stroke="#000" stroke-opacity=".3"' : stk(shade(wood, -0.2), 1)) + R(X + W * 0.14, T + H * 0.52, W * 0.72, H * 0.42, real ? shade(wood, -0.05) : shade(wood, 0.55), real ? 'stroke="#000" stroke-opacity=".3"' : stk(shade(wood, -0.2), 1));
+      s += grilleSVG(X, T, W, H, c, real, true);
+    }
+    if (real) { s += R(X - fr, T - fr, W + 2 * fr, H + fr, "url(#gLight)"); if (p.y < 5) groundShadow(o, X, W, 8); }
+    return s;
+  }
+  /* A coconut palm: a leaning ringed trunk and a crown of drooping fronds. */
+  function palmSVG(p, o, real) {
+    const { X, T, W, H, B } = bx(p), c = p.color, rnd = mulberry(p.id * 131 + 7), e = shade(c, -0.5), cx = X + W * 0.5, tx = X + W * 0.56, ty = T + H * 0.2, tw = Math.max(3, W * 0.035);
+    const trunk = `M${f(cx - tw)} ${f(B)}Q${f(cx - tw * 1.2)} ${f(T + H * 0.55)} ${f(tx - tw * 0.6)} ${f(ty)}L${f(tx + tw * 0.6)} ${f(ty)}Q${f(cx + tw * 0.8)} ${f(T + H * 0.55)} ${f(cx + tw)} ${f(B)}Z`;
+    let s = real ? "" : "";
+    if (real && p.y < 5) groundShadow(o, X + W * 0.25, W * 0.5, 12);
+    s += P(trunk, real ? "#8f7f6a" : shade("#8a7a68", 0.55), real ? "" : stk("#2a2a28", 1));
+    if (real) s += P(trunk, "url(#gCyl)", 'opacity=".7"');
+    let rings = ""; for (let y = B - 14; y > ty + 6; y -= 11) { const k = (B - y) / (B - ty), x = cx + (tx - cx) * k * k; rings += `M${f(x - tw * 0.9)} ${f(y)}q${f(tw * 0.9)} 3 ${f(tw * 1.8)} 0`; }
+    s += `<path d="${rings}" stroke="${real ? "#5e5244" : "#2a2a28"}" stroke-width="${real ? 1.1 : 0.6}" fill="none" opacity=".7"/>`;
+    const fill = real ? leafGrad(o, c) : shade(c, 0.5), L0 = W * 0.5;
+    [-172, -150, -128, -104, -80, -56, -32, -10, 158, 22].forEach((deg, i) => {
+      const a = deg * Math.PI / 180, L = L0 * (0.8 + rnd() * 0.25), droop = Math.abs(Math.cos(a)) * L * 0.42 + (Math.sin(a) > 0 ? L * 0.3 : 0);
+      const ex = tx + Math.cos(a) * L, ey = ty + Math.sin(a) * L * 0.55 + droop, mx = tx + Math.cos(a) * L * 0.55, my = ty + Math.sin(a) * L * 0.5 - L * 0.08, wd = L * 0.1;
+      const leaf = `M${f(tx)} ${f(ty)}Q${f(mx)} ${f(my - wd)} ${f(ex)} ${f(ey)}Q${f(mx)} ${f(my + wd)} ${f(tx)} ${f(ty)}Z`;
+      s += P(leaf, i % 3 && real ? shade(c, (rnd() - 0.5) * 0.2) : fill, real ? "" : `stroke="${e}" stroke-width="1"`);
+      let ticks = ""; for (let k = 1; k < 7; k++) { const t2 = k / 7, qx = (1 - t2) * (1 - t2) * tx + 2 * (1 - t2) * t2 * mx + t2 * t2 * ex, qy = (1 - t2) * (1 - t2) * ty + 2 * (1 - t2) * t2 * my + t2 * t2 * ey; ticks += `M${f(qx)} ${f(qy)}l${f(Math.sin(a) * wd * 0.9)} ${f(wd * 0.9)}`; }
+      s += `<path d="M${f(tx)} ${f(ty)}Q${f(mx)} ${f(my)} ${f(ex)} ${f(ey)}${ticks}" stroke="${real ? shade(c, -0.45) : e}" stroke-width="${real ? 1.1 : 0.7}" fill="none"/>`;
+    });
+    [[-6, 4], [5, 6], [0, 10]].forEach(q => { s += `<circle cx="${f(tx + q[0])}" cy="${f(ty + q[1])}" r="${f(Math.max(3, W * 0.018))}" fill="${real ? "#6a5a2e" : "#efece6"}" ${real ? "" : 'stroke="#2a2a28" stroke-width=".8"'}/>`; });
+    return s;
+  }
+  /* Rooftop and wall equipment: a water tank, a solar water heater and a mini-split AC condenser. */
+  function equipSVG(p, o, real) {
+    const { X, T, W, H, B } = bx(p), c = p.color, ink = real ? "" : stk("#2a2a28", 1);
+    let s = "";
+    if (p.style === "solar") {
+      const th = H * 0.28, ph = H * 0.5, legs = H - th - ph, leg = "#8d8a83";
+      s += R(X + W * 0.08, B - legs, W * 0.025, legs, leg) + R(X + W * 0.895, B - legs, W * 0.025, legs, leg);
+      s += R(X, T + th, W, ph, real ? "#1d3550" : "#9db1c0", stk("#c9c7c1", 2.5));
+      let fins = ""; for (let x = X + 10; x < X + W - 4; x += 10) fins += `M${f(x)} ${f(T + th + 2)}V${f(T + th + ph - 2)}`;
+      s += `<path d="${fins}" stroke="${real ? "#fff" : "#2a2a28"}" stroke-opacity="${real ? 0.14 : 0.35}" stroke-width=".8"/>`;
+      if (real) s += P(`M${f(X + W * 0.1)} ${f(T + th + ph)}L${f(X + W * 0.45)} ${f(T + th)}L${f(X + W * 0.6)} ${f(T + th)}L${f(X + W * 0.25)} ${f(T + th + ph)}Z`, "#fff", 'opacity=".1"');
+      s += R(X + W * 0.04, T, W * 0.92, th, "#e9e7e2", `rx="${f(th / 2)}" ${ink}`);
+      if (real) s += R(X + W * 0.04, T, W * 0.92, th * 0.35, "#fff", `rx="${f(th / 4)}" opacity=".45"`) + R(X + W * 0.04, T + th * 0.7, W * 0.92, th * 0.3, "#000", `rx="${f(th / 4)}" opacity=".14"`);
+    } else if (p.style === "ac") {
+      const fx = X + W * 0.36, fy = T + H * 0.5, fr = Math.min(W * 0.3, H * 0.42);
+      if (real) { s += R(X + 2, T + 3, W, H, "#000", 'opacity=".2"'); o.shad += R(X, B, W, 10, "url(#gEave)"); }
+      s += R(X, T, W, H, c, ink + ' rx="2"') + `<circle cx="${f(fx)}" cy="${f(fy)}" r="${f(fr)}" fill="${shade(c, -0.55)}"/>`;
+      let g = ""; for (let k = 1; k <= 3; k++) g += `<circle cx="${f(fx)}" cy="${f(fy)}" r="${f(fr * k / 3)}" fill="none" stroke="${shade(c, -0.15)}" stroke-width=".8"/>`;
+      g += `<path d="M${f(fx - fr)} ${f(fy)}H${f(fx + fr)}M${f(fx)} ${f(fy - fr)}V${f(fy + fr)}" stroke="${shade(c, -0.15)}" stroke-width=".8"/>`;
+      let v = ""; for (let y = T + H * 0.2; y < B - H * 0.15; y += 4) v += `M${f(X + W * 0.74)} ${f(y)}h${f(W * 0.18)}`;
+      s += g + `<path d="${v}" stroke="${shade(c, -0.3)}" stroke-width=".9"/>`;
+      if (real) s += R(X, T, W, H, "url(#gLight)") + R(X, T, W, 1.2, "#fff", 'opacity=".5"');
+    } else {
+      const sh = H * 0.16, top = T, bot = B - sh, r = W * 0.12, leg = "#77736c";
+      s += R(X + W * 0.1, bot, W * 0.06, sh, leg) + R(X + W * 0.84, bot, W * 0.06, sh, leg) + R(X + W * 0.06, bot, W * 0.88, sh * 0.18, leg);
+      const body = `M${f(X)} ${f(bot)}V${f(top + r)}Q${f(X)} ${f(top)} ${f(X + r)} ${f(top)}H${f(X + W - r)}Q${f(X + W)} ${f(top)} ${f(X + W)} ${f(top + r)}V${f(bot)}Z`;
+      s += P(body, c, ink);
+      let ribs = ""; for (let k = 1; k < 6; k++) ribs += `M${f(X)} ${f(top + r + (bot - top - r) * k / 6)}H${f(X + W)}`;
+      s += `<path d="${ribs}" stroke="${shade(c, real ? 0.18 : -0.3)}" stroke-width="1.2"/>` + R(X + W * 0.38, top - H * 0.04, W * 0.24, H * 0.04, shade(c, 0.12), ink);
+      if (real) s += P(body, "url(#gCyl)", 'opacity=".8"');
+    }
+    if (real && p.y < 5) groundShadow(o, X, W, 10);
+    return s;
   }
   function stepsSVG(p) {
     const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.35), st = stk(e, 1);
@@ -795,6 +946,7 @@ body.is3d .tool{opacity:.55}
     return d + "Z";
   }
   function plantSVG(p) {
+    if (p.style === "palm") return palmSVG(p, null, false);
     const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.5), rnd = mulberry(p.id * 977 + 13);
     const wash = `fill="${shade(c, 0.5)}" stroke="${e}" stroke-width="1.1" stroke-linejoin="round"`, tex = `fill="none" stroke="${e}" stroke-width=".7" stroke-linecap="round" opacity=".55"`;
     const ticks = (cx, cy, rx, ry, n) => { let d = ""; for (let i = 0; i < n; i++) { const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 0.75, x = cx + Math.cos(a) * rx * r, y = cy + Math.sin(a) * ry * r, l = Math.min(rx, ry) * 0.12; d += `M${f(x - l)} ${f(y + l * 0.3)}Q${f(x)} ${f(y - l * 0.6)} ${f(x + l)} ${f(y + l * 0.3)}`; } return `<path d="${d}" ${tex}/>`; };
@@ -1020,6 +1172,22 @@ body.is3d .tool{opacity:.55}
         for (let i = 0; i < 22; i++) b += `<circle cx="${f(r() * w)}" cy="${f(r() * h)}" r="${f(10 + r() * 26)}" fill="${vary(c, r, 0.03)}" opacity=".35"/>`;
         break;
       }
+      case "block": {
+        const bw = 40.6, bh = 20.3, cols = 4, rows = 4; w = bw * cols; h = bh * rows; b = R(0, 0, w, h, mix(c, "#8d877c", 0.45));
+        for (let y = 0; y < rows; y++) for (let k = -1; k <= cols; k++) {
+          const x = k * bw + (y % 2 ? bw / 2 : 0), t = vary(c, r, 0.05);
+          b += R(x + 0.6, y * bh + 0.6, bw - 1.2, bh - 1.2, t) + R(x + 0.6, y * bh + bh - 1.5, bw - 1.2, 0.9, shade(t, -0.16)) + R(x + 0.6, y * bh + 0.6, bw - 1.2, 0.6, shade(t, 0.1));
+          for (let i = 0; i < 4; i++) b += `<circle cx="${f(x + 2 + r() * (bw - 4))}" cy="${f(y * bh + 2 + r() * (bh - 4))}" r="${f(0.4 + r() * 0.5)}" fill="${shade(t, -0.2)}" opacity=".6"/>`;
+        }
+        break;
+      }
+      case "concrete": {
+        w = 240; h = 120; b = R(0, 0, w, h, c);
+        for (let i = 0; i < 10; i++) b += `<circle cx="${f(r() * w)}" cy="${f(r() * h)}" r="${f(12 + r() * 30)}" fill="${vary(c, r, 0.035)}" opacity=".3"/>`;
+        b += R(0, h - 0.7, w, 0.7, shade(c, -0.12)) + R(w - 0.7, 0, 0.7, h, shade(c, -0.1));
+        [[30, 30], [90, 30], [150, 30], [210, 30], [30, 90], [90, 90], [150, 90], [210, 90]].forEach(q => { b += `<circle cx="${q[0]}" cy="${q[1]}" r="1" fill="${shade(c, -0.28)}"/>`; });
+        break;
+      }
       case "shingle": {
         const tw = 33, ex = 14; w = tw * 4; h = ex * 4; b = R(0, 0, w, h, shade(c, -0.5));
         for (let y = 0; y < 4; y++) for (let k = -1; k <= 4; k++) {
@@ -1066,6 +1234,15 @@ body.is3d .tool{opacity:.55}
         o.shad += R(X, B, W, Math.min(60, Math.max(18, W * 0.05)), "url(#gEave)");
         return R(X, T, W, H, shade(c, 0.04)) + grain(X, T, W, H) + R(X, T, W, H, "url(#gRoofSh)") + R(X - 4, T, W + 8, ph, fas) + R(X - 4, T, W + 8, 1.2, shade(fas, 0.3)) + R(X - 4, T + ph - 1.5, W + 8, 1.5, "#000", 'opacity=".25"');
       }
+      case "parapet": {
+        /* A flat concrete roof behind a parapet: coping on top, scuppers (gárgolas) near the ends and the rain stains below them. */
+        const cap = Math.min(H * 0.2, 9);
+        o.shad += R(X, B, W, 14, "url(#gEave)");
+        let s = R(X, T, W, H, fill) + grain(X, T, W, H) + R(X, T, W, H, "url(#gLight)") + R(X - 3, T, W + 6, cap, shade(c, 0.1)) + R(X - 3, T, W + 6, 1, "#fff", 'opacity=".35"') + R(X - 3, T + cap, W + 6, 3, "#000", 'opacity=".16"');
+        [X + W * 0.07, X + W * 0.93 - 8].forEach(x => { s += R(x, B - 4, 8, 9, shade(c, -0.5)); o.shad += R(x + 1, B + 5, 6, 110, "#000", 'opacity=".07"'); });
+        return s;
+      }
+      case "side": pts = [[X, B], [X + W * 0.03, T], [X + W * 0.97, T], [X + W, B]]; extra = `<path d="M${f(X + W * 0.03)} ${f(T)}H${f(X + W * 0.97)}" stroke="${shade(c, -0.5)}" stroke-width="3"/>`; break;
       case "hip": pts = [[X, B], [X + W * 0.28, T], [X + W * 0.72, T], [X + W, B]]; break;
       case "shed": pts = [[X, B], [X, B - H * 0.35], [X + W, T], [X + W, B]]; break;
       case "mansard": pts = [[X, B], [X + W * 0.07, T + H * 0.3], [X + W * 0.18, T], [X + W * 0.82, T], [X + W * 0.93, T + H * 0.3], [X + W, B]]; extra = `<path d="M${f(X + W * 0.07)} ${f(T + H * 0.3)}H${f(X + W * 0.93)}" stroke="${shade(c, 0.25)}" stroke-width="2.5" fill="none"/><path d="M${f(X + W * 0.07)} ${f(T + H * 0.3 + 2.5)}H${f(X + W * 0.93)}" stroke="#000" stroke-opacity=".25" stroke-width="3" fill="none"/>`; break;
@@ -1082,6 +1259,7 @@ body.is3d .tool{opacity:.55}
     return s;
   }
   function realWindow(p, o) {
+    if (p.style === "jalousie" || p.style === "louver") return slatWindow(p, o, true);
     let { X, T, W, H, B } = bx(p), st = p.style, out = "", fc = p.color;
     if (st === "shutters") {
       const sw = W * 0.22, sc = mix(fc === "#f1efe9" ? "#3e4a4f" : fc, "#3e4a4f", 0.15);
@@ -1111,6 +1289,7 @@ body.is3d .tool{opacity:.55}
     return out;
   }
   function realDoor(p, o) {
+    if (p.style === "criollo" || p.style === "gate") return specialDoor(p, o, true);
     const { X, T, W, H, B } = bx(p), c = p.color, fr = clamp(W * 0.05, 3, 8), cas = "#eeebe4", id = "dc" + p.id;
     const knob = (x, y) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(clamp(W * 0.035, 2.5, 5))}" fill="url(#gKnob)"/>`;
     const panel = (x, y, w, h) => R(x, y, w, h, shade(c, 0.04)) + `<path d="M${f(x)} ${f(y + h)}V${f(y)}H${f(x + w)}" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.1"/><path d="M${f(x + w)} ${f(y)}V${f(y + h)}H${f(x)}" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1.1"/>` + R(x + 3, y + 3, w - 6, h - 6, "none", `stroke="#000" stroke-opacity=".12" stroke-width=".8"`);
@@ -1162,8 +1341,11 @@ body.is3d .tool{opacity:.55}
   }
   function realTrim(p, o) {
     const { X, T, W, H, B } = bx(p);
+    if (p.style === "reja") return grilleSVG(X, T, W, H, p.color, true, false);
+    if (p.style === "railing") return railingSVG(p, true);
     let s = trimSVG(p);
-    if (p.style === "column" || p.style === "pilaster" || p.style === "quoins") s += R(X, T, W, H, "url(#gCyl)", 'opacity=".8"');
+    if (p.style === "column" || p.style === "pilaster" || p.style === "quoins" || p.style === "post") s += R(X, T, W, H, "url(#gCyl)", 'opacity=".8"');
+    if (p.style === "tapered") { s += R(X, B - H * 0.4, W, H * 0.4, "url(#gCyl)", 'opacity=".6"'); if (p.y < 5) groundShadow(o, X, W, 10); return s; }
     if (p.style === "band" || p.style === "cornice") o.shad += R(X, B, W, Math.max(8, H * 0.5), "url(#gEave)");
     return s + grain(X, T, W, H, 0.6);
   }
@@ -1187,6 +1369,7 @@ body.is3d .tool{opacity:.55}
     return s;
   }
   function realPlant(p, o) {
+    if (p.style === "palm") return palmSVG(p, o, true);
     const { X, T, W, H, B } = bx(p), c = p.color, rnd = mulberry(p.id * 977 + 13), base = p.y < 5;
     switch (p.style) {
       case "tree": {
@@ -1230,8 +1413,8 @@ body.is3d .tool{opacity:.55}
       }
     }
   }
-  const REAL = { wall: realWall, roof: realRoof, window: realWindow, door: realDoor, steps: realSteps, chimney: realChimney, trim: realTrim, plant: realPlant };
-  const DRAW = { room: roomSVG, pdoor: pdoorSVG, pwindow: pwindowSVG, stairs: stairsSVG, furn: furnSVG, fixture: fixtureSVG, pplant: pplantSVG, pwall: lineSVG, wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
+  const REAL = { wall: realWall, roof: realRoof, window: realWindow, door: realDoor, steps: realSteps, chimney: realChimney, trim: realTrim, plant: realPlant, equip: (p, o) => equipSVG(p, o, true) };
+  const DRAW = { room: roomSVG, pdoor: pdoorSVG, pwindow: pwindowSVG, stairs: stairsSVG, furn: furnSVG, fixture: fixtureSVG, pplant: pplantSVG, pwall: lineSVG, wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, equip: (p, o) => equipSVG(p, o, false), label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
   const SKY = {
     day: { rtop: "#9fbad0", rbot: "#e6ecee", lawn: "#87956f", top: "#e9edef", bot: "#f6f5f1", soil: "#efece6", line: "#2a2a28", hatch: "rgba(42,42,40,.28)", halo: "rgba(246,245,241,.9)", glass: "url(#gDay)" },
     dusk: { rtop: "#4a5470", rbot: "#e0b796", lawn: "#626a52", top: "#5f6577", bot: "#d9c3b0", soil: "#c9bcb0", line: "#2b2a2e", hatch: "rgba(43,42,46,.3)", halo: "rgba(240,230,220,.85)", glass: "url(#gDusk)" },
@@ -1330,7 +1513,7 @@ body.is3d .tool{opacity:.55}
   function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function unb64u(s) { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/")); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
   const strip = list => list.map(p => { const q = Object.assign({}, p); delete q.id; return q; });
-  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; if (typeof d.lx === "number") o.lx = d.lx; if (d.lot) o.lot = d.lot; return o; }
+  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; if (typeof d.lx === "number") o.lx = d.lx; if (d.lot) o.lot = d.lot; if (d.style) o.style = d.style; return o; }
   async function encodeDesign(d) {
     const bytes = new TextEncoder().encode(JSON.stringify(compactDesign(d)));
     if (window.CompressionStream) {
@@ -1355,7 +1538,152 @@ body.is3d .tool{opacity:.55}
 
   /* ---------- templates ---------- */
   const TEMPLATES = {
-    cottage: { name: "Garden cottage", sky: "day", lot: "std", parts: [
+    prConcrete: { name: "Casa de concreto", r: "pr", style: "pr-concrete", sky: "day", lot: "pr", parts: [
+      { t: "wall", x: -450, y: 0, w: 450, h: 290, color: "#e2d5b8", tex: "stucco" },
+      { t: "wall", x: 0, y: 0, w: 900, h: 290, color: "#f0e2b6", tex: "stucco" },
+      { t: "roof", x: -460, y: 290, w: 1370, h: 60, color: "#ece7dc", tex: "concrete", style: "parapet" },
+      { t: "trim", x: -450, y: 0, w: 30, h: 290, color: "#ece7dc", style: "post" },
+      { t: "trim", x: -420, y: 0, w: 420, h: 150, color: "#f5f3ee", style: "reja" },
+      { t: "steps", x: 290, y: 0, w: 150, h: 30, color: "#bdb7ad", style: "steps" },
+      { t: "door", x: 319, y: 30, w: 91.4, h: 213, color: "#f5f3ee", style: "gate" },
+      { t: "window", x: 80, y: 100, w: 150, h: 120, color: "#c9ccce", style: "jalousie" },
+      { t: "window", x: 520, y: 100, w: 150, h: 120, color: "#c9ccce", style: "jalousie" },
+      { t: "trim", x: 72, y: 92, w: 166, h: 136, color: "#f5f3ee", style: "reja" },
+      { t: "trim", x: 512, y: 92, w: 166, h: 136, color: "#f5f3ee", style: "reja" },
+      { t: "equip", x: 710, y: 205, w: 85, h: 60, color: "#eeeeec", style: "ac" },
+      { t: "equip", x: 640, y: 350, w: 110, h: 140, color: "#2f3133", style: "tank" },
+      { t: "equip", x: 120, y: 350, w: 210, h: 110, color: "#2f3133", style: "solar" },
+      { t: "plant", x: 90, y: 0, w: 130, h: 70, color: "#5e7f4a", style: "shrub" },
+      { t: "plant", x: 530, y: 0, w: 130, h: 70, color: "#5e7f4a", style: "shrub" },
+      { t: "plant", x: 760, y: 0, w: 300, h: 640, color: "#6f8f4e", style: "palm" }],
+      plan: [
+      { t: "room", x: 0, y: 0, w: 450, h: 650, color: "#d5d2cb", tex: "concrete", text: "Marquesina" },
+      { t: "room", x: 0, y: 650, w: 450, h: 350, color: "#cbb59a", tex: "ftile", text: "Terraza" },
+      { t: "room", x: 450, y: 0, w: 500, h: 450, color: "#e8e2d6", tex: "ftile", text: "Sala" },
+      { t: "room", x: 950, y: 0, w: 400, h: 450, color: "#ebe8e1", tex: "ftile", text: "Cocina" },
+      { t: "room", x: 450, y: 450, w: 400, h: 550, color: "#ddd0b8", tex: "ftile", text: "Cuarto" },
+      { t: "room", x: 850, y: 450, w: 200, h: 280, color: "#e3e6e6", tex: "ftile", text: "Baño" },
+      { t: "room", x: 850, y: 730, w: 200, h: 270, color: "#dedad3", tex: "ftile", text: "Lavandería" },
+      { t: "room", x: 1050, y: 450, w: 300, h: 550, color: "#ddd0b8", tex: "ftile", text: "Cuarto 2" },
+      { t: "furn", x: 520, y: 120, w: 240, h: 170, color: "#a9a194", style: "rug" },
+      { t: "furn", x: 500, y: 345, w: 213, h: 91, color: "#8d9488", style: "sofa" },
+      { t: "furn", x: 840, y: 160, w: 86, h: 86, color: "#8d9488", style: "armchair", rot: 3 },
+      { t: "fixture", x: 1282, y: 20, w: 60, h: 240, color: "#ece9e2", style: "counter", rot: 1 },
+      { t: "fixture", x: 1282, y: 262, w: 60, h: 60, color: "#f7f6f2", style: "stove", rot: 1 },
+      { t: "fixture", x: 1170, y: 370, w: 70, h: 70, color: "#f7f6f2", style: "fridge" },
+      { t: "furn", x: 990, y: 150, w: 150, h: 130, color: "#cfc3b0", style: "table" },
+      { t: "furn", x: 550, y: 787, w: 152, h: 203, color: "#e2dbcf", style: "bed" },
+      { t: "furn", x: 470, y: 470, w: 120, h: 60, color: "#cfc3b0", style: "wardrobe" },
+      { t: "fixture", x: 860, y: 640, w: 90, h: 90, color: "#f7f6f2", style: "shower" },
+      { t: "fixture", x: 990, y: 650, w: 45, h: 71, color: "#f7f6f2", style: "toilet" },
+      { t: "fixture", x: 970, y: 460, w: 60, h: 45, color: "#f7f6f2", style: "sink" },
+      { t: "fixture", x: 860, y: 745, w: 69, h: 76, color: "#f7f6f2", style: "washer" },
+      { t: "fixture", x: 935, y: 745, w: 69, h: 76, color: "#f7f6f2", style: "dryer" },
+      { t: "furn", x: 1120, y: 787, w: 152, h: 203, color: "#e2dbcf", style: "bed" },
+      { t: "furn", x: 120, y: 760, w: 160, h: 140, color: "#cfc3b0", style: "table" },
+      { t: "pplant", x: 30, y: 930, w: 50, h: 50, style: "pot" },
+      { t: "pdoor", x: 769, y: 0, w: 91.4, h: 91.4, color: "#3e4a4f", style: "swing" },
+      { t: "pdoor", x: 700, y: 450, w: 80, h: 80, color: "#2a2a28", style: "swing" },
+      { t: "pdoor", x: 862, y: 450, w: 70, h: 70, color: "#2a2a28", style: "swing" },
+      { t: "pdoor", x: 1150, y: 450, w: 80, h: 80, color: "#2a2a28", style: "swing" },
+      { t: "pdoor", x: 960, y: 920, w: 80, h: 80, color: "#2a2a28", style: "swing", rot: 2 },
+      { t: "pdoor", x: 450, y: 250, w: 80, h: 80, color: "#2a2a28", style: "swing", rot: 1 },
+      { t: "pwindow", x: 530, y: -7.5, w: 150, h: 15 },
+      { t: "pwindow", x: 970, y: -7.5, w: 150, h: 15 },
+      { t: "pwindow", x: 560, y: 992.5, w: 120, h: 15 },
+      { t: "pwindow", x: 1140, y: 992.5, w: 120, h: 15 }] },
+    prCriollo: { name: "Casa criolla", r: "pr", style: "pr-criollo", sky: "day", lot: "row", parts: [
+      { t: "wall", x: 0, y: 0, w: 700, h: 720, color: "#e9b44c", tex: "stucco" },
+      { t: "roof", x: -10, y: 720, w: 720, h: 90, color: "#f5f0e4", tex: "concrete", style: "parapet" },
+      { t: "trim", x: -15, y: 690, w: 730, h: 40, color: "#f5f0e4", style: "cornice" },
+      { t: "trim", x: 0, y: 0, w: 32, h: 690, color: "#f5f0e4", style: "pilaster" },
+      { t: "trim", x: 668, y: 0, w: 32, h: 690, color: "#f5f0e4", style: "pilaster" },
+      { t: "trim", x: 0, y: 340, w: 700, h: 20, color: "#f5f0e4", style: "band" },
+      { t: "door", x: 85, y: 0, w: 130, h: 270, color: "#2f6b5a", style: "criollo" },
+      { t: "door", x: 285, y: 0, w: 130, h: 270, color: "#2f6b5a", style: "criollo" },
+      { t: "door", x: 485, y: 0, w: 130, h: 270, color: "#2f6b5a", style: "criollo" },
+      { t: "door", x: 85, y: 360, w: 130, h: 270, color: "#2f6b5a", style: "criollo" },
+      { t: "door", x: 285, y: 360, w: 130, h: 270, color: "#2f6b5a", style: "criollo" },
+      { t: "door", x: 485, y: 360, w: 130, h: 270, color: "#2f6b5a", style: "criollo" },
+      { t: "trim", x: 55, y: 360, w: 590, h: 100, color: "#2a2a28", style: "railing" },
+      { t: "plant", x: 620, y: 0, w: 90, h: 330, color: "#b8466a", style: "ivy" }] },
+    prCampo: { name: "Casa de campo", r: "pr", style: "pr-campo", sky: "day", lot: "qtr", parts: [
+      { t: "trim", x: 0, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
+      { t: "trim", x: 290, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
+      { t: "trim", x: 600, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
+      { t: "trim", x: 858, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
+      { t: "wall", x: 0, y: 120, w: 880, h: 270, color: "#7fb3a8", tex: "siding" },
+      { t: "roof", x: -60, y: 390, w: 1000, h: 210, color: "#9c4f3f", tex: "metal", style: "hip" },
+      { t: "door", x: 380, y: 120, w: 91.4, h: 210, color: "#f5f3ee", style: "panel" },
+      { t: "window", x: 110, y: 180, w: 110, h: 150, color: "#f5f3ee", style: "louver" },
+      { t: "window", x: 650, y: 180, w: 110, h: 150, color: "#f5f3ee", style: "louver" },
+      { t: "trim", x: 0, y: 120, w: 340, h: 95, color: "#f5f3ee", style: "railing" },
+      { t: "trim", x: 510, y: 120, w: 370, h: 95, color: "#f5f3ee", style: "railing" },
+      { t: "steps", x: 360, y: 0, w: 130, h: 120, color: "#bdb7ad", style: "steps" },
+      { t: "plant", x: -380, y: 0, w: 300, h: 640, color: "#6f8f4e", style: "palm" },
+      { t: "plant", x: 980, y: 0, w: 280, h: 500, color: "#5f7a4e", style: "tree" }] },
+    craftsman: { name: "Craftsman bungalow", r: "us", style: "us-craftsman", sky: "day", lot: "std", parts: [
+      { t: "chimney", x: 760, y: 400, w: 60, h: 200, color: "#8a5444", tex: "brick" },
+      { t: "wall", x: 0, y: 0, w: 900, h: 280, color: "#7f8c6a", tex: "siding" },
+      { t: "roof", x: -70, y: 280, w: 1040, h: 230, color: "#4a4b4d", tex: "shingle", style: "gable" },
+      { t: "roof", x: 70, y: 236, w: 540, h: 150, color: "#4a4b4d", tex: "shingle", style: "gable" },
+      { t: "trim", x: 90, y: 0, w: 50, h: 236, color: "#efe9dd", style: "tapered" },
+      { t: "trim", x: 540, y: 0, w: 50, h: 236, color: "#efe9dd", style: "tapered" },
+      { t: "door", x: 280, y: 0, w: 91.4, h: 210, color: "#8a5a3a", style: "glass" },
+      { t: "window", x: 400, y: 80, w: 100, h: 140, color: "#efe9dd", style: "double" },
+      { t: "window", x: 660, y: 70, w: 90, h: 150, color: "#efe9dd", style: "double" },
+      { t: "window", x: 770, y: 70, w: 90, h: 150, color: "#efe9dd", style: "double" },
+      { t: "plant", x: 650, y: 0, w: 220, h: 70, color: "#7d8f6e", style: "hedge" },
+      { t: "plant", x: -400, y: 0, w: 260, h: 480, color: "#7d8f6e", style: "tree" }] },
+    colonial: { name: "Center-hall colonial", r: "us", style: "us-colonial", sky: "day", lot: "sub", parts: [
+      { t: "chimney", x: 900, y: 600, w: 70, h: 260, color: "#8a5444", tex: "brick" },
+      { t: "wall", x: 0, y: 0, w: 1000, h: 580, color: "#9c4f3f", tex: "brick" },
+      { t: "roof", x: -40, y: 580, w: 1080, h: 240, color: "#3d3f42", tex: "shingle", style: "side" },
+      { t: "trim", x: -20, y: 560, w: 1040, h: 30, color: "#f5f3ee", style: "cornice" },
+      { t: "steps", x: 420, y: 0, w: 160, h: 30, color: "#bdb7ad", style: "stoop" },
+      { t: "door", x: 454, y: 30, w: 91.4, h: 213, color: "#2a2a28", style: "panel" },
+      { t: "trim", x: 435, y: 30, w: 130, h: 240, color: "#f5f3ee", style: "frame" },
+      { t: "window", x: 75, y: 80, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 255, y: 80, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 595, y: 80, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 775, y: 80, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 75, y: 350, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 255, y: 350, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 425, y: 350, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 595, y: 350, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "window", x: 775, y: 350, w: 150, h: 150, color: "#2a2a28", style: "shutters" },
+      { t: "plant", x: 80, y: 0, w: 300, h: 80, color: "#5f7a4e", style: "hedge" },
+      { t: "plant", x: 620, y: 0, w: 300, h: 80, color: "#5f7a4e", style: "hedge" },
+      { t: "plant", x: -380, y: 0, w: 300, h: 560, color: "#7d8f6e", style: "tree" }] },
+    ranch: { name: "Ranch house", r: "us", style: "us-ranch", sky: "day", lot: "sub", parts: [
+      { t: "chimney", x: 300, y: 300, w: 70, h: 170, color: "#8a5444", tex: "brick" },
+      { t: "wall", x: 0, y: 0, w: 1300, h: 260, color: "#b39a7c", tex: "brick" },
+      { t: "roof", x: -60, y: 260, w: 1420, h: 170, color: "#5b5e60", tex: "shingle", style: "hip" },
+      { t: "window", x: 150, y: 80, w: 300, h: 140, color: "#f5f3ee", style: "single" },
+      { t: "door", x: 560, y: 0, w: 91.4, h: 203, color: "#6e5a4c", style: "panel" },
+      { t: "window", x: 700, y: 90, w: 90, h: 130, color: "#f5f3ee", style: "double" },
+      { t: "window", x: 820, y: 90, w: 90, h: 130, color: "#f5f3ee", style: "double" },
+      { t: "door", x: 960, y: 0, w: 300, h: 213, color: "#efe9dd", style: "garage" },
+      { t: "plant", x: 120, y: 0, w: 360, h: 70, color: "#7d8f6e", style: "hedge" },
+      { t: "plant", x: -360, y: 0, w: 280, h: 500, color: "#7d8f6e", style: "tree" }] },
+    farmhouse: { name: "Modern farmhouse", r: "us", style: "us-farmhouse", sky: "day", lot: "qtr", parts: [
+      { t: "wall", x: 0, y: 0, w: 1000, h: 520, color: "#f5f3ee", tex: "board" },
+      { t: "roof", x: -40, y: 520, w: 1080, h: 380, color: "#2a2a28", tex: "metal", style: "gable" },
+      { t: "trim", x: 0, y: 0, w: 22, h: 250, color: "#2a2a28", style: "post" },
+      { t: "trim", x: 320, y: 0, w: 22, h: 250, color: "#2a2a28", style: "post" },
+      { t: "trim", x: 658, y: 0, w: 22, h: 250, color: "#2a2a28", style: "post" },
+      { t: "trim", x: 978, y: 0, w: 22, h: 250, color: "#2a2a28", style: "post" },
+      { t: "roof", x: -40, y: 250, w: 1080, h: 70, color: "#2a2a28", tex: "metal", style: "side" },
+      { t: "door", x: 455, y: 0, w: 91.4, h: 213, color: "#2a2a28", style: "glass" },
+      { t: "window", x: 120, y: 50, w: 170, h: 170, color: "#2a2a28", style: "casement" },
+      { t: "window", x: 710, y: 50, w: 170, h: 170, color: "#2a2a28", style: "casement" },
+      { t: "window", x: 200, y: 340, w: 120, h: 150, color: "#2a2a28", style: "casement" },
+      { t: "window", x: 680, y: 340, w: 120, h: 150, color: "#2a2a28", style: "casement" },
+      { t: "window", x: 460, y: 640, w: 80, h: 120, color: "#2a2a28", style: "casement" },
+      { t: "plant", x: 100, y: 0, w: 200, h: 70, color: "#7d8f6e", style: "hedge" },
+      { t: "plant", x: 700, y: 0, w: 200, h: 70, color: "#7d8f6e", style: "hedge" },
+      { t: "plant", x: 1150, y: 0, w: 300, h: 560, color: "#7d8f6e", style: "tree" }] },
+    cottage: { name: "Garden cottage", r: "us", sky: "day", lot: "std", parts: [
       { t: "chimney", x: 560, y: 380, w: 60, h: 230, color: "#8a5444", tex: "brick" },
       { t: "wall", x: 0, y: 0, w: 800, h: 300, color: "#a0705a", tex: "brick" },
       { t: "roof", x: -50, y: 300, w: 900, h: 270, color: "#4a4b4d", tex: "shingle", style: "gable" },
@@ -1393,7 +1721,7 @@ body.is3d .tool{opacity:.55}
       { t: "pwindow", x: 150, y: 642.5, w: 120, h: 15 },
       { t: "pwindow", x: 520, y: 642.5, w: 80, h: 15 },
       { t: "pplant", x: 20, y: 20, w: 50, h: 50, style: "pot" }] },
-    townhouse: { name: "City townhouse", sky: "dusk", lot: "row", parts: [
+    townhouse: { name: "City townhouse", r: "us", sky: "dusk", lot: "row", parts: [
       { t: "wall", x: 0, y: 0, w: 650, h: 940, color: "#d8cdbb", tex: "stucco" },
       { t: "trim", x: 0, y: 0, w: 40, h: 920, color: "#ece8df", style: "quoins" },
       { t: "trim", x: 610, y: 0, w: 40, h: 920, color: "#ece8df", style: "quoins", fx: true },
@@ -1413,7 +1741,7 @@ body.is3d .tool{opacity:.55}
       { t: "window", x: 460, y: 690, w: 110, h: 170, color: "#ece8df", style: "double" },
       { t: "plant", x: 80, y: 690, w: 110, h: 40, color: "#7d8f6e", style: "flowers" },
       { t: "plant", x: 460, y: 690, w: 110, h: 40, color: "#7d8f6e", style: "flowers" }] },
-    modern: { name: "Modern house", sky: "day", lot: "sub", parts: [
+    modern: { name: "Modern house", r: "us", style: "us-modern", sky: "day", lot: "sub", parts: [
       { t: "wall", x: 0, y: 0, w: 1000, h: 320, color: "#eceae4", tex: "board" },
       { t: "wall", x: 450, y: 320, w: 550, h: 300, color: "#3a3b3d", tex: "siding" },
       { t: "roof", x: -20, y: 320, w: 470, h: 22, color: "#3a3b3d", tex: "plain", style: "flat" },
@@ -1667,15 +1995,17 @@ body.is3d .tool{opacity:.55}
      Walls, roofs, doors, steps and ground plants can't float: after they are placed or moved they fall onto the highest
      thing below them that can hold them (the ground, a wall top, steps, a flat roof or a band of trim). Doors also stand
      on the base of the wall they're in. The fall is animated at real gravity, slowed a little to be seen. */
-  const FALLS = { wall: 1, roof: 1, door: 1, steps: 1, plant: 1 };
-  const falls = p => !!(p && S().gravity && D.mode !== "plan" && FALLS[p.t] && !(p.t === "plant" && (p.style === "ivy" || p.style === "flowers")));
+  const FALLS = { wall: 1, roof: 1, door: 1, steps: 1, plant: 1, equip: 1 };
+  const falls = p => !!(p && S().gravity && D.mode !== "plan" && FALLS[p.t] && !(p.t === "plant" && (p.style === "ivy" || p.style === "flowers")) && !(p.t === "equip" && p.style === "ac")) || !!(p && S().gravity && D.mode !== "plan" && isPost(p));
+  const isPost = p => p.t === "trim" && (p.style === "post" || p.style === "column" || p.style === "tapered");
   function restY(p) {
     let best = 0; const x0 = p.x + 1, x1 = p.x + p.w - 1;
     D.parts.forEach(q => {
       if (q === p || !visible(q) || kindOf(q) !== "rect" || q.x >= x1 || q.x + q.w <= x0) return;
       const tops = [];
-      if (q.t === "wall" || (q.t === "steps" && p.t !== "roof") || (q.t === "roof" && q.style === "flat") || (q.t === "trim" && (q.style === "band" || q.style === "cornice"))) tops.push(q.y + q.h);
+      if (q.t === "wall" || (q.t === "steps" && p.t !== "roof") || (q.t === "roof" && (q.style === "flat" || q.style === "parapet")) || (q.t === "trim" && (q.style === "band" || q.style === "cornice")) || ((p.t === "wall" || p.t === "roof") && q.t === "trim" && (q.style === "post" || q.style === "column" || q.style === "tapered"))) tops.push(q.y + q.h);
       if (p.t === "door" && q.t === "wall") tops.push(q.y);
+      if (p.t === "roof" && q.t === "wall" && p.y >= q.y + 100 && p.y <= q.y + q.h - 20) tops.push(p.y); // a porch roof hangs on the wall
       tops.forEach(t => { if (t <= p.y + 2 && t > best) best = t; });
     });
     return r1(best);
@@ -1721,12 +2051,101 @@ body.is3d .tool{opacity:.55}
     return s;
   }
 
+
+  /* ---------- building styles ----------
+     How houses are built in Puerto Rico and on the US mainland. A style sets what new walls, roofs, windows, doors and trim
+     start as, and can restyle the house already drawn. It's a starting point; any part can still be anything. */
+  const STYLES = {
+    "pr-concrete": { r: "pr", n: "Concrete house", tpl: "prConcrete",
+      d: "The everyday Puerto Rico house: reinforced concrete and block with a stucco finish, a flat concrete roof with a parapet, aluminum jalousie windows behind rejas, a marquesina for the car and a water tank on the roof. Built to stand up to hurricanes and earthquakes.",
+      wall: { tex: "stucco", color: "#f0e2b6" }, roof: { style: "parapet", tex: "concrete", color: "#ece7dc" }, window: { style: "jalousie", color: "#c9ccce" }, door: { style: "gate", color: "#f5f3ee" }, trim: { style: "reja", color: "#f5f3ee" } },
+    "pr-criollo": { r: "pr", n: "Criollo (Spanish colonial)", tpl: "prCriollo",
+      d: "Old San Juan and Ponce: thick masonry walls in bright colors, tall criollo doors with louvered leaves and glass transoms, iron balconies, a cornice and a flat roof behind a parapet.",
+      wall: { tex: "stucco", color: "#e9b44c" }, roof: { style: "parapet", tex: "concrete", color: "#f5f0e4" }, window: { style: "louver", color: "#2f6b5a" }, door: { style: "criollo", color: "#2f6b5a" }, trim: { style: "railing", color: "#2a2a28" } },
+    "pr-campo": { r: "pr", n: "Wood country house", tpl: "prCampo",
+      d: "The traditional casa de campo: a wood frame raised on posts for air and floods, a zinc (metal) roof, louvered windows and a front balcony to catch the breeze.",
+      wall: { tex: "siding", color: "#7fb3a8" }, roof: { style: "hip", tex: "metal", color: "#9c4f3f" }, window: { style: "louver", color: "#f5f3ee" }, door: { style: "panel", color: "#f5f3ee" }, trim: { style: "post", color: "#f5f3ee" } },
+    "us-craftsman": { r: "us", n: "Craftsman bungalow", tpl: "craftsman",
+      d: "Wood frame with lap siding, a low gable roof with deep eaves, and a front porch on tapered columns over stone piers.",
+      wall: { tex: "siding", color: "#7f8c6a" }, roof: { style: "gable", tex: "shingle", color: "#4a4b4d" }, window: { style: "double", color: "#efe9dd" }, door: { style: "glass", color: "#8a5a3a" }, trim: { style: "tapered", color: "#efe9dd" } },
+    "us-colonial": { r: "us", n: "Colonial", tpl: "colonial",
+      d: "A symmetrical two-story box with a side-gable roof, a centered front door and shuttered double-hung windows, in brick or clapboard.",
+      wall: { tex: "brick", color: "#9c4f3f" }, roof: { style: "side", tex: "shingle", color: "#3d3f42" }, window: { style: "shutters", color: "#2a2a28" }, door: { style: "panel", color: "#2a2a28" }, trim: { style: "cornice", color: "#f5f3ee" } },
+    "us-ranch": { r: "us", n: "Ranch", tpl: "ranch",
+      d: "One long story under a low hip roof, with a picture window and an attached garage. Wood frame with brick or siding.",
+      wall: { tex: "brick", color: "#b39a7c" }, roof: { style: "hip", tex: "shingle", color: "#5b5e60" }, window: { style: "single", color: "#f5f3ee" }, door: { style: "panel", color: "#6e5a4c" }, trim: { style: "band", color: "#efe9dd" } },
+    "us-farmhouse": { r: "us", n: "Modern farmhouse", tpl: "farmhouse",
+      d: "White board and batten, a steep metal gable roof, black windows and a long front porch on simple posts.",
+      wall: { tex: "board", color: "#f5f3ee" }, roof: { style: "gable", tex: "metal", color: "#2a2a28" }, window: { style: "casement", color: "#2a2a28" }, door: { style: "glass", color: "#2a2a28" }, trim: { style: "post", color: "#2a2a28" } },
+    "us-modern": { r: "us", n: "Modern", tpl: "modern",
+      d: "Flat roofs, big panes of glass and mixed cladding of light board and dark siding.",
+      wall: { tex: "board", color: "#eceae4" }, roof: { style: "flat", tex: "plain", color: "#3a3b3d" }, window: { style: "single", color: "#3a3b3d" }, door: { style: "glass", color: "#9b7a58" }, trim: { style: "band", color: "#3a3b3d" } }
+  };
+  const REGIONS = [["pr", "Puerto Rico"], ["us", "US mainland"]];
+  const STYLED = ["wall", "roof", "window", "door", "trim"];
+  function useStyle(k) {
+    /* New parts start in the style's materials. */
+    const Sy = STYLES[k]; if (!Sy) return;
+    STYLED.forEach(t => { if (Sy[t]) store.mem[t] = Object.assign({}, store.mem[t] || {}, Sy[t]); });
+    save();
+  }
+  function restyle(k) {
+    /* Restyles the front: walls, roofs, windows and doors take the style's look. Garage doors and round windows keep theirs. */
+    const Sy = STYLES[k]; if (!Sy) return 0;
+    const flat = st => st === "flat" || st === "parapet";
+    let n = 0;
+    D.front.forEach(p => {
+      if (p.t === "wall") { Object.assign(p, Sy.wall); n++; }
+      else if (p.t === "roof") {
+        const was = p.style || "gable", to = Sy.roof.style;
+        if (flat(to) !== flat(was)) { p.h = flat(to) ? (to === "parapet" ? 60 : 25) : r1(p.w * (to === "side" || to === "hip" ? 0.22 : 0.3)); }
+        else if (to === "parapet" && was !== "parapet") p.h = 60;
+        Object.assign(p, Sy.roof); n++;
+      }
+      else if (p.t === "window" && p.style !== "round") { Object.assign(p, Sy.window); n++; }
+      else if (p.t === "door" && p.style !== "garage") { Object.assign(p, Sy.door); n++; }
+    });
+    syncLinks();
+    return n;
+  }
+  function swatch(Sy) { return [Sy.wall.color, Sy.roof.color, Sy.window.color, Sy.door.color].map(c => `<i style="background:${c}"></i>`).join(""); }
+  function renderStyles() {
+    const cur = D.style;
+    let h = `<div class="grab"></div><h2>Building style</h2><p class="lede">How houses are built in Puerto Rico and on the US mainland. A style sets what new walls, roofs, windows and doors start as. Any part can still be changed, and styles can be mixed.</p>`;
+    REGIONS.forEach(rg => {
+      h += `<h3>${rg[1]}</h3><div class="styles">`;
+      Object.keys(STYLES).filter(k => STYLES[k].r === rg[0]).forEach(k => { const Sy = STYLES[k]; h += `<button data-sty="${k}" aria-pressed="${cur === k}"><span class="sw">${swatch(Sy)}</span><b>${esc(Sy.n)}</b><small>${esc(Sy.d)}</small></button>`; });
+      h += `</div>`;
+    });
+    h += `<div class="styles" style="margin-top:8px"><button data-sty="none" aria-pressed="${!cur}"><span class="sw" style="background:repeating-linear-gradient(45deg,#ddd 0 4px,#f6f6f6 4px 8px)"></span><b>No style</b><small>Mix freely. New parts start as whatever you used last.</small></button></div>`;
+    if (cur) h += `<h3>${esc(STYLES[cur].n)}</h3><div class="links"><button data-sa="apply">Restyle this house</button><button data-sa="new">New house in this style</button></div><p class="note">Restyle changes the walls, roofs, windows and doors in the front view. Undo brings the old look back.</p>`;
+    h += `<button class="primary" data-close>Done</button>`;
+    $("styleSheet").innerHTML = h;
+  }
+  $("styleSheet").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.sty) {
+      const k = b.dataset.sty === "none" ? null : b.dataset.sty;
+      if (k) { D.style = k; useStyle(k); } else delete D.style;
+      SFX.tap(); save(); renderStyles(); libThumbs = {};
+      if (k) toast("New walls, roofs, windows and doors start as " + STYLES[k].n + ". Restyle this house changes the ones already drawn.");
+      track("style_pick", { style: k || "none" }); return;
+    }
+    if (b.dataset.sa === "apply") {
+      const k = D.style, ok = withUndo(() => restyle(k));
+      SFX.place(); closeSheets(); render();
+      toast(ok ? "Restyled as " + STYLES[k].n + ". Undo brings the old look back." : "There's nothing in the front view to restyle yet.");
+      track("style_apply", { style: k });
+    } else if (b.dataset.sa === "new") { const t = STYLES[D.style].tpl; startTemplate(t); track("design_new", { template: t, from: "style" }); }
+  });
+
   /* ---------- lot ----------
      A design can sit on a lot: width along the street, depth back from it, and minimum yards (setbacks).
      The lot is kept in plan coordinates (x across, y back from the street), so the front view adds the link offset. */
   const FT = 30.48;
   const LOTS = [
     { k: "row", n: "City row", w: 25, h: 100, sf: 10, ss: 0, sr: 20 },
+    { k: "pr", n: "Urbanización", w: 60, h: 90, sf: 15, ss: 5, sr: 15 },
     { k: "narrow", n: "Narrow", w: 40, h: 100, sf: 20, ss: 5, sr: 20 },
     { k: "std", n: "Standard", w: 50, h: 100, sf: 25, ss: 5, sr: 20 },
     { k: "sub", n: "Suburban", w: 60, h: 120, sf: 25, ss: 8, sr: 25 },
@@ -1849,7 +2268,7 @@ body.is3d .tool{opacity:.55}
   function renderLot() {
     const L = D.lot, F = houseFoot(D);
     const lf = (label, key, v) => `<label class="fld"><span>${label}</span><input data-lf="${key}" value="${esc(fmtIn(v))}" inputmode="${S().units === "ft" ? "text" : "decimal"}" autocomplete="off" enterkeyhint="done"></label>`;
-    let h = `<div class="grab"></div><h2>Lot size</h2><p class="lede">Pick a common US lot or type your own. The plan shows the property lines, setbacks, sidewalk and street; the front shows the property lines; 3D shows the yard.</p><div class="lots">`;
+    let h = `<div class="grab"></div><h2>Lot size</h2><p class="lede">Pick a common lot in the US or a Puerto Rico urbanización, or type your own. The plan shows the property lines, setbacks, sidewalk and street; the front shows the property lines; 3D shows the yard.</p><div class="lots">`;
     h += `<button data-lot="none" aria-pressed="${!L}"><b>No lot</b><small>House only</small></button>`;
     LOTS.forEach(q => { h += `<button data-lot="${q.k}" aria-pressed="${!!L && L.k === q.k}"><b>${q.n}</b><small>${fmtLen(q.w * FT)} × ${fmtLen(q.h * FT)}<br>${fmtArea(q.w * q.h * FT * FT)}</small></button>`; });
     h += `<button data-lot="custom" aria-pressed="${!!L && L.k === "custom"}"><b>Custom</b><small>Type the width<br>and depth</small></button></div>`;
@@ -1925,7 +2344,7 @@ body.is3d .tool{opacity:.55}
         if (k === "rect" || k === "label") {
           xs.push(p.x, p.x + p.w / 2, p.x + p.w); ys.push(p.y, p.y + p.h / 2, p.y + p.h);
           [[p.x, p.y], [p.x + p.w, p.y], [p.x, p.y + p.h], [p.x + p.w, p.y + p.h], [p.x + p.w / 2, p.y], [p.x + p.w / 2, p.y + p.h], [p.x, p.y + p.h / 2], [p.x + p.w, p.y + p.h / 2]].forEach(q => pts.push({ x: q[0], y: q[1] }));
-          if (p.t === "roof" && p.style !== "flat") pts.push({ x: p.x + p.w / 2, y: p.y + p.h });
+          if (p.t === "roof" && p.style !== "flat" && p.style !== "parapet") pts.push({ x: p.x + p.w / 2, y: p.y + p.h });
         } else if (k === "line" || k === "dim") { pts.push({ x: p.x1, y: p.y1 }, { x: p.x2, y: p.y2 }); xs.push(p.x1, p.x2); ys.push(p.y1, p.y2); }
       });
     }
@@ -2187,7 +2606,7 @@ body.is3d .tool{opacity:.55}
     if (T.kind === "rect") Object.assign(p, { x: 0, y: 0, w: T.w, h: T.h });
     const pre = tool === "lib" && libItem && libItem.t === type ? libItem : null;
     if (pre) { if (pre.s) p.style = pre.s; if (pre.ex) Object.assign(p, pre.ex); }
-    if (type === "room") p.text = "Room " + (D.parts.filter(q => q.t === "room").length + 1);
+    if (type === "room" && !p.text) p.text = "Room " + (D.parts.filter(q => q.t === "room").length + 1);
     if (type === "pwall") p.lw = 15.24;
     if (type === "label") { p.text = "Label"; p.h = T.h; p.w = labelW(p.text, p.h); }
     if (type === "line") { p.lw = r1(Math.max(0.5, 2 / view.s)); p.color = store.paint.color; }
@@ -2203,12 +2622,19 @@ body.is3d .tool{opacity:.55}
     const wall = wallAt(w);
     let x = w.x - ww / 2, y = w.y - hh / 2, fixed = false;
     if (type === "roof") {
-      const wb = wallBelow(w);
-      if (wb) { ww = wb.w + 80; x = wb.x - 40; y = wb.y + wb.h; hh = st === "flat" ? 25 : Math.round(ww * (st === "shed" ? 0.2 : 0.3)); fixed = true; }
+      const porch = pre && /porch/i.test(pre.n), wb = porch ? (wall && wall.t === "wall" ? wall : wallBelow(w)) : wallBelow(w);
+      if (wb && porch) { y = wb.y + Math.min(wb.h - 40, 240); if (st === "side") { ww = wb.w + 80; x = wb.x - 40; } fixed = true; }
+      else if (wb) { const flatish = st === "flat" || st === "parapet"; ww = wb.w + (st === "parapet" ? 0 : 80); x = wb.x - (st === "parapet" ? 0 : 40); y = wb.y + wb.h; hh = st === "flat" ? 25 : st === "parapet" ? 60 : Math.round(ww * (st === "shed" ? 0.2 : st === "side" ? 0.22 : 0.3)); fixed = flatish || true; }
     } else if (type === "door") { y = wall ? wall.y : 0; }
     else if (type === "steps" || type === "plant" || type === "wall") { if (w.y - hh / 2 < (type === "wall" ? 150 : 40)) y = 0; }
     else if (type === "trim" && wall && (st === "band" || st === "cornice")) { x = wall.x - (st === "cornice" ? 20 : 0); ww = wall.w + (st === "cornice" ? 40 : 0); fixed = true; y = w.y - hh / 2; }
+    else if (type === "trim" && (st === "post" || st === "tapered") && w.y - hh / 2 < 60) { y = 0; }
     else if (type === "trim" && wall && (st === "column" || st === "pilaster" || st === "quoins")) { y = wall.y; hh = wall.h; }
+    else if (type === "trim" && st === "reja") {
+      /* A reja tapped on a window or door fits over it. */
+      const op = D.parts.slice().reverse().find(q => (q.t === "window" || q.t === "door") && visible(q) && w.x >= q.x && w.x <= q.x + q.w && w.y >= q.y && w.y <= q.y + q.h);
+      if (op) { const m = op.t === "door" ? 4 : 8; x = op.x - m; y = op.y - (op.t === "door" ? 0 : m); ww = op.w + 2 * m; hh = op.h + (op.t === "door" ? m : 2 * m); fixed = true; }
+    }
     if ((type === "pdoor" || type === "pwindow") && D.mode === "plan") {
       const fitp = wallFit(type, w, ww, hh, st);
       if (fitp) {
@@ -2219,7 +2645,7 @@ body.is3d .tool{opacity:.55}
     const tg = snapTargets(null);
     act = { tg }; // snapping helpers read act.tg
     if (!fixed) { x = snapEdge(x, ww, tg.xs, "x"); }
-    if (!fixed || type === "trim") { if (!(type === "door" || ((type === "steps" || type === "plant" || type === "wall") && y === 0))) y = snapEdge(y, hh, tg.ys, "y"); }
+    if (!fixed || type === "trim") { if (!(type === "door" || ((type === "steps" || type === "plant" || type === "wall" || type === "trim") && y === 0))) y = snapEdge(y, hh, tg.ys, "y"); }
     act = null; guides = { x: [], y: [] };
     const props = type === "label" ? { x: r1(w.x), y: r1(w.y) } : { x: r1(x), y: r1(y), w: r1(ww), h: r1(hh) };
     let drop = null; withUndo(() => { const p = mk(type, props); D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); drop = settle(p); linkNew(p); });
@@ -2527,6 +2953,30 @@ body.is3d .tool{opacity:.55}
     if (tile) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / tile[0], uv.getY(i) / tile[1]); }
     const m = new THREE.Mesh(g, mats); m.position.z = z0; m.castShadow = true; m.receiveShadow = true; group.add(m); return m;
   }
+  /* Extrudes a profile drawn in (z, y) across x, for side gables and porch roofs. */
+  function extrudeX(group, pts, x0, x1, mats, tile) {
+    const m = extrudeW(group, pts.map(q => [-q[0], q[1]]), 0, x1 - x0, mats, tile); m.rotation.y = Math.PI / 2; m.position.set(x0, 0, 0); return m;
+  }
+  const isOpenRoom = r => /marquesina|carport|garage open|balc|porch|terraz|terrace|patio|veranda|deck|galer|lanai|balcón/i.test(r.text || "");
+  function palm3(group, x, z, w, h, color, rnd) {
+    const bark = solid("#8f7f6a", 0.95), leaf = new THREE.MeshStandardMaterial({ color, roughness: 0.9, side: THREE.DoubleSide, flatShading: true });
+    const lean = w * 0.06, ch = h * 0.8, tw = Math.max(3, w * 0.035), at = t => new THREE.Vector3(x + lean * t * t, ch * t, z + lean * 0.3 * t * t), n = 8;
+    const seg = (a, b, w0, w1, mat, box) => {
+      const len = a.distanceTo(b), geo = box ? new THREE.BoxGeometry(w0, 1.6, len) : new THREE.CylinderGeometry(w1, w0, len, 10);
+      if (!box) geo.rotateX(Math.PI / 2);
+      const m = new THREE.Mesh(geo, mat); m.position.copy(a).add(b).multiplyScalar(0.5); m.lookAt(b); m.castShadow = true; m.receiveShadow = true; group.add(m);
+    };
+    for (let i = 0; i < n; i++) seg(at(i / n), at((i + 1) / n), tw * (1.15 - i / n * 0.3), tw * (1.15 - (i + 1) / n * 0.3), bark);
+    const top = at(1);
+    for (let i = 0; i < 11; i++) {
+      const a = i / 11 * Math.PI * 2 + rnd() * 0.3, L = w * 0.5 * (0.8 + rnd() * 0.25), k = 5; let p = top.clone(), el = 0.55 + rnd() * 0.25;
+      for (let j = 0; j < k; j++) {
+        const q = p.clone().add(new THREE.Vector3(Math.cos(a) * Math.cos(el), Math.sin(el), Math.sin(a) * Math.cos(el)).multiplyScalar(L / k));
+        seg(p, q, L * 0.2 * (1 - j / k * 0.75), 0, leaf, true); p = q; el -= 0.32;
+      }
+    }
+    [[-6, 0], [5, 3], [0, -5]].forEach(q => { const c = new THREE.Mesh(new THREE.SphereGeometry(Math.max(4, w * 0.02), 10, 8), solid("#6a5a2e", 0.8)); c.position.set(top.x + q[0], top.y - 8, top.z + q[1]); group.add(c); });
+  }
   function tree3(group, x, z, w, h, color, rnd) {
     const leaf = new THREE.MeshStandardMaterial({ color, roughness: 0.95, flatShading: true }), bark = solid("#5b4636", 0.95);
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.03, w * 0.05, h * 0.55, 8), bark); trunk.position.set(x, h * 0.275, z); trunk.castShadow = true; group.add(trunk);
@@ -2549,6 +2999,7 @@ body.is3d .tool{opacity:.55}
     const g = new THREE.Group(), rnd = mulberry(99);
     const vis = p => !D.layers[p.layer].hide, front = D.front.filter(vis), plan = D.plan.filter(vis);
     const fWalls = front.filter(p => p.t === "wall"), ground = fWalls.filter(p => p.y < 5), rooms = plan.filter(p => p.t === "room");
+    const openRooms = rooms.filter(isOpenRoom), encl = rooms.filter(r => !isOpenRoom(r));
     if (!fWalls.length && !rooms.length) return null;
     const main = (ground.length ? ground : fWalls).slice().sort((a, b) => b.w * b.h - a.w * a.h)[0];
     const facade = main ? await matFor(main.tex, main.color) : solid(PLASTER, 0.9), plaster = solid(PLASTER, 0.95), wallTop = ground.length ? Math.max.apply(null, ground.map(p => p.y + p.h)) : 274.3;
@@ -2557,12 +3008,12 @@ body.is3d .tool{opacity:.55}
     const segs = [];
     if (rooms.length) {
       PX0 = Math.min.apply(null, rooms.map(p => p.x)); PX1 = Math.max.apply(null, rooms.map(p => p.x + p.w)); PY0 = E.y; PY1 = Math.max.apply(null, rooms.map(p => p.y + p.h));
-      const inRoom = (x, y) => rooms.some(r => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h), groups = new Map();
+      const inRoom = (x, y) => encl.some(r => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h), groups = new Map();
       const edge = (h, c, a, b, sign) => {
         const mx = h ? (a + b) / 2 : c + sign * 12, my = h ? c + sign * 12 : (a + b) / 2, ext = !inRoom(mx, my);
         const key = (h ? "h" : "v") + r1(c) + (ext ? "e" + sign : "i"); if (!groups.has(key)) groups.set(key, { h, c, ext, sign: ext ? sign : -1, iv: [] }); groups.get(key).iv.push([a, b]);
       };
-      rooms.forEach(r => { edge(true, r.y, r.x, r.x + r.w, -1); edge(true, r.y + r.h, r.x, r.x + r.w, 1); edge(false, r.x, r.y, r.y + r.h, -1); edge(false, r.x + r.w, r.y, r.y + r.h, 1); });
+      encl.forEach(r => { edge(true, r.y, r.x, r.x + r.w, -1); edge(true, r.y + r.h, r.x, r.x + r.w, 1); edge(false, r.x, r.y, r.y + r.h, -1); edge(false, r.x + r.w, r.y, r.y + r.h, 1); });
       plan.filter(p => p.t === "pwall").forEach(p => { if (Math.abs(p.y1 - p.y2) < 0.5) edge(true, p.y1, Math.min(p.x1, p.x2), Math.max(p.x1, p.x2), -1); else if (Math.abs(p.x1 - p.x2) < 0.5) edge(false, p.x1, Math.min(p.y1, p.y2), Math.max(p.y1, p.y2), -1); });
       groups.forEach(gr => {
         gr.iv.sort((a, b) => a[0] - b[0]); const merged = [];
@@ -2617,32 +3068,88 @@ body.is3d .tool{opacity:.55}
         if (p.t === "window" && p.style === "shutters") { const sw = W * 0.22, sm = solid("#3e4a4f", 0.7); put(u0, u0 + sw, o.y0, o.y1, -3, 0, sm); put(u1 - sw, u1, o.y0, o.y1, -3, 0, sm); }
         if (!s.ext && isDoor) return; // inside doorways stay open
         if (isDoor) {
-          const col = p.t === "door" ? p.color : "#7a6a58", dm = doorMat[col] || (doorMat[col] = solid(col, 0.55));
-          put(u0, u1, o.y0, o.y1, 9, 13, dm);
+          const st = p.style, col = p.t !== "door" ? "#7a6a58" : st === "gate" ? "#6e5038" : p.color, dm = doorMat[col] || (doorMat[col] = solid(col, 0.55)), Hd = o.y1 - o.y0;
+          if (st === "criollo") {
+            const ty = o.y1 - Hd * 0.18;
+            put(u0, u1, o.y0, ty, 9, 13, dm); put(u0, u1, ty, o.y1, 9.5, 10.5, glassMat);
+            const lm = doorMat["l" + col] || (doorMat["l" + col] = solid(shade(col, -0.35), 0.7));
+            for (let k = 1; k < 6; k++) put(u0 + W * k / 6 - 1, u0 + W * k / 6 + 1, ty, o.y1, 8, 9.5, dm);
+            put(u0, u1, ty - 3, ty, 8, 9.5, dm);
+            [u0, (u0 + u1) / 2].forEach(a => { const pw = W / 2 * 0.72, px = a + W / 2 * 0.14, n = Math.max(6, Math.round(Hd * 0.45 / 7)), y0 = o.y0 + (ty - o.y0) * 0.4, y1 = ty - (ty - o.y0) * 0.06;
+              put(px, px + pw, y0, y1, 8.7, 9, lm); for (let k = 0; k < n; k++) put(px, px + pw, y0 + (y1 - y0) * k / n + 1, y0 + (y1 - y0) * (k + 0.6) / n, 8.2, 9, dm); });
+          } else put(u0, u1, o.y0, o.y1, 9, 13, dm);
+          if (st === "gate") {
+            const gm = doorMat["g" + p.color] || (doorMat["g" + p.color] = solid(p.color, 0.45, 0.3)), n = Math.max(3, Math.round(W / 11));
+            for (let k = 1; k < n; k++) put(u0 + W * k / n - 0.8, u0 + W * k / n + 0.8, o.y0, o.y1, -4, -2.4, gm);
+            [0.33, 0.66].forEach(r => put(u0, u1, o.y0 + Hd * r - 0.8, o.y0 + Hd * r + 0.8, -4.4, -2, gm));
+            put(u0, u0 + 3, o.y0, o.y1, -4.6, -2, gm); put(u1 - 3, u1, o.y0, o.y1, -4.6, -2, gm); put(u0, u1, o.y1 - 3, o.y1, -4.6, -2, gm);
+          }
           put(u0 - 8, u0, o.y0, o.y1 + 8, -2, 1, frameMat); put(u1, u1 + 8, o.y0, o.y1 + 8, -2, 1, frameMat); put(u0, u1, o.y1, o.y1 + 8, -2, 1, frameMat);
-          const st = p.style;
           if (st === "garage") for (let k = 1; k < 4; k++) put(u0, u1, o.y0 + (o.y1 - o.y0) * k / 4 - 1, o.y0 + (o.y1 - o.y0) * k / 4 + 1, 8.5, 9, solid("#000", 1));
           if (st === "glass" || st === "french") put(u0 + W * 0.15, u1 - W * 0.15, o.y0 + (o.y1 - o.y0) * (st === "french" ? 0.08 : 0.55), o.y1 - (o.y1 - o.y0) * 0.07, 8.5, 9.5, glassMat);
           if (st === "double" || st === "french" || st === "pair") put((u0 + u1) / 2 - 0.6, (u0 + u1) / 2 + 0.6, o.y0, o.y1, 8.6, 9, solid("#111", 1));
-          if (st !== "garage" && st !== "sliding") { const k = new THREE.Mesh(new THREE.SphereGeometry(3, 12, 8), solid("#b8954f", 0.3, 0.9)), ku = st === "double" || st === "french" || st === "pair" ? (u0 + u1) / 2 - 8 : u1 - 9, ky = o.y0 + 100; if (s.h) k.position.set(ku, ky, Zo - dz * 7); else k.position.set(Xo - wx * 7, ky, -ku); g.add(k); }
+          if (st !== "garage" && st !== "sliding") { const k = new THREE.Mesh(new THREE.SphereGeometry(3, 12, 8), solid("#b8954f", 0.3, 0.9)), ku = st === "double" || st === "french" || st === "pair" || st === "criollo" ? (u0 + u1) / 2 - 8 : u1 - 9, ky = o.y0 + 100; if (s.h) k.position.set(ku, ky, Zo - dz * 7); else k.position.set(Xo - wx * 7, ky, -ku); g.add(k); }
           return;
         }
         if (p.t === "window" && p.style === "shutters") { u0 += W * 0.22 + 2; u1 -= W * 0.22 + 2; }
         const fm = p.t === "window" && p.style !== "shutters" ? (doorMat["f" + p.color] || (doorMat["f" + p.color] = solid(p.color, 0.55))) : frameMat;
         put(u0, u0 + fw, o.y0, o.y1, 3, 10, fm); put(u1 - fw, u1, o.y0, o.y1, 3, 10, fm); put(u0, u1, o.y0, o.y0 + fw, 3, 10, fm); put(u0, u1, o.y1 - fw, o.y1, 3, 10, fm);
-        put(u0 + fw, u1 - fw, o.y0 + fw, o.y1 - fw, 7, 7.6, glassMat);
         const st = p.style;
+        if (st === "jalousie" || st === "louver") {
+          const jal = st === "jalousie", ih = o.y1 - o.y0 - 2 * fw, n = Math.max(4, Math.round(ih / (jal ? 10.5 : 8.5))), sh = ih / n;
+          for (let k = 0; k < n; k++) put(u0 + fw, u1 - fw, o.y0 + fw + k * sh + sh * 0.12, o.y0 + fw + k * sh + sh * 0.88, jal ? 5.5 : 4, jal ? 7.5 : 9, jal ? glassMat : fm);
+          if (!jal) put(u0 + fw, u1 - fw, o.y0 + fw, o.y1 - fw, 9.5, 10, solid("#262626", 1));
+          if (W > 110) put((u0 + u1) / 2 - 2, (u0 + u1) / 2 + 2, o.y0 + fw, o.y1 - fw, 3, 10, fm);
+          if (s.ext) put(u0 - 5, u1 + 5, o.y0 - 5, o.y0, -5, 10, frameMat);
+          return;
+        }
+        put(u0 + fw, u1 - fw, o.y0 + fw, o.y1 - fw, 7, 7.6, glassMat);
         if (!st || st === "double" || st === "shutters") put(u0 + fw, u1 - fw, (o.y0 + o.y1) / 2 - 2.5, (o.y0 + o.y1) / 2 + 2.5, 4, 9, fm);
         if (st === "double" || st === "shutters" || st === "casement" || st === "arched" || st === "round") put((u0 + u1) / 2 - 1.5, (u0 + u1) / 2 + 1.5, o.y0 + fw, o.y1 - fw, 5, 8, fm);
         if (s.ext) put(u0 - 5, u1 + 5, o.y0 - 5, o.y0, -5, 10, frameMat);
       });
     }
     /* Roofs, from the front view's roofs, over the footprint. */
-    const Zf = -PY0, Zb = -PY1, ov = 40, rg = new THREE.Group(); g.add(rg);
+    const Zf = -PY0, Zb = -PY1, ov = 40, rg = new THREE.Group(), PD = 230; g.add(rg);
+    /* A roof that starts partway up the ground floor's walls is a porch roof: it reaches out over a porch PD deep. */
+    const isPorch = p => p.t === "roof" && p.y > 100 && p.y < wallTop - 20;
+    const porchX = front.filter(isPorch).map(p => [p.x - lx, p.x - lx + p.w]);
     for (const p of front.filter(q => q.t === "roof")) {
       const rm = await matFor(p.tex, p.color, { side: THREE.DoubleSide, rough: 0.8, metal: p.tex === "metal" ? 0.5 : 0 }), tile = rm.userData.tile, X = p.x - lx, W = p.w, yb = p.y, H = p.h, yt = p.y + p.h;
       const st = p.style || "gable";
+      if (isPorch(p)) {
+        const Z0 = Zf + 2, Z1 = Zf + PD + 20, beam = solid(p.style === "parapet" ? p.color : "#efece6", 0.7);
+        boxW(rg, X + 8, X + W - 8, yb - 22, yb, Z1 - 34, Z1 - 16, beam);
+        if (st === "flat" || st === "parapet") boxW(rg, X, X + W, yb, yb + Math.min(H, st === "parapet" ? H : 25), Z0, Z1, rm, tile);
+        else if (st === "gable" || st === "gambrel") {
+          const top = st === "gambrel" ? [[X, yb], [X + W * 0.13, yb + H * 0.55], [X + W * 0.5, yt], [X + W * 0.87, yb + H * 0.55], [X + W, yb]] : [[X, yb], [X + W / 2, yt], [X + W, yb]];
+          extrudeW(rg, top.concat(top.slice().reverse().map(q => [q[0], q[1] - 12])), Z0, Z1, rm, tile);
+          extrudeW(rg, [[X + 18, yb], [X + W / 2, yt - 26], [X + W - 18, yb]], Z1 - 30, Z1 - 22, [facade, plaster], facade.userData.tile);
+        } else if (st === "hip" || st === "mansard") ringRoof(rg, X, X + W, Z0 - (Z1 - Z0), Z1, [[0, 0, yb], [Math.min(W * 0.3, W / 2 - 1), Z1 - Z0, yt]], rm, tile);
+        else extrudeX(rg, [[Z0, yt], [Z1, yb], [Z1, yb - 10], [Z0, yt - 10]], X, X + W, rm);
+        continue;
+      }
       if (st === "flat") { boxW(rg, X, X + W, yb, yt, Zb - 15, Zf + 15, rm, tile); continue; }
+      if (st === "parapet") {
+        /* A concrete roof slab with a low wall around its edge, a coping on top and a scupper or two. */
+        const Z0 = Zb - 8, Z1 = Zf + 8, X0 = X, X1 = X + W, t = 15, slab = Math.min(20, H * 0.4), cop = solid(shade(p.color, 0.08), 0.85);
+        boxW(rg, X0, X1, yb, yb + slab, Z0, Z1, rm, tile);
+        boxW(rg, X0, X1, yb, yt, Z1 - t, Z1, rm, tile); boxW(rg, X0, X1, yb, yt, Z0, Z0 + t, rm, tile);
+        boxW(rg, X0, X0 + t, yb, yt, Z0 + t, Z1 - t, rm, tile); boxW(rg, X1 - t, X1, yb, yt, Z0 + t, Z1 - t, rm, tile);
+        boxW(rg, X0 - 3, X1 + 3, yt, yt + 5, Z1 - t - 2, Z1 + 3, cop); boxW(rg, X0 - 3, X1 + 3, yt, yt + 5, Z0 - 3, Z0 + t + 2, cop);
+        boxW(rg, X0 - 3, X0 + t + 2, yt, yt + 5, Z0 + t + 2, Z1 - t - 2, cop); boxW(rg, X1 - t - 2, X1 + 3, yt, yt + 5, Z0 + t + 2, Z1 - t - 2, cop);
+        [X0 + W * 0.06, X0 + W * 0.94 - 8].forEach(sx => boxW(rg, sx, sx + 8, yb + slab - 2, yb + slab + 5, Z1, Z1 + 25, solid("#8e8a82", 0.9)));
+        continue;
+      }
+      if (st === "side") {
+        /* Side gable: the ridge runs across the front, so the slopes face the street and the back, and the gable ends are walls. */
+        const D2 = (Zf - Zb + 2 * ov) / 2, zm = (Zf + Zb) / 2, slope = (yt - yb) / D2, wy = yb + slope * (ov - 7.6);
+        const prof = [[Zf + ov, yb], [zm, yt], [Zb - ov, yb]];
+        extrudeX(rg, prof.concat(prof.slice().reverse().map(q => [q[0], q[1] - 14])), X, X + W, rm, tile);
+        const wx0 = Math.max(X, PX0 - 7.6), wx1 = Math.min(X + W, PX1 + 7.6);
+        if (wx1 > wx0) extrudeX(rg, [[Zf + 7.6, yb], [Zf + 7.6, wy - 4], [zm, yt - 8], [Zb - 7.6, wy - 4], [Zb - 7.6, yb]], wx0, wx1, [facade, plaster], facade.userData.tile);
+        continue;
+      }
       if (st === "hip" || st === "mansard") {
         const D2 = (Zf - Zb + 2 * ov) / 2;
         const rings = st === "hip" ? [[0, 0, yb], [Math.min(W * 0.28, W / 2 - 1), D2, yt]] : [[0, 0, yb], [W * 0.07, W * 0.07, yb + H * 0.7], [Math.min(W * 0.18, W / 2 - 1), Math.min(W * 0.18, D2 - 1), yt]];
@@ -2657,12 +3164,83 @@ body.is3d .tool{opacity:.55}
       top.forEach(q => { if (q[0] > wx0 && q[0] < wx1) fill.push([q[0], q[1] - thick]); }); fill.push([wx1, yAt(wx1) - thick], [wx1, yb]);
       if (wx1 > wx0) extrudeW(rg, fill, Zb - 7.6, Zf + 7.6, [facade, plaster], facade.userData.tile);
     }
+    /* Trim, rejas, railings, posts and equipment. Freestanding posts go to the front edge of an open room (a marquesina or porch) or of a porch roof. */
+    const Zw = Zf + 7.6, conc = solid(PLASTER, 0.92), mats3 = {}, mat3 = (c, r, m) => mats3[c + r + m] || (mats3[c + r + m] = solid(c, r, m));
+    const openAt = cx => openRooms.find(r => cx >= r.x - 5 && cx <= r.x + r.w + 5);
+    const porchAt = cx => porchX.some(q => cx >= q[0] - 5 && cx <= q[1] + 5);
+    const overOpening = p => front.some(q => (q.t === "window" || q.t === "door") && q.x < p.x + p.w && q.x + q.w > p.x && q.y < p.y + p.h && q.y + q.h > p.y && (Math.min(q.x + q.w, p.x + p.w) - Math.max(q.x, p.x)) > p.w * 0.5);
+    const raisedOver = p => fWalls.some(w => w.y > 30 && w.y >= p.y + p.h - 6 && p.x + p.w > w.x && p.x < w.x + w.w);
+    const zOut = (p, cx) => { const r = openAt(cx); if (r) return -r.y; if (porchAt(cx)) return Zf + PD; return null; };
+    const bars = (x0, x1, z0, z1, y0, y1, m, along, n, w) => { for (let k = 1; k < n; k++) { const t = k / n; if (along === "x") boxW(g, x0 + (x1 - x0) * t - w / 2, x0 + (x1 - x0) * t + w / 2, y0, y1, z0, z1, m); else boxW(g, x0, x1, y0, y1, z0 + (z1 - z0) * t - w / 2, z0 + (z1 - z0) * t + w / 2, m); } };
+    const rail = (ax, bx_, az, bz, y0, h, m) => {
+      /* a railing between two points on the ground plan, along x or along z */
+      const along = Math.abs(bx_ - ax) > Math.abs(bz - az) ? "x" : "z", L = along === "x" ? Math.abs(bx_ - ax) : Math.abs(bz - az), rt = 5;
+      const x0 = Math.min(ax, bx_), x1 = Math.max(ax, bx_), z0 = Math.min(az, bz), z1 = Math.max(az, bz);
+      if (along === "x") { boxW(g, x0, x1, y0 + h - rt, y0 + h, z0 - 3, z0 + 3, m); boxW(g, x0, x1, y0 + 6, y0 + 10, z0 - 2, z0 + 2, m); bars(x0, x1, z0 - 1, z0 + 1, y0 + 6, y0 + h - rt, m, "x", Math.max(3, Math.round(L / 12)), 2.2); }
+      else { boxW(g, x0 - 3, x0 + 3, y0 + h - rt, y0 + h, z0, z1, m); boxW(g, x0 - 2, x0 + 2, y0 + 6, y0 + 10, z0, z1, m); bars(x0 - 1, x0 + 1, z0, z1, y0 + 6, y0 + h - rt, m, "z", Math.max(3, Math.round(L / 12)), 2.2); }
+    };
+    for (const p of front.filter(q => q.t === "trim")) {
+      const X0 = p.x - lx, X1 = X0 + p.w, cx = (X0 + X1) / 2, y0 = p.y, y1 = p.y + p.h, m = mat3(p.color, 0.75, 0), st = p.style || "band";
+      if (st === "post" || st === "column" || st === "tapered") {
+        const z = zOut(p, cx), raised = z == null && p.y < 5 && raisedOver(p), r = p.w / 2;
+        const zs = raised ? [Zw - r - 2, (Zf + Zb) / 2, Zb + r + 2] : z == null ? [Zw + r] : [z - r - 2];
+        zs.forEach(zc => {
+          if (st === "post") boxW(g, cx - r, cx + r, y0, y1, zc - r, zc + r, m);
+          else if (st === "column") {
+            const c = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.62, r * 0.7, p.h * 0.86, 20), m); c.position.set(cx, y0 + p.h * 0.5, zc); c.castShadow = c.receiveShadow = true; g.add(c);
+            boxW(g, cx - r, cx + r, y0, y0 + p.h * 0.07, zc - r, zc + r, m); boxW(g, cx - r, cx + r, y1 - p.h * 0.07, y1, zc - r, zc + r, m);
+          } else {
+            const ph = p.h * 0.4, pier = mat3(mix(p.color, "#8f8a80", 0.85), 0.95, 0), top = r * 0.62;
+            boxW(g, cx - r, cx + r, y0, y0 + ph, zc - r, zc + r, pier);
+            const sh = new THREE.Mesh(new THREE.CylinderGeometry(top * Math.SQRT2, r * 0.76 * Math.SQRT2, p.h - ph - p.h * 0.05, 4, 1), m); sh.rotation.y = Math.PI / 4; sh.position.set(cx, y0 + ph + (p.h - ph - p.h * 0.05) / 2, zc); sh.castShadow = sh.receiveShadow = true; g.add(sh);
+            boxW(g, cx - top - 4, cx + top + 4, y1 - p.h * 0.05, y1, zc - top - 4, zc + top + 4, m);
+          }
+        });
+      } else if (st === "railing") {
+        const z = zOut(p, cx);
+        if (p.y > 100 && z == null) {
+          /* a balcony: a slab out from the wall with the railing around its edge */
+          const BD = 110, zb = Zw + BD; boxW(g, X0 - 4, X1 + 4, y0 - 16, y0, Zw, zb + 4, conc);
+          rail(X0, X1, zb, zb, y0, p.h, m); rail(X0 + 1, X0 + 1, Zw, zb, y0, p.h, m); rail(X1 - 1, X1 - 1, Zw, zb, y0, p.h, m);
+        } else rail(X0, X1, z == null ? Zw + 60 : z - 4, z == null ? Zw + 60 : z - 4, y0, p.h, m);
+      } else if (st === "reja") {
+        const z = overOpening(p) ? null : zOut(p, cx), zz = z == null ? Zw + 3 : z - 3, gm = mat3(p.color, 0.45, 0.3), t = 3, n = Math.max(3, Math.round(p.w / 11));
+        bars(X0, X1, zz - 0.8, zz + 0.8, y0, y1, gm, "x", n, 1.6);
+        (overOpening(p) && p.h > 180 ? [0.33, 0.66] : [0.5]).forEach(rr => boxW(g, X0, X1, y0 + p.h * rr - 0.8, y0 + p.h * rr + 0.8, zz - 1, zz + 1, gm));
+        boxW(g, X0, X0 + t, y0, y1, zz - 1.2, zz + 1.2, gm); boxW(g, X1 - t, X1, y0, y1, zz - 1.2, zz + 1.2, gm); boxW(g, X0, X1, y1 - t, y1, zz - 1.2, zz + 1.2, gm); boxW(g, X0, X1, y0, y0 + t, zz - 1.2, zz + 1.2, gm);
+      } else if (st === "band" || st === "cornice") boxW(g, X0, X1, y0, y1, Zw - 1, Zw + (st === "cornice" ? 16 : 5), m);
+      else if (st === "pilaster" || st === "quoins") boxW(g, X0, X1, y0, y1, Zw - 1, Zw + (st === "quoins" ? 3 : 6), m);
+      else if (st === "frame") { const t = clamp(Math.min(p.w, p.h) * 0.12, 4, 20); boxW(g, X0, X0 + t, y0, y1, Zw - 1, Zw + 4, m); boxW(g, X1 - t, X1, y0, y1, Zw - 1, Zw + 4, m); boxW(g, X0 + t, X1 - t, y1 - t, y1, Zw - 1, Zw + 4, m); }
+    }
+    for (const p of front.filter(q => q.t === "equip")) {
+      const X0 = p.x - lx, X1 = X0 + p.w, cx = (X0 + X1) / 2, m = mat3(p.color, 0.6, 0.1), st = p.style || "tank";
+      const onRoof = p.y >= wallTop - 5, deck = front.find(q => q.t === "roof" && q.style === "parapet" && Math.abs(q.y + q.h - p.y) < 4 && q.x < X1 + lx && q.x + q.w > X0 + lx);
+      const yb = deck ? deck.y + Math.min(20, deck.h * 0.4) : p.y, zc = onRoof ? Zb + (Zf - Zb) * 0.4 : st === "ac" ? Zw + 20 : Zw + 70;
+      if (st === "tank") {
+        const r = p.w / 2, lh = p.h * 0.16, leg = mat3("#77736c", 0.6, 0.4);
+        boxW(g, X0 + p.w * 0.06, X1 - p.w * 0.06, yb, yb + lh, zc - r * 0.8, zc + r * 0.8, leg);
+        const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, p.h - lh, 28), m); c.position.set(cx, yb + lh + (p.h - lh) / 2, zc); c.castShadow = c.receiveShadow = true; g.add(c);
+        const lid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.24, r * 0.24, 6, 16), mat3(shade(p.color, 0.12), 0.6, 0.1)); lid.position.set(cx, yb + p.h + 3, zc); g.add(lid);
+      } else if (st === "solar") {
+        const L = p.h * 1.5, tilt = 0.5, pg = new THREE.Group(), panel = new THREE.Mesh(new THREE.BoxGeometry(p.w, 5, L), mat3("#1d3550", 0.25, 0.4));
+        panel.castShadow = true; pg.add(panel); pg.position.set(cx, yb + Math.sin(tilt) * L / 2 + 12, zc); pg.rotation.x = -tilt; g.add(pg);
+        const zt = zc - Math.cos(tilt) * L / 2, tank = new THREE.Mesh(new THREE.CylinderGeometry(p.h * 0.14, p.h * 0.14, p.w * 0.92, 20), mat3("#e9e7e2", 0.5, 0.2));
+        tank.rotation.z = Math.PI / 2; tank.position.set(cx, yb + Math.sin(tilt) * L + 12 + p.h * 0.1, zt - 4); tank.castShadow = true; g.add(tank);
+        [X0 + p.w * 0.1, X1 - p.w * 0.1].forEach(lxp => boxW(g, lxp - 2, lxp + 2, yb, yb + Math.sin(tilt) * L + 12, zt - 6, zt - 2, mat3("#8d8a83", 0.6, 0.4)));
+      } else {
+        const d = 34, z0 = onRoof ? zc - d / 2 : Zw, z1 = z0 + d;
+        boxW(g, X0, X1, yb, yb + p.h, z0, z1, m);
+        const fan = new THREE.Mesh(new THREE.CylinderGeometry(Math.min(p.w * 0.3, p.h * 0.42), Math.min(p.w * 0.3, p.h * 0.42), 1, 24), mat3(shade(p.color, -0.55), 0.9, 0));
+        fan.rotation.x = Math.PI / 2; fan.position.set(X0 + p.w * 0.36, yb + p.h / 2, z1 + 0.4); g.add(fan);
+      }
+    }
     /* Chimney, steps and plants. */
     for (const p of front.filter(q => q.t === "chimney")) { const cm = await matFor(p.tex, p.color); boxW(g, p.x - lx, p.x - lx + p.w, p.y, p.y + p.h, Zb + (Zf - Zb) * 0.35, Zb + (Zf - Zb) * 0.35 + 70, cm, cm.userData.tile); boxW(g, p.x - lx - 6, p.x - lx + p.w + 6, p.y + p.h - 10, p.y + p.h, Zb + (Zf - Zb) * 0.35 - 6, Zb + (Zf - Zb) * 0.35 + 76, solid("#8e8a82", 0.9)); }
     for (const p of front.filter(q => q.t === "steps")) { const n = Math.max(1, Math.round(p.h / 17)), sm = solid(p.color, 0.9); for (let i = 0; i < n; i++) boxW(g, p.x - lx, p.x - lx + p.w, 0, p.h * (n - i) / n, Zf + 7.6, Zf + 7.6 + 30 * (i + 1), sm); }
     for (const p of front.filter(q => q.t === "plant" && q.y < 5)) {
       const x = p.x - lx + p.w / 2;
       if (p.style === "tree") tree3(g, x, Zf + 260, p.w, p.h, p.color, rnd);
+      else if (p.style === "palm") palm3(g, x, Zf + 230, p.w, p.h, p.color, rnd);
       else if (p.style === "hedge" || p.style === "shrub") shrub3(g, x, Zf + 55, p.w, p.h, p.color, rnd);
     }
     if (S().figure) {
@@ -2796,7 +3374,9 @@ body.is3d .tool{opacity:.55}
       ["Doors", [["door", "panel", 36, 80, "Panel"], ["door", "glass", 36, 80, "Glass top"], ["door", "double", 60, 80, "Double"], ["door", "french", 72, 80, "French"], ["door", "arched", 42, 90, "Arched"], ["door", "garage", 108, 84, "Garage"], ["door", "garage", 192, 84, "Double garage"]]],
       ["Roofs and structure", [["roof", "gable", 360, 108, "Gable roof"], ["roof", "hip", 360, 96, "Hip roof"], ["roof", "mansard", 360, 102, "Mansard roof"], ["roof", "gambrel", 360, 120, "Gambrel roof"], ["roof", "flat", 336, 10, "Flat roof"], ["chimney", null, 24, 72, "Brick chimney", { tex: "brick" }], ["chimney", null, 28, 72, "Stone chimney", { tex: "stone", color: "#9c968a" }], ["steps", "steps", 64, 21, "Steps"], ["steps", "stoop", 80, 28, "Stoop"]]],
       ["Trim", [["trim", "cornice", 336, 16, "Cornice"], ["trim", "band", 312, 8, "Band"], ["trim", "column", 16, 120, "Column"], ["trim", "pilaster", 14, 120, "Pilaster"], ["trim", "quoins", 16, 120, "Quoins"], ["trim", "frame", 60, 72, "Surround"]]],
-      ["Garden", [["plant", "shrub", 60, 36, "Shrub"], ["plant", "tree", 102, 190, "Tree"], ["plant", "hedge", 120, 40, "Hedge"], ["plant", "flowers", 42, 18, "Flower box"], ["plant", "ivy", 48, 120, "Ivy"]]]
+      ["Garden", [["plant", "shrub", 60, 36, "Shrub"], ["plant", "tree", 102, 190, "Tree"], ["plant", "palm", 118, 252, "Palm"], ["plant", "hedge", 120, 40, "Hedge"], ["plant", "flowers", 42, 18, "Flower box"], ["plant", "ivy", 48, 120, "Ivy"], ["plant", "ivy", 60, 108, "Bougainvillea", { color: "#b8466a" }]]],
+      ["Puerto Rico", [["window", "jalousie", 48, 48, "Jalousie window", { color: "#c9ccce" }], ["window", "jalousie", 72, 48, "Wide jalousie", { color: "#c9ccce" }], ["window", "louver", 44, 60, "Louvered window"], ["trim", "reja", 54, 66, "Reja grille", { color: "#f5f3ee" }], ["door", "gate", 36, 84, "Door with reja", { color: "#f5f3ee" }], ["door", "criollo", 52, 106, "Criollo doors", { color: "#2f6b5a" }], ["roof", "parapet", 336, 24, "Parapet roof", { tex: "concrete", color: "#ece7dc" }], ["trim", "railing", 120, 40, "Balcony railing", { color: "#2a2a28" }], ["trim", "post", 12, 114, "Concrete column", { color: "#ece7dc" }], ["trim", "reja", 168, 60, "Marquesina gate", { color: "#f5f3ee" }], ["equip", "tank", 44, 56, "Water tank"], ["equip", "solar", 84, 44, "Solar heater"], ["equip", "ac", 34, 24, "Mini-split AC", { color: "#eeeeec" }]]],
+      ["Craftsman and farmhouse", [["trim", "tapered", 20, 93, "Tapered column", { color: "#efe9dd" }], ["trim", "post", 9, 102, "Porch post", { color: "#2a2a28" }], ["roof", "side", 360, 96, "Side gable roof"], ["roof", "side", 360, 28, "Porch roof", { tex: "metal", color: "#2a2a28" }], ["roof", "gable", 216, 60, "Porch gable"], ["trim", "railing", 120, 36, "Porch railing", { color: "#efe9dd" }]]]
     ],
     plan: [
       ["Doors and windows", [["pdoor", "swing", 30, 30, "Narrow door"], ["pdoor", "swing", 36, 36, "Door"], ["pdoor", "pair", 60, 30, "Double door"], ["pdoor", "sliding", 72, 6, "Sliding door"], ["pwindow", null, 36, 6, "Small window"], ["pwindow", null, 48, 6, "Window"], ["pwindow", null, 72, 6, "Wide window"]]],
@@ -2804,24 +3384,30 @@ body.is3d .tool{opacity:.55}
       ["Bathroom", [["fixture", "toilet", 18, 28, "Toilet"], ["fixture", "sink", 24, 18, "Basin"], ["fixture", "bath", 60, 30, "Bathtub"], ["fixture", "shower", 36, 36, "Shower"]]],
       ["Living and dining", [["furn", "sofa", 84, 36, "Sofa"], ["furn", "armchair", 34, 34, "Armchair"], ["furn", "table", 78, 64, "Dining table"], ["furn", "rug", 96, 66, "Rug", { color: "#b8466a" }], ["furn", "tv", 72, 18, "TV console"], ["furn", "desk", 54, 28, "Desk"]]],
       ["Bedroom", [["furn", "bed", 76, 80, "King bed", { color: "#d8cbb5" }], ["furn", "bed", 60, 80, "Queen bed", { color: "#d8cbb5" }], ["furn", "bed", 39, 75, "Twin bed", { color: "#d8cbb5" }], ["furn", "wardrobe", 48, 24, "Wardrobe"]]],
-      ["Stairs and garden", [["stairs", "straight", 36, 120, "Stairs"], ["stairs", "spiral", 60, 60, "Spiral stairs"], ["pplant", "pot", 24, 24, "Potted plant"], ["pplant", "tree", 120, 120, "Tree"]]]
+      ["Stairs and garden", [["stairs", "straight", 36, 120, "Stairs"], ["stairs", "spiral", 60, 60, "Spiral stairs"], ["pplant", "pot", 24, 24, "Potted plant"], ["pplant", "tree", 120, 120, "Tree"]]],
+      ["Open rooms", [["room", null, 168, 240, "Marquesina", { tex: "concrete", color: "#d5d2cb", text: "Marquesina" }], ["room", null, 144, 60, "Balcón", { tex: "ftile", color: "#cbb59a", text: "Balcón" }], ["room", null, 144, 144, "Terraza", { tex: "ftile", color: "#cbb59a", text: "Terraza" }], ["room", null, 240, 96, "Front porch", { tex: "wood", color: "#b9a58a", text: "Porch" }], ["room", null, 240, 264, "Carport", { tex: "concrete", color: "#d5d2cb", text: "Carport" }]]]
     ]
   };
   let libThumbs = {};
-  function libPart(it) { const T = TYPES[it.t]; const p = { id: 1, t: it.t, layer: T.layer, color: (it.ex && it.ex.color) || T.color, x: 0, y: 0, w: it.w, h: it.h }; if (T.styles) p.style = it.s; if (T.texs) p.tex = (it.ex && it.ex.tex) || T.tex; return p; }
+  function libPart(it) { const T = TYPES[it.t]; const p = { id: 1, t: it.t, layer: T.layer, color: (it.ex && it.ex.color) || T.color, x: 0, y: 0, w: it.w, h: it.h }; if (T.styles) p.style = it.s; if (T.texs) p.tex = (it.ex && it.ex.tex) || T.tex; if (it.ex && it.ex.text) p.text = it.ex.text; return p; }
   function libThumb(it, mode, key) {
     if (libThumbs[key]) return libThumbs[key];
     const p = libPart(it), a = artSVG([p], "day", null, mode, true), pad = Math.max(it.w, it.h) * 0.12 + 4, side = Math.max(it.w, it.h) + pad * 2;
     const x0 = it.w / 2 - side / 2, y0 = -it.h / 2 - side / 2;
     return (libThumbs[key] = svgURL(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(y0)} ${f(side)} ${f(side)}"><defs>${STATIC_DEFS}${a.defs}</defs>${a.body}</svg>`));
   }
-  function libItems(mode) { return LIB[mode].map(c => [c[0], c[1].map(q => ({ t: q[0], s: q[1], w: r1(q[2] * 2.54), h: r1(q[3] * 2.54), n: q[4], ex: q[5] }))]); }
+  function libItems(mode) {
+    /* With a Puerto Rico style the Puerto Rico parts come first. */
+    const cats = LIB[mode].slice(), pr = D.style && STYLES[D.style].r === "pr", i = cats.findIndex(c => c[0] === "Puerto Rico");
+    if (pr && i > 0) cats.unshift(cats.splice(i, 1)[0]);
+    return cats.map(c => [c[0], c[1].map(q => ({ t: q[0], s: q[1], w: r1(q[2] * 2.54), h: r1(q[3] * 2.54), n: q[4], ex: q[5] }))]);
+  }
   function renderLib() {
     const m = D.mode;
     let h = `<div class="grab"></div><h2>Library</h2><p class="lede">${m === "plan" ? "Doors, windows, appliances, fixtures and furniture for the floor plan." : "Ready-made windows, doors, roofs, trim and plants for the front."} Pick one, then tap the board to place it, or drag to size it.</p>`;
     libItems(m).forEach((c, ci) => {
       h += `<h3>${esc(c[0])}</h3><div class="libgrid">`;
-      c[1].forEach((it, ii) => { const on = tool === "lib" && libItem && libItem.n === it.n && libItem.t === it.t; h += `<button class="libitem" data-c="${ci}" data-i="${ii}" aria-pressed="${!!on}"><img alt="" src="${libThumb(it, m, m + ci + "_" + ii)}"><b>${esc(it.n)}</b><small>${esc(fmtLen(it.w))} × ${esc(fmtLen(it.h))}</small></button>`; });
+      c[1].forEach((it, ii) => { const on = tool === "lib" && libItem && libItem.n === it.n && libItem.t === it.t; h += `<button class="libitem" data-c="${ci}" data-i="${ii}" aria-pressed="${!!on}"><img alt="" src="${libThumb(it, m, m + it.t + it.n)}"><b>${esc(it.n)}</b><small>${esc(fmtLen(it.w))} × ${esc(fmtLen(it.h))}</small></button>`; });
       h += `</div>`;
     });
     h += `<button class="secondary" data-close>Close</button>`;
@@ -2999,6 +3585,7 @@ body.is3d .tool{opacity:.55}
     let h = `<div class="grab"></div><h2>Brick <em style="color:var(--accent);font-weight:500">&amp;</em> Blueprint</h2>
       <div class="field"><label for="nameIn">Design name</label><input id="nameIn" maxlength="40" value="${esc(D.name)}" autocomplete="off" enterkeyhint="done"></div>
       <div class="links" style="margin-top:10px"><button data-m="designs">Your designs (${store.designs.length})</button><button data-m="new">New design</button></div>
+      <h3>Building style</h3><div class="links" style="grid-template-columns:1fr"><button data-m="style">${D.style ? esc(STYLES[D.style].n) + " · " + (STYLES[D.style].r === "pr" ? "Puerto Rico" : "US mainland") + " · change" : "Pick a Puerto Rico or US style"}</button></div>
       <h3>Lot</h3><div class="links" style="grid-template-columns:1fr"><button data-m="lot">${D.lot ? esc(lotName(D.lot)) + " · change" : "Set the lot size"}</button></div>
       <h3>Share</h3><div class="links three"><button data-m="link">Share link</button><button data-m="png">Save picture</button><button data-m="svg">Save SVG</button></div>
       <h3>Front view style</h3><div class="seg" data-s="render"><button data-v="real" aria-pressed="${st.render === "real"}">Realistic</button><button data-v="draft" aria-pressed="${st.render === "draft"}">Drafting</button></div>
@@ -3038,6 +3625,7 @@ body.is3d .tool{opacity:.55}
     else if (m === "linkall") { const n = linkAll(true); closeSheets(); toast(n ? "Linked " + n + (n === 1 ? " opening" : " openings") + " between the front and the plan." : linkWhyNot()); }
     else if (m === "help") openSheet("helpSheet");
     else if (m === "lot") { renderLot(); openSheet("lotSheet"); }
+    else if (m === "style") { renderStyles(); openSheet("styleSheet"); }
     else if (m === "clear") {
       if (!D.parts.length) { toast("The drawing is already empty."); return; }
       if (Date.now() - clearArmed > 3000) { clearArmed = Date.now(); b.textContent = "Tap again to clear"; return; }
@@ -3073,21 +3661,36 @@ body.is3d .tool{opacity:.55}
     }
   });
   function switchTo(d) { close3D(); D = d; store.cur = d.id; selectPart(null); tool = "select"; libItem = null; undoStack = []; redoStack = []; buildTools(); save(); render(); fit(); }
+  let newThumbs = {};
   function renderNew() {
     let h = `<div class="grab"></div><h2>New design</h2><p class="lede">Start from an empty lot, or from a house to take apart and remix.</p><div class="cards">`;
-    h += `<button class="card" data-tpl="blank"><img alt="" src="${thumbURL(newDesign("", []))}"><b>Empty lot</b><small>Start from scratch</small></button>`;
-    Object.keys(TEMPLATES).forEach(k => { const t = TEMPLATES[k], d = newDesign(t.name, t.parts, t.plan); d.sky = t.sky; h += `<button class="card" data-tpl="${k}"><img alt="" src="${thumbURL(d)}"><b>${esc(t.name)}</b><small>${t.plan ? "Front and plan" : d.front.length + " parts"}</small></button>`; });
-    h += `</div><button class="secondary" data-close>Cancel</button>`;
+    h += `<button class="card" data-tpl="blank"><img alt="" src="${thumbURL(newDesign("", []))}"><b>Empty lot</b><small>Start from scratch</small></button></div>`;
+    REGIONS.forEach(rg => {
+      h += `<h3>${rg[1]}</h3><div class="cards">`;
+      Object.keys(TEMPLATES).filter(k => TEMPLATES[k].r === rg[0]).forEach(k => {
+        const t = TEMPLATES[k];
+        if (!newThumbs[k]) { const d = newDesign(t.name, t.parts, t.plan); d.sky = t.sky; newThumbs[k] = thumbURL(d); }
+        h += `<button class="card" data-tpl="${k}"><img alt="" src="${newThumbs[k]}"><b>${esc(t.name)}</b><small>${t.style ? esc(STYLES[t.style].n) : "Mixed"}${t.plan ? " · front and plan" : ""}</small></button>`;
+      });
+      h += `</div>`;
+    });
+    h += `<button class="secondary" data-close>Cancel</button>`;
     $("newSheet").innerHTML = h;
   }
-  $("newSheet").addEventListener("click", e => {
-    const c = e.target.closest("[data-tpl]"); if (!c) return;
-    const t = TEMPLATES[c.dataset.tpl];
+  function startTemplate(k) {
+    const t = TEMPLATES[k];
     const n = store.designs.length + 1;
     const d = t ? newDesign(t.name, t.parts, t.plan) : newDesign("House " + n, []);
     if (t) d.sky = t.sky;
+    if (t && t.style) d.style = t.style;
     if (t && t.lot) d.lot = presetLot(t.lot, d);
-    store.designs.push(d); switchTo(d); if (t && t.plan && S().link) { linkAll(false); save(); render(); } closeSheets(); SFX.place(); sess.games++;
+    store.designs.push(d); switchTo(d); if (d.style) useStyle(d.style);
+    if (t && t.plan && S().link) { linkAll(false); save(); render(); }
+    closeSheets(); SFX.place(); sess.games++;
+  }
+  $("newSheet").addEventListener("click", e => {
+    const c = e.target.closest("[data-tpl]"); if (!c) return;
+    startTemplate(c.dataset.tpl);
     track("design_new", { template: c.dataset.tpl });
   });
   async function openShare() {
