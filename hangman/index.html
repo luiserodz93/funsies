@@ -29,7 +29,7 @@
   --check:rgba(214,60,40,.85); --shadow:rgba(40,52,28,.28); --sky:#f6f1e2; --tile-ink:#3a2f22;
   --font-display:"Fraunces", "Iowan Old Style", Georgia, serif;
   --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -85,9 +85,9 @@
 
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-html{min-height:100%}
+html,body{height:100%}
 body{
-  margin:0; min-height:100%; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px;
+  margin:0; overflow:hidden; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px;
   -webkit-tap-highlight-color:transparent; overscroll-behavior:none;
 }
 body::before{content:""; position:fixed; inset:0; z-index:-2;
@@ -98,33 +98,36 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .arcade{position:fixed; left:0; right:0; bottom:0; height:22vh; z-index:-1; color:var(--ink); opacity:.07; pointer-events:none}
 .arcade svg{width:100%; height:100%; display:block}
 
+/* The app fills the screen inside the safe areas (Dynamic Island, home bar). fit() measures it,
+   sets --u (a UI scale for big phones) and --scene (the pillar's height), and spreads any spare room. */
 .app{
-  display:flex; justify-content:center;
+  height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:clip;
+  padding-top:max(8px, env(safe-area-inset-top, 0px)); padding-bottom:max(10px, env(safe-area-inset-bottom, 0px));
   padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
-  padding-block:6px 14px;
+  --u:1;
 }
-.col{width:100%; max-width:560px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.col{width:100%; max-width:calc(520px * var(--u)); display:flex; flex-direction:column; gap:calc(8px * var(--u) + var(--gapx, 0px)); min-width:0; flex:none}
 
 header.top{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:4px}
 .brand{display:flex; align-items:center; gap:10px; min-width:0}
-.brand svg{width:34px; height:34px; flex:none}
-.brand h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:24px; letter-spacing:-.01em; line-height:1; white-space:nowrap}
+.brand svg{width:calc(34px * var(--u)); height:calc(34px * var(--u)); flex:none}
+.brand h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:calc(24px * var(--u)); letter-spacing:-.01em; line-height:1; white-space:nowrap}
 .brand h1 em{font-style:italic; font-weight:500; color:var(--accent)}
 .brand small{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-top:4px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .brand > div{min-width:0}
 .hbtns{display:flex; gap:8px; flex:none}
-.iconbtn{position:relative; width:42px; height:42px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.iconbtn svg{width:22px; height:22px}
+.iconbtn{position:relative; width:calc(42px * var(--u)); height:calc(42px * var(--u)); border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.iconbtn svg{width:calc(22px * var(--u)); height:calc(22px * var(--u))}
 .badge{position:absolute; top:-3px; right:-3px; min-width:19px; height:19px; padding:0 5px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel-solid)}
 
 /* Info slab */
-.slab{display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line); min-height:54px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.slab{display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line); min-height:calc(54px * var(--u)); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .slab .clue{flex:1; min-width:0}
 .lbl{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.clue b{display:block; font-family:var(--font-display); font-weight:700; font-size:19px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.clue b{display:block; font-family:var(--font-display); font-weight:700; font-size:calc(19px * var(--u)); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .leaves{display:flex; align-items:center; gap:8px; flex:none}
-.leaves svg{width:26px; height:26px}
-.leaves b{font-family:var(--font-display); font-size:26px; line-height:1; font-variant-numeric:tabular-nums}
+.leaves svg{width:calc(26px * var(--u)); height:calc(26px * var(--u))}
+.leaves b{font-family:var(--font-display); font-size:calc(26px * var(--u)); line-height:1; font-variant-numeric:tabular-nums}
 .leaves .lbl{display:block; line-height:1.2}
 
 /* Scene */
@@ -135,8 +138,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .sprig{position:absolute; width:min(17%, 90px); height:auto; pointer-events:none; z-index:3}
 .sprig.tl{left:-14px; top:-12px}
 .sprig.br{right:-14px; bottom:-12px; transform:rotate(180deg)}
-.scene{position:relative; border-radius:8px; overflow:hidden; background:linear-gradient(180deg, var(--sky), var(--light)); box-shadow:0 0 0 1px rgba(0,0,0,.2); height:clamp(170px, 31vh, 290px)}
-@supports (height:1dvh){ .scene{height:clamp(170px, 31dvh, 290px)} }
+.scene{position:relative; border-radius:8px; overflow:hidden; background:linear-gradient(180deg, var(--sky), var(--light)); box-shadow:0 0 0 1px rgba(0,0,0,.2); height:var(--scene, clamp(150px, 31vh, 290px))}
 .scene svg.art{position:absolute; inset:0; width:100%; height:100%; display:block}
 .texture{position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply; opacity:.22;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .35 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -163,10 +165,10 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .bud.bloom{transform:scale(1.35)}
 
 /* Word tiles */
-.word{container-type:inline-size; display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; min-height:56px; align-items:center; padding:4px 0}
+.word{container-type:inline-size; display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; min-height:calc(56px * var(--u)); align-items:center; padding:4px 0}
 .wgrp{display:flex; gap:5px}
 .tile{
-  --s:min(42px, calc((100cqw - (var(--n) - 1) * 5px) / var(--n)));
+  --s:min(calc(42px * var(--u)), calc((100cqw - (var(--n) - 1) * 5px) / var(--n)));
   width:var(--s); height:calc(var(--s) * 1.22); border-radius:7px; position:relative;
   background:var(--light); box-shadow:inset 0 0 0 1px var(--grout), inset 0 -3px 0 rgba(0,0,0,.08), 0 4px 10px -6px var(--shadow);
   display:grid; place-items:center;
@@ -180,16 +182,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .tile.punct{background:transparent; box-shadow:none}
 .tile.punct::before{display:none}
 
-.status{text-align:center; font-weight:700; font-size:13.5px; color:var(--ink2); min-height:1.4em}
+.status{text-align:center; font-weight:700; font-size:calc(13.5px * var(--u)); color:var(--ink2); min-height:1.4em}
 .status.win{color:var(--vine)}
 .status.lose{color:var(--check)}
 
 /* Letter tiles */
-.kb{display:grid; gap:6px}
+.kb{display:grid; gap:calc(6px * var(--u))}
 .kb .krow{display:flex; justify-content:center; gap:5px}
 .kb button{
-  flex:1 1 0; max-width:48px; min-width:0; height:clamp(40px, 6.4vh, 52px);
-  font-family:var(--font-display); font-weight:700; font-size:clamp(16px, 4.6vw, 20px); color:var(--tile-ink);
+  flex:1 1 0; max-width:calc(48px * var(--u)); min-width:0; height:calc(44px * var(--u));
+  font-family:var(--font-display); font-weight:700; font-size:calc(19px * var(--u)); color:var(--tile-ink);
   background:var(--light); border:0; border-radius:9px; cursor:pointer;
   box-shadow:inset 0 0 0 1px var(--grout), inset 0 -3px 0 rgba(0,0,0,.1), 0 3px 8px -5px var(--shadow);
   transition:transform .1s, background .25s, color .25s, opacity .25s;
@@ -202,8 +204,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 
 /* Tool path */
 .tools{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
-.tool{display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 2px 6px; border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); cursor:pointer; font-size:11.5px; font-weight:700; color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.tool svg{width:22px; height:22px}
+.tool{display:flex; flex-direction:column; align-items:center; gap:2px; padding:calc(7px * var(--u)) 2px calc(6px * var(--u)); border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); cursor:pointer; font-size:calc(11.5px * var(--u)); font-weight:700; color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.tool svg{width:calc(22px * var(--u)); height:calc(22px * var(--u))}
 .tool:disabled{opacity:.4; cursor:default}
 .tool:not(:disabled):active{transform:scale(.96)}
 .tool.arm{border-color:var(--check); color:var(--check)}
@@ -211,7 +213,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 /* Sheets */
 .scrim{position:fixed; inset:0; background:rgba(10,16,10,.38); z-index:40; animation:fade .2s}
 @keyframes fade{from{opacity:0}}
-.sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0 auto; width:min(100%, 520px); max-height:88vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+.sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0 auto; width:min(100%, 520px); max-height:calc(100% - 8px - env(safe-area-inset-top, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch;
   background:var(--panel-solid); color:var(--ink); border-radius:22px 22px 0 0; box-shadow:0 -10px 40px -10px var(--shadow);
   padding:10px max(20px, env(safe-area-inset-left, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-right, 0px));
   animation:rise .28s cubic-bezier(.2,.8,.3,1)}
@@ -288,7 +290,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 #fx{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:30}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
 
-@media (max-height:700px){ .tool span{display:none} .tool{padding:6px 2px} .brand small{display:none} }
+@media (max-height:640px){ .tool span{display:none} .tool{padding:6px 2px} .brand small{display:none} .kb button{height:40px} }
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms !important; transition-duration:.01ms !important}
 }
@@ -1185,6 +1187,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       });
       w.appendChild(grp);
     });
+    refit();
     w.setAttribute("aria-label", "Word: " + game.word.split("").map(function (c) { return /[a-z]/.test(c) && game.guessed.indexOf(c) < 0 && !game.over ? "blank" : c === " " ? "space" : c; }).join(" "));
 
     var st = $("status");
@@ -1494,7 +1497,36 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (e.key === "Enter" && game && game.over) { e.preventDefault(); $("againBtn").click(); return; }
     if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); guess(e.key.toLowerCase()); }
   });
-  window.addEventListener("resize", resizeFx);
+  /* ---------- fit to the screen ----------
+     Measures the room inside the safe areas, picks a UI scale for big phones, gives the pillar
+     scene whatever height is left (kept near its drawn proportions), then spreads any spare room. */
+  function fit() {
+    var app = document.querySelector(".app"), col = document.querySelector(".col"), frame = document.querySelector(".frame");
+    var cs = getComputedStyle(app);
+    var W = Math.min(app.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), 560);
+    var H = app.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var u = Math.max(1, Math.min(1.3, W / 380, H / 720));
+    app.style.setProperty("--u", u.toFixed(3));
+    app.style.setProperty("--gapx", "0px");
+    var gap = parseFloat(getComputedStyle(col).rowGap) || 8, other = 0, n = 0;
+    Array.prototype.forEach.call(col.children, function (el) {
+      if (getComputedStyle(el).display === "none") return;
+      n++;
+      if (el !== frame) other += el.getBoundingClientRect().height;
+    });
+    other += gap * (n - 1) + 20;
+    var room = H - other, cap = Math.min(W * 0.72, 420);
+    var sc = Math.floor(Math.max(140, Math.min(room, cap)));
+    app.style.setProperty("--scene", sc + "px");
+    var spare = room - sc;
+    if (spare > 16) app.style.setProperty("--gapx", Math.min(14 * u, spare / (n + 2)).toFixed(1) + "px");
+  }
+  var fitT = 0;
+  function refit() { clearTimeout(fitT); fitT = setTimeout(fit, 30); }
+  window.addEventListener("resize", function () { resizeFx(); refit(); });
+  window.addEventListener("orientationchange", refit);
+  if (window.visualViewport) visualViewport.addEventListener("resize", refit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
   document.addEventListener("visibilitychange", function () {
     if (!document.hidden) { kickFx(); goOnline(); syncWatchers(); }
     else { goOffline(); closeWatchers(); }
@@ -1518,7 +1550,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   }
 
   /* ---------- boot ---------- */
-  buildKeys(); buildIvy(); resizeFx();
+  buildKeys(); buildIvy(); resizeFx(); fit();
   window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot(function () { return { game: game }; });
   function start(data) {
     load();
