@@ -6,21 +6,113 @@
         "state": {
           ".write": "newData.exists() && $id.length >= 8 && $id.length <= 16 && $id.matches(/^[A-Za-z0-9_-]+$/)",
           ".validate": "newData.hasChildren(['g', 'by', 'at']) && (!data.exists() || newData.child('g').val().length >= data.child('g').val().length)",
-          "g": { ".validate": "newData.isString() && newData.val().length <= 2000 && newData.val().beginsWith('g=' + $id + '.')" },
-          "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
-          "at": { ".validate": "newData.val() == now" },
-          "$other": { ".validate": false }
+          "g": {
+            ".validate": "newData.isString() && newData.val().length <= 2000 && newData.val().beginsWith('g=' + $id + '.')"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "at": {
+            ".validate": "newData.val() == now"
+          },
+          "$other": {
+            ".validate": false
+          }
         },
         "presence": {
           "$cid": {
             ".write": "newData.exists() && $cid.length >= 8 && $cid.length <= 40 && $cid.matches(/^[A-Za-z0-9_-]+$/)",
             ".validate": "newData.hasChildren(['on', 'at'])",
-            "on": { ".validate": "newData.isBoolean()" },
-            "at": { ".validate": "newData.val() == now" },
-            "$other": { ".validate": false }
+            "on": {
+              ".validate": "newData.isBoolean()"
+            },
+            "at": {
+              ".validate": "newData.val() == now"
+            },
+            "$other": {
+              ".validate": false
+            }
           }
         },
-        "$other": { ".validate": false }
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "logs": {
+      "sessions": {
+        "$sid": {
+          ".write": "newData.exists() && $sid.length >= 8 && $sid.length <= 32 && $sid.matches(/^[A-Za-z0-9_-]+$/)",
+          ".validate": "newData.hasChildren(['start', 'last', 'dev'])",
+          "start": {
+            ".validate": "newData.isNumber()"
+          },
+          "last": {
+            ".validate": "newData.val() == now"
+          },
+          "active": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 864000"
+          },
+          "games": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
+          },
+          "moves": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000"
+          },
+          "ver": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "dev": {
+            "$k": {
+              ".validate": "$k.length <= 12 && ((newData.isString() && newData.val().length <= 60) || newData.isNumber() || newData.isBoolean())"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "games": {
+        "$gid": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['at', 'sid', 'mode', 'result'])",
+          "at": {
+            ".validate": "newData.val() == now"
+          },
+          "sid": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "mode": {
+            ".validate": "newData.isString() && newData.val().length <= 12"
+          },
+          "level": {
+            ".validate": "newData.isNumber() && newData.val() >= -1 && newData.val() <= 9"
+          },
+          "side": {
+            ".validate": "newData.isNumber() && newData.val() >= -1 && newData.val() <= 1"
+          },
+          "result": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "reason": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "plies": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5000"
+          },
+          "dur": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+          },
+          "season": {
+            ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "view": {
+            ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
       }
     }
   }
