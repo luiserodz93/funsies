@@ -26,7 +26,7 @@
   --bg1:#edf2e4; --bg2:#c9d9bd; --ink:#26301f; --ink2:#5a6852;
   --panel:rgba(255,253,245,.72); --panel-line:rgba(52,74,40,.16); --panel-solid:#f8f5ea;
   --light:#efe6cf; --frame1:#bea983; --frame2:#8c7454; --grout:rgba(60,48,30,.16);
-  --accent:#b8466a; --accent-ink:#fff8f6; --vine:#4f7d3a; --blue:#2f5d7c;
+  --accent:#b8466a; --accent-ink:#fff8f6; --vine:#4f7d3a; --blue:#2f5d7c; --link:#2f7d8c;
   --check:rgba(214,60,40,.9); --shadow:rgba(40,52,28,.28);
   --font-display:"Fraunces", "Iowan Old Style", Georgia, serif;
   --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -37,7 +37,7 @@
     --bg1:#13211f; --bg2:#0b1413; --ink:#e9efe3; --ink2:#a8b8a6;
     --panel:rgba(26,40,37,.8); --panel-line:rgba(200,230,200,.14); --panel-solid:#1b2a27;
     --light:#c9c2a6; --frame1:#33433d; --frame2:#1c2724; --grout:rgba(0,0,0,.22);
-    --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0;
+    --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0; --link:#7fc8d4;
     --check:rgba(240,110,84,.95); --shadow:rgba(0,0,0,.45);
     color-scheme:dark;
   }
@@ -46,7 +46,7 @@
   --bg1:#13211f; --bg2:#0b1413; --ink:#e9efe3; --ink2:#a8b8a6;
   --panel:rgba(26,40,37,.8); --panel-line:rgba(200,230,200,.14); --panel-solid:#1b2a27;
   --light:#c9c2a6; --frame1:#33433d; --frame2:#1c2724; --grout:rgba(0,0,0,.22);
-  --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0;
+  --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0; --link:#7fc8d4;
   --check:rgba(240,110,84,.95); --shadow:rgba(0,0,0,.45);
   color-scheme:dark;
 }
@@ -285,7 +285,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     <li><b>Select several.</b> With Select, drag across empty board to box-select, or turn on Multi and tap parts to add them. Then move them together, group them, align and distribute them, or copy and paste them into the other view or another design.</li>
     <li><b>Snap.</b> Grid snaps to the grid size. Snap lines parts up with the edges and centers of other parts and the ground (dashed guides show it). Ortho keeps lines and dimensions straight.</li>
     <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
-    <li><b>Front and Plan.</b> The switch at the top left flips between the front of the house and its floor plan. Each has its own tools, and rooms show their floor area as you size them.</li>
+    <li><b>Front and Plan.</b> The switch at the top left flips between the front of the house and its floor plan. Each has its own tools, and rooms show their floor area as you size them. They are linked: a ground-floor window or door placed on the front wall also goes into the plan's front wall (the bottom edge of the rooms), and the other way round. Moving or resizing it in one view moves it in the other, and dotted lines show where the other view's walls and openings fall.</li>
     <li><b>Library.</b> Ready-made windows, doors, roofs, trim and plants for the front, and doors, windows, appliances, bathroom fixtures and furniture for the plan. Pick one, then tap the board to place it.</li>
     <li><b>Measure.</b> Measure drags a dimension between two points. Drag its middle handle to move it away from the wall.</li>
     <li><b>Move around.</b> Pinch to zoom and drag with two fingers, or use the + and − buttons. The corner button fits the drawing to the screen.</li>
@@ -381,13 +381,14 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     "#5b4a42", "#3d3f42", "#4c5560", "#2f5d7c", "#6f8fa6", "#3f6b5a", "#5f8a45",
     "#9bb26b", "#d6b25e", "#e7a33e", "#c8553d", "#d9668a", "#26301f"];
   const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "wood", "ftile", "carpet", "concrete", "plain"];
+  const LINKABLE = { window: 1, door: 1, pwindow: 1, pdoor: 1 };
   const modeOf = t => TYPES[t].mode || "front";
   const GRIDS = { m: [5, 10, 25, 50, 100], ft: [2.54, 7.62, 15.24, 30.48, 60.96] };
   const GRID_NAMES = { m: ["5 cm", "10 cm", "25 cm", "50 cm", "1 m"], ft: ["1″", "3″", "6″", "1′", "2′"] };
 
   /* ---------- state ---------- */
   const STORE = "brick-blueprint-v1";
-  const DEF_SETTINGS = { units: "ft", grid: 15.24, snap: true, osnap: true, ortho: true, sizes: true, sound: true, stats: true };
+  const DEF_SETTINGS = { units: "ft", grid: 15.24, snap: true, osnap: true, ortho: true, sizes: true, sound: true, stats: true, link: true };
   let store = null, D = null, sel = null, tool = "select", multi = [], clip = null, pickColor = false, multiMode = false;
   let undoStack = [], redoStack = [];
   const view = { s: 0.4, tx: 0, ty: 0 };
@@ -438,6 +439,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       p.pts = pts; p.lw = clamp(num(q.lw) || 4, 0.2, 200);
     }
     if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = q.g;
+    if (LINKABLE[q.t] && typeof q.lk === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.lk)) p.lk = q.lk;
     return p;
   }
   function cleanDesign(o) {
@@ -449,6 +451,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (typeof o.id === "string" && /^[A-Za-z0-9_-]{6,20}$/.test(o.id)) d.id = o.id;
     if (typeof o.at === "number" && isFinite(o.at)) d.at = o.at;
     d.sky = ["day", "dusk", "night"].indexOf(o.sky) >= 0 ? o.sky : "day";
+    if (num(o.lx) != null) d.lx = num(o.lx);
     if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
     return d;
   }
@@ -460,7 +463,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       const s = d.settings || {}, st = store.settings;
       st.units = s.units === "m" ? "m" : "ft";
       st.grid = GRIDS[st.units].find(g => Math.abs(g - s.grid) < 0.01) || GRIDS[st.units][st.units === "ft" ? 2 : 1];
-      ["snap", "osnap", "ortho", "sizes", "sound", "stats"].forEach(k => { if (typeof s[k] === "boolean") st[k] = s[k]; });
+      ["snap", "osnap", "ortho", "sizes", "sound", "stats", "link"].forEach(k => { if (typeof s[k] === "boolean") st[k] = s[k]; });
       if (Array.isArray(d.designs)) d.designs.slice(0, 100).forEach(x => { const c = cleanDesign(x); if (c && !store.designs.some(y => y.id === c.id)) store.designs.push(c); });
       store.cur = typeof d.cur === "string" ? d.cur : null;
       if (d.mem && typeof d.mem === "object") Object.keys(TYPES).forEach(t => {
@@ -960,7 +963,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function unb64u(s) { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/")); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
   const strip = list => list.map(p => { const q = Object.assign({}, p); delete q.id; return q; });
-  function compactDesign(d) { return { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; }
+  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; if (typeof d.lx === "number") o.lx = d.lx; return o; }
   async function encodeDesign(d) {
     const bytes = new TextEncoder().encode(JSON.stringify(compactDesign(d)));
     if (window.CompressionStream) {
@@ -1069,9 +1072,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const plan = D.mode === "plan";
     if (b) { x0 = b.x0; x1 = b.x1; y0 = plan ? b.y0 : Math.min(b.y0, 0); y1 = plan ? b.y1 : Math.max(b.y1, 100); }
     else { x0 = -100; x1 = 1100; y0 = plan ? -100 : 0; y1 = plan ? 800 : 600; }
-    const padT = 60, padB = 64, padX = 26;
-    const s = clamp(Math.min((stageW - padX * 2) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6);
-    view.s = s; view.tx = (stageW - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
+    const padT = 60, padB = 64, padL = 22, padR = 62; // the zoom buttons sit along the right edge
+    const s = clamp(Math.min((stageW - padL - padR) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6);
+    view.s = s; view.tx = padL + (stageW - padL - padR - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
     renderView();
   }
 
@@ -1100,6 +1103,11 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   let handles = [];
   function renderUI() {
     const u = $("ui"); let s = "";
+    const pj = projXs();
+    if (pj.length) {
+      const E = D.mode === "plan" ? planEdge() : null, y0 = clamp(toS(0, E ? E.y : 0).y, 0, stageH);
+      pj.forEach(x => { const sx = f(toS(x, 0).x); s += `<path d="M${sx} ${f(y0)}V${f(stageH)}" stroke="var(--link)" stroke-width="1" stroke-dasharray="2 5" opacity=".75"/>`; });
+    }
     guides.x.forEach(x => { const sx = f(toS(x, 0).x); s += `<path d="M${sx} 0V${f(stageH)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`; });
     guides.y.forEach(y => { const sy = f(toS(0, y).y); s += `<path d="M0 ${sy}H${f(stageW)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`; });
     handles = [];
@@ -1165,7 +1173,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === D.mode));
     const lb = document.querySelector('.tool[data-t="lib"] span'); if (lb) lb.textContent = tool === "lib" && libItem ? libItem.n : "Library";
     if (many) { const U = unionBox(list); $("ctxName").textContent = (grouped ? "Group of " : "") + list.length + " parts"; $("ctxSize").textContent = fmtLen(U.w) + " × " + fmtLen(U.h); }
-    else if (p) { $("ctxName").textContent = partName(p) + (p.tex && p.tex !== "plain" ? " · " + NAMES[p.tex] : ""); $("ctxSize").textContent = sizeText(p); }
+    else if (p) { $("ctxName").textContent = partName(p) + (p.tex && p.tex !== "plain" ? " · " + NAMES[p.tex] : "") + (p.lk && S().link ? " · linked" : ""); $("ctxSize").textContent = sizeText(p); }
     $("undoBtn").disabled = !undoStack.length; $("redoBtn").disabled = !redoStack.length;
     $("gridChip").textContent = "Grid " + GRID_NAMES[S().units][GRIDS[S().units].indexOf(S().grid)];
     $("gridChip").setAttribute("aria-pressed", S().snap); $("osnapChip").setAttribute("aria-pressed", S().osnap); $("orthoChip").setAttribute("aria-pressed", S().ortho);
@@ -1177,12 +1185,118 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   function queue(art) { if (art) rafArt = true; if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; if (rafArt) renderArt(); rafArt = false; renderUI(); }); }
   function render() { renderArt(); renderView(); renderDock(); }
 
+  /* ---------- linking front and plan ---------- */
+  /* Ground-floor windows and doors on the front pair with openings in the plan's front wall, the lowest edge of its rooms.
+     A pair shares an id in p.lk. Across-the-page position and width follow whichever view is being edited. D.lx is the
+     fixed offset from plan x to front x, set the first time two openings are linked. */
+  function groundWalls() { return D.front.filter(p => p.t === "wall" && p.y < 5 && visible(p)); }
+  function planEdge() {
+    const rooms = D.plan.filter(p => p.t === "room");
+    if (!rooms.length) return null;
+    const y = Math.min.apply(null, rooms.map(p => p.y)), on = rooms.filter(p => Math.abs(p.y - y) < 8);
+    return { y, x0: Math.min.apply(null, on.map(p => p.x)), x1: Math.max.apply(null, on.map(p => p.x + p.w)) };
+  }
+  function linkOff(E, peek) {
+    if (typeof D.lx === "number") return D.lx;
+    const ws = groundWalls(), v = ws.length && E ? r1(Math.min.apply(null, ws.map(p => p.x)) - E.x0) : 0;
+    if (!peek) D.lx = v;
+    return v;
+  }
+  const inWallX = (cx, w) => cx >= w.x - 1 && cx <= w.x + w.w + 1;
+  function frontLinkable(p) { return (p.t === "window" || p.t === "door") && p.y < 250 && groundWalls().some(w => inWallX(p.x + p.w / 2, w)); }
+  function wallLineY(p) { return p.t === "pwindow" || p.style === "sliding" ? p.y + p.h / 2 : p.rot === 2 ? p.y + p.h : p.y; }
+  function planLinkable(p, E) { return (p.t === "pwindow" || p.t === "pdoor") && !(p.rot === 1 || p.rot === 3) && !!E && Math.abs(wallLineY(p) - E.y) < 20 && p.x + p.w / 2 >= E.x0 - 1 && p.x + p.w / 2 <= E.x1 + 1; }
+  function twinSpec(p, E) {
+    const lx = linkOff(E);
+    if (p.t === "window") return { t: "pwindow", x: r1(p.x - lx), y: r1(E.y - 7.6), w: p.w, h: 15.2 };
+    if (p.t === "door") {
+      const st = p.style === "garage" ? "sliding" : p.style === "double" || p.style === "french" ? "pair" : "swing", x = r1(p.x - lx);
+      return st === "sliding" ? { t: "pdoor", style: st, x, y: r1(E.y - 7.6), w: p.w, h: 15.2 } : { t: "pdoor", style: st, x, y: E.y, w: p.w, h: r1(st === "pair" ? p.w / 2 : p.w) };
+    }
+    const x = r1(p.x + lx), wall = groundWalls().find(w => inWallX(x + p.w / 2, w));
+    if (!wall) return null;
+    if (p.t === "pwindow") { const y = r1(wall.y + Math.min(91.4, wall.h * 0.3)); return { t: "window", x, y, w: p.w, h: r1(clamp(wall.h - (y - wall.y) - 45, 30, 152.4)) }; }
+    return { t: "door", style: p.style === "pair" ? "double" : p.style === "sliding" ? "french" : "panel", x, y: wall.y, w: p.w, h: r1(clamp(wall.h - 20, 60, 203.2)) };
+  }
+  const overlapX = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+  function syncTwin(p, q) {
+    const front = modeOf(p.t) === "front", lx = D.lx || 0;
+    q.x = r1(front ? p.x - lx : p.x + lx); q.w = p.w;
+    if (q.t === "pdoor" && q.style !== "sliding") q.h = r1(q.style === "pair" ? q.w / 2 : q.w);
+  }
+  /* Pairs p with an unlinked matching opening in the other view, or adds one there. Returns the twin, or null. */
+  function addTwin(p) {
+    if (!LINKABLE[p.t] || p.lk) return null;
+    const E = planEdge(), front = modeOf(p.t) === "front";
+    if (!E || !groundWalls().length || (front ? !frontLinkable(p) : !planLinkable(p, E))) return null;
+    const spec = twinSpec(p, E); if (!spec) return null;
+    const list = front ? D.plan : D.front, kind = spec.t;
+    let q = list.find(o => !o.lk && o.t === kind && (front ? planLinkable(o, E) : frontLinkable(o)) && overlapX(o, spec) > 0.5 * Math.min(o.w, spec.w));
+    if (!q) {
+      delete spec.t; const keep = D.mode; D.mode = front ? "plan" : "front";
+      q = mk(kind, spec); D.mode = keep; list.push(q);
+    }
+    const id = randId(8); p.lk = id; q.lk = id; syncTwin(p, q);
+    return q;
+  }
+  function linkNew(p) {
+    if (!S().link || !addTwin(p)) return;
+    const where = modeOf(p.t) === "front" ? "plan" : "front";
+    if (!store.hinted.link) { store.hinted.link = true; save(); toast("Linked: it went into the " + where + " too. Moving or resizing it here moves it there. Turn this off in the menu."); }
+  }
+  function linkOne(p) {
+    let ok = false; withUndo(() => { ok = !!addTwin(p); });
+    if (ok) { SFX.place(); toast("Linked with the " + (modeOf(p.t) === "front" ? "plan" : "front") + "."); } else toast(linkWhyNot(p));
+  }
+  function linkAll(undoable) {
+    let n = 0; const run = () => { D.parts.slice().concat((D.mode === "plan" ? D.front : D.plan).slice()).forEach(p => { if (addTwin(p)) n++; }); };
+    if (undoable) withUndo(run); else run();
+    return n;
+  }
+  function linkWhyNot(p) {
+    if (!groundWalls().length) return "Linking needs a wall standing on the ground in the front view.";
+    if (!planEdge()) return "Linking needs rooms in the floor plan. Their bottom edge is the front wall.";
+    if (p && modeOf(p.t) === "plan") return "Only doors and windows in the plan's front wall (the bottom edge of the rooms) link with the front.";
+    if (p) return "Only windows and doors on the ground floor of a wall link with the plan.";
+    return "Every ground-floor opening is already linked, or none sits on a front wall.";
+  }
+  function linkBtn(p) {
+    if (!S().link || !LINKABLE[p.t]) return "";
+    return p.lk ? `<button data-a="unlink">Unlink from ${D.mode === "plan" ? "front" : "plan"}</button>` : `<button data-a="link">Link to ${D.mode === "plan" ? "front" : "plan"}</button>`;
+  }
+  /* Keeps pairs in step and drops broken links: a missing twin, a copy that kept the id, or a plan opening turned onto a side wall. */
+  function syncLinks() {
+    const cur = D.parts, other = D.mode === "plan" ? D.front : D.plan;
+    [cur, other].forEach(list => { const seen = {}; list.forEach(p => { if (!p.lk) return; if (seen[p.lk]) delete p.lk; else seen[p.lk] = 1; }); });
+    cur.forEach(p => {
+      if (!p.lk) return;
+      const q = other.find(o => o.lk === p.lk);
+      if (!q || p.rot === 1 || p.rot === 3) { delete p.lk; if (q) delete q.lk; return; }
+      if (S().link) syncTwin(p, q);
+    });
+    other.forEach(q => { if (q.lk && !cur.some(p => p.lk === q.lk)) delete q.lk; });
+  }
+  /* Across-the-page lines of the other view, drawn below the drawing and used as snap targets. */
+  function projXs() {
+    if (!S().link) return [];
+    const E = planEdge(), ws = groundWalls(); if (!E || !ws.length) return [];
+    const lx = linkOff(E, true), xs = [];
+    if (D.mode === "plan") {
+      ws.forEach(w => xs.push(w.x - lx, w.x + w.w - lx));
+      D.front.forEach(p => { if (frontLinkable(p) && visible(p)) xs.push(p.x - lx, p.x + p.w - lx); });
+    } else {
+      D.plan.forEach(p => { if (p.t === "room" && Math.abs(p.y - E.y) < 8) xs.push(p.x + lx, p.x + p.w + lx); else if (planLinkable(p, E)) xs.push(p.x + lx, p.x + p.w + lx); });
+    }
+    const out = []; xs.map(r1).sort((a, b) => a - b).forEach(x => { if (!out.length || x - out[out.length - 1] > 0.5) out.push(x); });
+    return out.slice(0, 80);
+  }
+
   /* ---------- undo ---------- */
   const snapshot = () => JSON.stringify({ f: D.front, p: D.plan, n: D.next });
   function restore(s) { const o = JSON.parse(s); D.front = o.f; D.plan = o.p; D.next = o.n; }
   function pushUndo(before) { undoStack.push(before); if (undoStack.length > 150) undoStack.shift(); redoStack = []; }
   function changed() {
-    D.at = Date.now();
+    D.at = Date.now(); syncLinks();
     if (multi.length) { multi = multi.filter(id => D.parts.some(p => p.id === id)); if (multi.length < 2) multi = []; }
     if (sel != null && !selPart()) sel = multi.length ? multi[0] : null;
     save(); render();
@@ -1198,6 +1312,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const xs = [], ys = [], pts = [];
     if (S().osnap) {
       if (D.mode !== "plan") ys.push(0);
+      projXs().forEach(x => xs.push(x));
       D.parts.forEach(p => {
         if (p === skip || (Array.isArray(skip) && skip.indexOf(p) >= 0) || !visible(p)) return;
         const k = kindOf(p);
@@ -1432,7 +1547,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
         if (a.k === "pen") p.pts = simplify(p.pts);
         if (a.k === "line" && Math.hypot(p.x2 - p.x1, p.y2 - p.y1) < 1) { renderArt(); renderUI(); return; }
         p.id = D.next++; D.parts.push(p); selectPart(p); sess.moves++;
-        unhideFor(p); remember(p);
+        unhideFor(p); remember(p); linkNew(p);
         SFX.place();
         if (p.t === "label") { pushUndo(a.before); changed(); openProps(true); return; }
       }
@@ -1486,7 +1601,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if ((type === "pdoor" || type === "pwindow") && D.mode === "plan") {
       const fitp = wallFit(type, w, ww, hh, st);
       if (fitp) {
-        withUndo(() => { const p = mk(type, fitp); if (fitp.rot) p.rot = fitp.rot; D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); });
+        withUndo(() => { const p = mk(type, fitp); if (fitp.rot) p.rot = fitp.rot; D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); linkNew(p); });
         SFX.place(); return;
       }
     }
@@ -1496,7 +1611,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (!fixed || type === "trim") { if (!(type === "door" || ((type === "steps" || type === "plant" || type === "wall") && y === 0))) y = snapEdge(y, hh, tg.ys, "y"); }
     act = null; guides = { x: [], y: [] };
     const props = type === "label" ? { x: r1(w.x), y: r1(w.y) } : { x: r1(x), y: r1(y), w: r1(ww), h: r1(hh) };
-    withUndo(() => { const p = mk(type, props); D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); });
+    withUndo(() => { const p = mk(type, props); D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); linkNew(p); });
     SFX.place();
     if (type === "label") openProps(true);
   }
@@ -1531,7 +1646,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   }
 
   /* ---------- part actions ---------- */
-  function clonePart(p) { const q = JSON.parse(JSON.stringify(p)); q.id = D.next++; return q; }
+  function clonePart(p) { const q = JSON.parse(JSON.stringify(p)); q.id = D.next++; delete q.lk; return q; }
   function shiftPart(q, dx, dy) {
     const k = kindOf(q);
     if (k === "rect" || k === "label") { q.x = r1(q.x + dx); q.y = r1(q.y + dy); }
@@ -1563,7 +1678,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const dx = gsnap(c.x - (U.x + U.w / 2)), dy = gsnap(c.y - (U.y + U.h / 2));
     withUndo(() => {
       const gmap = {}, ids = [];
-      ok.forEach(q => { const p = cleanPart(q, D.next, D.mode); if (!p) return; D.next++; if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(p, dx, dy); D.parts.push(p); ids.push(p.id); });
+      ok.forEach(q => { const p = cleanPart(q, D.next, D.mode); if (!p) return; D.next++; delete p.lk; if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(p, dx, dy); D.parts.push(p); ids.push(p.id); });
       tool = "select"; selectIds(ids);
     });
     SFX.place(); if (ok.length < clip.parts.length) toast("Pasted the parts that fit this view.");
@@ -1635,7 +1750,14 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     SFX.tap();
   }
   function arrange(front) { const list = selList(); if (!list.length) return; withUndo(() => { D.parts = D.parts.filter(q => list.indexOf(q) < 0); if (front) D.parts.push.apply(D.parts, list); else D.parts.unshift.apply(D.parts, list); }); SFX.tap(); }
-  function del() { const list = selList(); if (!list.length) return; withUndo(() => { D.parts = D.parts.filter(q => list.indexOf(q) < 0); selectPart(null); }); SFX.del(); closeSheets(); if (list.length > 1) toast(list.length + " parts deleted. Undo brings them back."); }
+  function del() {
+    const list = selList(); if (!list.length) return;
+    const lks = S().link ? list.map(q => q.lk).filter(Boolean) : [], other = D.mode === "plan" ? "front" : "plan";
+    withUndo(() => { D.parts = D.parts.filter(q => list.indexOf(q) < 0); if (lks.length) D[other] = D[other].filter(q => lks.indexOf(q.lk) < 0); selectPart(null); });
+    SFX.del(); closeSheets();
+    if (list.length > 1) toast(list.length + " parts deleted" + (lks.length ? ", with their twins in the " + (other === "plan" ? "plan" : "front") : "") + ". Undo brings them back.");
+    else if (lks.length) toast("Deleted here and in the " + (other === "plan" ? "plan" : "front") + ". Undo brings both back.");
+  }
   function centerOnWall() {
     const p = selPart(); if (!p) return; const k = kindOf(p); if (k !== "rect" && k !== "label") return;
     let wl = wallAt({ x: p.x + p.w / 2, y: p.y + p.h / 2 }, p) || wallBelow({ x: p.x + p.w / 2, y: p.y }) || mainWall();
@@ -1826,7 +1948,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     h += `</div><p class="note">Type sizes in ${u}${plan ? ". Positions are measured on the plan grid." : ". Height is measured from the ground line."}</p>`;
     if (k === "line") h += `<div class="row"><label>Dashed</label><button class="switch" data-sw="dash" role="switch" aria-checked="${!!p.dash}" aria-label="Dashed"></button></div>`;
     h += `<h3>Layer</h3><div class="seg" data-k="layer">${LAYERS.map(l => `<button data-v="${l.id}" aria-pressed="${p.layer === l.id}">${l.name}</button>`).join("")}</div>`;
-    h += `<h3>Arrange</h3><div class="acts">${TYPES[p.t].rot ? '<button data-a="rot">Rotate 90°</button>' : ""}${k === "rect" || k === "label" ? `<button data-a="center">${plan ? "Center in room" : "Center on wall"}</button>` : ""}${k === "rect" ? '<button data-a="dims">Add dimensions</button>' : ""}<button data-a="copy">Copy</button><button data-a="mirror">Mirror copy</button><button data-a="dup">Duplicate</button><button data-a="front">Bring to front</button><button data-a="back">Send to back</button><button data-a="del" class="danger">Delete</button></div>`;
+    h += `<h3>Arrange</h3><div class="acts">${TYPES[p.t].rot ? '<button data-a="rot">Rotate 90°</button>' : ""}${k === "rect" || k === "label" ? `<button data-a="center">${plan ? "Center in room" : "Center on wall"}</button>` : ""}${k === "rect" ? '<button data-a="dims">Add dimensions</button>' : ""}${linkBtn(p)}<button data-a="copy">Copy</button><button data-a="mirror">Mirror copy</button><button data-a="dup">Duplicate</button><button data-a="front">Bring to front</button><button data-a="back">Send to back</button><button data-a="del" class="danger">Delete</button></div>`;
     h += nudgePad();
     h += `<h3>Repeat</h3><div class="rep">${fld("Copies", "repN", "2").replace('data-f="repN"', 'id="repN" inputmode="numeric"')}${fld("Gap", "repG", fmtIn(gsnap(60))).replace('data-f="repG"', 'id="repG"')}</div>
       <div class="seg" id="repDir" style="margin-top:8px"><button data-v="right" aria-pressed="true">To the right</button><button data-v="up" aria-pressed="false">Upward</button></div>
@@ -1848,6 +1970,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (a === "center") { centerOnWall(); buildProps(p); }
     else if (a === "rot") { rotate(); buildProps(p); }
     else if (a === "dims") { addDims(); closeSheets(); }
+    else if (a === "link") { linkOne(p); buildProps(p); }
+    else if (a === "unlink") { withUndo(() => { const o = D[D.mode === "plan" ? "front" : "plan"].find(q => q.lk === p.lk); if (o) delete o.lk; delete p.lk; }); SFX.tap(); buildProps(p); toast("Unlinked. The two views now change separately."); }
     else if (a === "copy") { copySel(); }
     else if (b.dataset.n) { const n = b.dataset.n.split(",").map(Number); nudge(n[0], n[1]); buildProps(p); }
     else if (a === "mirror") { mirror(); refreshProps(); }
@@ -1937,6 +2061,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <h3>Units</h3><div class="seg" data-s="units"><button data-v="ft" aria-pressed="${st.units === "ft"}">Feet &amp; inches</button><button data-v="m" aria-pressed="${st.units === "m"}">Metres</button></div>
       <h3>Grid</h3><div class="seg" data-s="grid">${GRIDS[st.units].map((g, i) => `<button data-v="${g}" aria-pressed="${Math.abs(st.grid - g) < 0.01}">${GRID_NAMES[st.units][i]}</button>`).join("")}</div>
       <div style="margin-top:8px">
+      <div class="row"><div><label>Link front and plan</label><small>Ground-floor windows and doors appear in both views and keep the same place and width. Dotted lines project one view onto the other.</small></div><button class="switch" data-t="link" role="switch" aria-checked="${st.link}" aria-label="Link front and plan"></button></div>
+      ${st.link ? '<div class="links" style="margin:4px 0 8px;grid-template-columns:1fr"><button data-m="linkall">Link the openings already drawn</button></div>' : ""}
       <div class="row"><div><label>Show sizes</label><small>Width and height next to the selected part</small></div><button class="switch" data-t="sizes" role="switch" aria-checked="${st.sizes}" aria-label="Show sizes"></button></div>
       <div class="row"><div><label>Sounds</label></div><button class="switch" data-t="sound" role="switch" aria-checked="${st.sound}" aria-label="Sounds"></button></div>
       <div class="row"><div><label>Share anonymous play stats</label><small>Device type, visit length and parts placed. Never your drawings.</small></div><button class="switch" data-t="stats" role="switch" aria-checked="${st.stats}" aria-label="Share anonymous play stats"></button></div>
@@ -1962,6 +2088,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     else if (m === "png") { closeSheets(); savePNG(); }
     else if (m === "svg") { closeSheets(); saveSVGFile(); }
     else if (m === "link") openShare();
+    else if (m === "linkall") { const n = linkAll(true); closeSheets(); toast(n ? "Linked " + n + (n === 1 ? " opening" : " openings") + " between the front and the plan." : linkWhyNot()); }
     else if (m === "help") openSheet("helpSheet");
     else if (m === "clear") {
       if (!D.parts.length) { toast("The drawing is already empty."); return; }
@@ -2011,7 +2138,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const n = store.designs.length + 1;
     const d = t ? newDesign(t.name, t.parts, t.plan) : newDesign("House " + n, []);
     if (t) d.sky = t.sky;
-    store.designs.push(d); switchTo(d); closeSheets(); SFX.place(); sess.games++;
+    store.designs.push(d); switchTo(d); if (t && t.plan && S().link) { linkAll(false); save(); render(); } closeSheets(); SFX.place(); sess.games++;
     track("design_new", { template: c.dataset.tpl });
   });
   async function openShare() {

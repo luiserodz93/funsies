@@ -58,6 +58,8 @@ A drafting board in the garden for designing a house two ways: the **Front** (th
 
 **Library:** ready-made items for each view. Front: windows, doors, roofs and structure, trim and garden. Plan: doors and windows, kitchen and laundry appliances (fridge, stove, sink, dishwasher, counter, island, washer, dryer), bathroom fixtures, living and dining furniture, bedroom furniture, stairs and plants. Pick one, then tap the board to place it or drag to size it.
 
+**Linked views:** ground-floor windows and doors on the front wall are linked to the plan's front wall (the bottom edge of the rooms). Placing one in either view adds its twin to the other, moving or resizing it moves the twin, and deleting it deletes both. Dotted lines under each view show where the other view's walls and openings fall, and parts snap to them. Turn linking off, or link openings drawn earlier, from the menu. The starter cottage comes linked.
+
 **Features**
 
 - Tap to drop a part or drag to draw it at any size. Smart placing on the front: a roof tapped above a wall fits that wall, a door stands on the wall's base, a trim band spans the wall
