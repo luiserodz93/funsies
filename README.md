@@ -1,11 +1,12 @@
 # funsies
 
-Two games set in the same stone courtyard garden, built to play on an iPhone. Each game is a single HTML file with no build step and no dependencies, and both share one look: carved stone being slowly taken over by plants, four seasons, frosted panels and synthesized sounds.
+Three games set in the same stone courtyard garden, built to play on an iPhone. Each game is a single HTML file with no build step and no dependencies, and all share one look: carved stone being slowly taken over by plants, four seasons, frosted panels and synthesized sounds.
 
 | Game | What it is | Folder | Play it |
 | ---- | ---------- | ------ | ------- |
 | **Arbor & Arch** | Chess | [`chess/`](chess/) | https://luiserodz93.github.io/funsies/chess/ |
 | **Leaf & Letter** | Hangman | [`hangman/`](hangman/) | https://luiserodz93.github.io/funsies/hangman/ |
+| **Brick & Blueprint** | House facade designer | [`facade/`](facade/) | https://luiserodz93.github.io/funsies/facade/ |
 
 ## Arbor & Arch (chess)
 
@@ -45,13 +46,31 @@ A carved limestone pillar and lintel stand in the courtyard with ivy climbing th
 - Dig up a letter (costs one leaf) and a two-tap Give up
 - Win, loss and streak record
 
-**Both games** have four seasons (Spring, Autumn, Winter, Night) with drifting petals, leaves, snow or fireflies, synthesized sounds, auto-save, and offline play once installed.
+**Arbor & Arch and Leaf & Letter** have four seasons (Spring, Autumn, Winter, Night) with drifting petals, leaves, snow or fireflies, synthesized sounds, auto-save, and offline play once installed.
+
+## Brick & Blueprint (facade designer)
+
+A drafting board in the garden for designing the front of a house. It mixes CAD precision (real sizes, a snapping grid, snap to other parts, typed dimensions, layers) with paint-box freedom (colors, textures, freehand pen and a paint bucket). It's a free sandbox: no scores or goals.
+
+**Parts:** walls (brick, stone, siding, board and batten, stucco, shingle), roofs (gable, hip, flat, shed, mansard, gambrel), windows (double hung, picture, casement, arched, round, shuttered), doors (panel, glass top, double, French, arched, garage), trim (band, cornice, column, pilaster, quoins, surround), plants (shrub, tree, hedge, flower box, ivy), steps, chimneys and labels. Sketch tools: line, pen and measure (dimension lines).
+
+**Features**
+
+- Tap to drop a part or drag to draw it at any size. Smart placing: a roof tapped above a wall fits that wall, a door stands on the wall's base, a trim band spans the wall
+- Select, move and resize with handles, with a live size readout. Snap chips toggle grid snap, snap to other parts and the ground (with guide lines), and ortho for straight lines
+- Part settings: style, texture, color (palette or any color), exact width, height and position typed in metres or feet and inches, layer, center on wall, mirror copy across the main wall, duplicate, repeat in a row or column, front and back
+- Five layers (Structure, Openings, Details, Sketch, Dimensions) that can be hidden or locked
+- Undo and redo, pinch to zoom, two-finger pan, and fit to screen
+- Day, dusk and night skies (windows light up at night)
+- Designs auto-save on the phone, with a gallery, copies and three starter houses (Garden cottage, City townhouse, Modern house)
+- Save a picture (PNG) or an SVG, or share a link that carries the whole design inside it, so nothing is uploaded
+- Works in portrait and landscape
 
 ## Put it online with GitHub Pages
 
 1. On GitHub, open the repo, then **Settings → Pages**.
 2. Under **Build and deployment**, set Source to **Deploy from a branch**, pick `main` and `/ (root)`, then click **Save**.
-3. After a minute or two both games are live at the addresses in the table above.
+3. After a minute or two all three games are live at the addresses in the table above.
 
 GitHub Pages on a free account requires the repository to be public.
 
@@ -72,7 +91,7 @@ Game links open in Safari, even if you've added the game to your home screen. Se
 Both games share one Firebase Realtime Database, used through its web API, so no Firebase library is loaded. Chess games live under `games/`, hangman words under `hangman/`, and play stats under `logs/`. If no database is set, live play falls back to the free [ntfy.sh](https://ntfy.sh) relay.
 
 1. In the [Firebase console](https://console.firebase.google.com), open your project, go to **Build → Realtime Database**, and create a database in **locked mode**.
-2. On the database's **Rules** tab, replace everything with the contents of [`firebase.rules.json`](firebase.rules.json) and click **Publish**. This one file covers both games. **Publish it again whenever it changes**, or the new parts are refused (hangman live play and its stats need the current version).
+2. On the database's **Rules** tab, replace everything with the contents of [`firebase.rules.json`](firebase.rules.json) and click **Publish**. This one file covers all three games. **Publish it again whenever it changes**, or the new parts are refused (hangman live play and its stats need the current version).
 3. Copy the database URL shown at the top of the **Data** tab, for example `https://your-project-default-rtdb.firebaseio.com`.
 4. Set `var FIREBASE_DB = "...";` to that URL in both `chess/index.html` and `hangman/index.html`.
 
@@ -80,11 +99,11 @@ The database URL is not a secret. It is meant to appear in public web pages, and
 
 ## Play stats
 
-Both games send anonymous play stats unless the player turns off **Share anonymous play stats** in the menu:
+All three games send anonymous play stats unless the player turns off **Share anonymous play stats** in the menu:
 
 - **Google Analytics** (one property, `G-K2XD82086T`, with each game reporting its own app name): city-level location, device type, sessions and game events. Google signals and ad personalization are off.
 - **Firebase logs**, which the rules make write-only:
-  - `logs/sessions`: one record per visit with device type, active time and counts. Hangman visits carry `app: "hangman"`.
+  - `logs/sessions`: one record per visit with device type, active time and counts. Hangman visits carry `app: "hangman"` and facade designer visits `app: "facade"` (where `games` counts new designs and `moves` counts parts placed). Brick & Blueprint sends no drawings and writes nothing else to the database, so it needs no rules change.
   - `logs/games`: one record per finished or abandoned chess game.
   - `logs/words`: one record per finished or abandoned hangman round: mode, level, result, word length, guesses, misses, dug-up letters and time. The word itself is recorded only for words the computer picked, never for words friends hide.
   - `logs/errors`: up to five script errors per visit, to diagnose problems on real phones.
@@ -95,6 +114,7 @@ Both games send anonymous play stats unless the player turns off **Share anonymo
 - Each friend game (chess) and hidden word (hangman) has a random 72-bit ID from the browser's cryptographic generator. The ID is the only way to read or write it, and the database rules block listing.
 - Every database write is checked for format and size. A chess game's record can only grow by one move at a time, so nobody can lock a game by padding it, roll it back, or delete it. Moves are replayed and checked for legality on each phone before they are shown.
 - A hangman word's record holds only the guesses, never the word. It can only be extended: each write must start with the previous record, so guesses can't be rewritten or removed. The sender's phone replays the guesses against the word it kept and ignores anything that doesn't fit.
+- Brick & Blueprint share links are checked part by part when opened: only known parts, styles and textures, colors in `#rrggbb` form, sizes within limits, labels cleaned and escaped, and a cap on the decompressed size
 - Names, clues and other text from links or the database are escaped before display, and invisible or direction-changing characters are stripped.
 - Saved data is checked field by field when a game loads, so a damaged store can't break the page.
 - A Content Security Policy limits each page to its own code, Google Fonts, Google Analytics, the Firebase database and the ntfy.sh relay. Referrers are turned off.

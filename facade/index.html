@@ -1,0 +1,1712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brick &amp; Blueprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.firebaseio.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#cfdcc4">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Design house facades in a stone garden: snap-to-grid precision with paint-box freedom.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brick &amp; Blueprint">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: a drafting table in the stone garden. The header and the tool tray sit inside the safe areas
+   (Dynamic Island, home bar); the drawing board fills everything between them. */
+:root{
+  --bg1:#edf2e4; --bg2:#c9d9bd; --ink:#26301f; --ink2:#5a6852;
+  --panel:rgba(255,253,245,.72); --panel-line:rgba(52,74,40,.16); --panel-solid:#f8f5ea;
+  --light:#efe6cf; --frame1:#bea983; --frame2:#8c7454; --grout:rgba(60,48,30,.16);
+  --accent:#b8466a; --accent-ink:#fff8f6; --vine:#4f7d3a; --blue:#2f5d7c;
+  --check:rgba(214,60,40,.9); --shadow:rgba(40,52,28,.28);
+  --font-display:"Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg1:#13211f; --bg2:#0b1413; --ink:#e9efe3; --ink2:#a8b8a6;
+    --panel:rgba(26,40,37,.8); --panel-line:rgba(200,230,200,.14); --panel-solid:#1b2a27;
+    --light:#c9c2a6; --frame1:#33433d; --frame2:#1c2724; --grout:rgba(0,0,0,.22);
+    --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0;
+    --check:rgba(240,110,84,.95); --shadow:rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg1:#13211f; --bg2:#0b1413; --ink:#e9efe3; --ink2:#a8b8a6;
+  --panel:rgba(26,40,37,.8); --panel-line:rgba(200,230,200,.14); --panel-solid:#1b2a27;
+  --light:#c9c2a6; --frame1:#33433d; --frame2:#1c2724; --grout:rgba(0,0,0,.22);
+  --accent:#e8c45e; --accent-ink:#1b1608; --vine:#6f9f73; --blue:#9cc3e0;
+  --check:rgba(240,110,84,.95); --shadow:rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0; overflow:hidden; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px;
+  -webkit-tap-highlight-color:transparent; overscroll-behavior:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none}
+body::before{content:""; position:fixed; inset:0; z-index:-2; background:radial-gradient(120% 80% at 50% 0%, var(--bg1) 0%, var(--bg2) 100%)}
+button,input{font:inherit; color:inherit}
+button{touch-action:manipulation}
+input{-webkit-user-select:text; user-select:text}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.app{position:fixed; inset:0; display:flex; flex-direction:column;
+  padding-top:max(6px, env(safe-area-inset-top, 0px));
+  padding-left:env(safe-area-inset-left, 0px); padding-right:env(safe-area-inset-right, 0px)}
+
+header.top{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 12px 8px; flex:none}
+.brand{display:flex; align-items:center; gap:9px; min-width:0; border:0; background:none; padding:0; cursor:pointer; text-align:left}
+.brand svg{width:34px; height:34px; flex:none}
+.brand h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:21px; letter-spacing:-.01em; line-height:1; white-space:nowrap}
+.brand h1 em{font-style:italic; font-weight:500; color:var(--accent)}
+.brand small{display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); margin-top:4px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:46vw}
+.brand > div{min-width:0}
+.hbtns{display:flex; gap:7px; flex:none}
+.iconbtn{position:relative; width:40px; height:40px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; padding:0; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.iconbtn svg{width:21px; height:21px}
+.iconbtn:disabled{opacity:.35; cursor:default}
+
+/* The drawing board */
+#stage{position:relative; flex:1; min-height:0; margin:0 8px; border-radius:16px; overflow:hidden; touch-action:none;
+  box-shadow:0 0 0 6px var(--frame1), 0 0 0 7px var(--frame2), 0 14px 30px -12px var(--shadow);
+  background:linear-gradient(180deg,#dceaf3,#f4efe3)}
+#stage[data-sky="dusk"]{background:linear-gradient(180deg,#7d6fa0,#f1b48a)}
+#stage[data-sky="night"]{background:linear-gradient(180deg,#0d1626,#24344c)}
+#cv{position:absolute; inset:0; width:100%; height:100%; display:block}
+.corner{position:absolute; right:10px; top:10px; z-index:2; display:grid; gap:8px}
+.mini{width:38px; height:38px; border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; padding:0; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.mini svg{width:20px; height:20px}
+.snaps{position:absolute; left:10px; bottom:10px; z-index:2; display:flex; gap:6px; flex-wrap:wrap; max-width:calc(100% - 20px)}
+.chip{border:1px solid var(--panel-line); background:var(--panel); border-radius:9px; padding:6px 9px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; color:var(--ink2); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.chip[aria-pressed="true"]{color:var(--accent-ink); background:var(--accent); border-color:var(--accent)}
+.readout{position:absolute; z-index:3; pointer-events:none; background:var(--ink); color:var(--bg1); border-radius:10px; padding:6px 10px; font-weight:800; font-size:13px; white-space:nowrap; font-variant-numeric:tabular-nums; box-shadow:0 8px 20px -8px var(--shadow)}
+
+/* Tool tray */
+.dock{flex:none; padding:8px 8px max(8px, env(safe-area-inset-bottom, 0px))}
+.ctx{display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:5px 5px 5px 12px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.ctxinfo{flex:1; min-width:0; line-height:1.15}
+.ctxinfo b{display:block; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ctxinfo span{display:block; font-size:12px; color:var(--ink2); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
+.ctxbtns{display:flex; gap:4px; flex:none}
+.ctxbtns button{width:38px; height:38px; border-radius:10px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
+.ctxbtns button:active{background:var(--panel-line)}
+.ctxbtns svg{width:20px; height:20px}
+.ctxbtns .danger{color:var(--check)}
+.tools{display:grid; grid-template-columns:repeat(7, 1fr); gap:5px}
+.tool{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:50px; padding:0 1px; border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); cursor:pointer; font-size:10.5px; font-weight:800; color:var(--ink); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); min-width:0}
+.tool svg{width:22px; height:22px; flex:none}
+.tool span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+.tool[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); box-shadow:0 6px 14px -8px var(--accent)}
+.tool .dot{position:absolute; right:6px; top:6px; width:10px; height:10px; border-radius:50%; box-shadow:0 0 0 1.5px var(--panel-solid)}
+@media (max-height:520px){
+  .tools{grid-template-columns:repeat(14, 1fr)}
+  .tool{height:42px} .tool span{display:none}
+  header.top{padding-bottom:4px} .brand small{display:none}
+}
+
+/* Sheets */
+.scrim{position:fixed; inset:0; background:rgba(10,16,10,.38); z-index:40; animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0 auto; width:min(100%, 520px); max-height:calc(100% - 8px - env(safe-area-inset-top, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  background:var(--panel-solid); color:var(--ink); border-radius:22px 22px 0 0; box-shadow:0 -10px 40px -10px var(--shadow);
+  padding:10px max(20px, env(safe-area-inset-left, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-right, 0px));
+  animation:rise .28s cubic-bezier(.2,.8,.3,1); -webkit-user-select:none; user-select:none}
+@keyframes rise{from{transform:translateY(40px); opacity:0}}
+.sheet .grab{width:40px; height:5px; border-radius:3px; background:var(--panel-line); margin:0 auto 12px}
+.sheet h2{font-family:var(--font-display); font-weight:700; font-size:25px; margin:0 0 4px; letter-spacing:-.01em; text-wrap:balance}
+.sheet .lede{color:var(--ink2); margin:0 0 12px; font-size:14px; line-height:1.45}
+.sheet h3{font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin:18px 0 8px; font-weight:800}
+.seg{display:flex; background:var(--panel-line); border-radius:12px; padding:3px; gap:3px}
+.seg button{flex:1; border:0; background:transparent; padding:9px 4px; border-radius:9px; font-weight:700; font-size:13px; cursor:pointer; line-height:1.2; min-width:0}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); box-shadow:0 2px 8px -2px var(--shadow)}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chips button{border:1.5px solid var(--panel-line); background:transparent; border-radius:999px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.swatches{display:grid; grid-template-columns:repeat(7, 1fr); gap:7px}
+.sw{aspect-ratio:1; border-radius:10px; border:0; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); position:relative; padding:0}
+.sw[aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(0,0,0,.18), 0 0 0 2.5px var(--panel-solid), 0 0 0 4.5px var(--accent)}
+.sw.custom{display:grid; place-items:center; background:conic-gradient(#e06060,#e0c060,#60c060,#60c0e0,#6060e0,#e060c0,#e06060); overflow:hidden}
+.sw.custom input{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; border:0; padding:0}
+.fields{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.fld{display:grid; gap:4px}
+.fld span{font-size:12px; font-weight:700; color:var(--ink2)}
+.fld input, .field input{width:100%; min-width:0; border:1.5px solid var(--panel-line); background:var(--panel); border-radius:11px; padding:10px 11px; font-weight:700; font-size:16px; font-variant-numeric:tabular-nums}
+.fld input:focus, .field input:focus{border-color:var(--accent); outline:none}
+.fld.wide{grid-column:1 / -1}
+.field{display:grid; gap:6px; margin-top:4px}
+.field label{font-size:12.5px; font-weight:700; color:var(--ink2)}
+.note{font-size:12.5px; color:var(--ink2); margin:8px 2px 0; line-height:1.45}
+.acts{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.acts button, .links button{border:1.5px solid var(--panel-line); background:transparent; border-radius:12px; padding:11px 8px; font-weight:700; font-size:14px; cursor:pointer}
+.acts .danger, .links .danger{color:var(--check)}
+.links{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.links.three{grid-template-columns:1fr 1fr 1fr}
+.primary{width:100%; margin-top:18px; border:0; border-radius:14px; padding:14px; font-weight:800; font-size:16px; background:var(--accent); color:var(--accent-ink); cursor:pointer; box-shadow:0 8px 20px -10px var(--accent)}
+.secondary{width:100%; margin-top:10px; border:1.5px solid var(--panel-line); border-radius:14px; padding:12px; font-weight:700; font-size:15px; background:transparent; cursor:pointer}
+.rep{display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:end}
+.row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--panel-line)}
+.row:last-child{border-bottom:0}
+.row label{font-weight:700}
+.row small{display:block; color:var(--ink2); font-weight:600; font-size:12px; margin-top:2px}
+.switch{width:50px; height:30px; border-radius:15px; border:0; background:var(--panel-line); position:relative; cursor:pointer; flex:none; transition:background .2s; padding:0}
+.switch::after{content:""; position:absolute; left:3px; top:3px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.lyr{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--panel-line)}
+.lyr:last-child{border-bottom:0}
+.lyr b{display:block}
+.lyr small{color:var(--ink2); font-weight:600; font-size:12px}
+.tog{border:1.5px solid var(--panel-line); background:transparent; border-radius:10px; padding:7px 10px; font-weight:800; font-size:12px; cursor:pointer; min-width:64px}
+.tog[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid); border-color:var(--ink)}
+.cards{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.card{border:1.5px solid var(--panel-line); background:var(--panel); border-radius:14px; padding:8px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:6px; min-width:0}
+.card.cur{border-color:var(--accent)}
+.card img{width:100%; aspect-ratio:4/3; object-fit:contain; border-radius:9px; background:linear-gradient(180deg,#dceaf3,#f4efe3); display:block}
+.card b{font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.card small{font-size:12px; color:var(--ink2); font-weight:600}
+.card .cbtns{display:flex; gap:6px}
+.card .cbtns button{flex:1; border:1px solid var(--panel-line); background:transparent; border-radius:9px; padding:6px 0; font-size:12px; font-weight:800; cursor:pointer}
+.card .cbtns .danger{color:var(--check)}
+.card .cbtns .danger[data-armed]{background:var(--check); color:#fff; border-color:var(--check)}
+.help{margin:0; padding-left:18px; display:grid; gap:8px; font-size:14px; line-height:1.45}
+.help b{font-weight:800}
+.linkbox{width:100%; border:1.5px dashed var(--accent); background:var(--panel); border-radius:12px; padding:10px; font-size:13px; font-weight:600; word-break:break-all; max-height:90px; overflow:auto; -webkit-user-select:all; user-select:all}
+.toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--bg1); padding:10px 16px; border-radius:12px; font-weight:700; font-size:14px; box-shadow:0 8px 24px -8px var(--shadow); max-width:calc(100vw - 32px); width:max-content; text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere; pointer-events:none}
+@keyframes drop{from{transform:translate(-50%,-10px); opacity:0}}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <button class="brand" id="brandBtn" aria-label="Open menu">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 19 20 7l15 12" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><rect x="10" y="18" width="20" height="15" fill="var(--light)" stroke="var(--frame2)" stroke-width="1.5"/><rect x="17.5" y="24" width="5" height="9" fill="var(--frame2)"/><rect x="12.5" y="21" width="4" height="4" fill="var(--blue)"/><rect x="23.5" y="21" width="4" height="4" fill="var(--blue)"/><path d="M4 33.5h32" stroke="var(--vine)" stroke-width="2.5" stroke-linecap="round"/><path d="M9 33c-1-3 1-5 3-5 0 2-1 4-3 5z" fill="var(--vine)"/></svg>
+      <div><h1>Brick <em>&amp;</em> Blueprint</h1><small id="dname">My first house</small></div>
+    </button>
+    <div class="hbtns">
+      <button class="iconbtn" id="undoBtn" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+      <button class="iconbtn" id="redoBtn" aria-label="Redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+      <button class="iconbtn" id="layersBtn" aria-label="Layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".5"/></svg></button>
+      <button class="iconbtn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </header>
+
+  <main id="stage" data-sky="day" aria-label="Drawing board">
+    <svg id="cv" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e8f2"/><stop offset="1" stop-color="#7c9fb6"/></linearGradient>
+        <linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c79b"/><stop offset="1" stop-color="#806f9c"/></linearGradient>
+        <linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a6"/><stop offset="1" stop-color="#f0ac52"/></linearGradient>
+      </defs>
+      <g id="grid"></g>
+      <g id="art"><defs id="defs"></defs><g id="artBody"></g></g>
+      <g id="ui"></g>
+    </svg>
+        <div class="corner">
+      <button class="mini" id="fitBtn" aria-label="Fit drawing to screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button class="mini" id="helpBtn" aria-label="How to draw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h0"/></svg></button>
+    </div>
+    <div class="snaps">
+      <button class="chip" id="gridChip" aria-pressed="true">Grid</button>
+      <button class="chip" id="osnapChip" aria-pressed="true">Snap</button>
+      <button class="chip" id="orthoChip" aria-pressed="true">Ortho</button>
+    </div>
+    <div id="readout" class="readout" hidden></div>
+  </main>
+
+  <footer class="dock">
+    <div class="ctx" id="ctx" hidden>
+      <div class="ctxinfo"><b id="ctxName"></b><span id="ctxSize"></span></div>
+      <div class="ctxbtns">
+        <button id="cEdit" aria-label="Edit part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
+        <button id="cCopy" aria-label="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
+        <button id="cMirror" aria-label="Mirror copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3v18" stroke-dasharray="2 2.5"/><path d="M8 7 3 17h5z"/><path d="m16 7 5 10h-5z"/></svg></button>
+        <button id="cFront" aria-label="Bring to front"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="1.5" opacity=".5"/><rect x="10" y="10" width="11" height="11" rx="1.5" fill="currentColor"/></svg></button>
+        <button id="cBack" aria-label="Send to back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="1.5" fill="currentColor" opacity=".5"/><rect x="10" y="10" width="11" height="11" rx="1.5"/></svg></button>
+        <button id="cDel" class="danger" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
+      </div>
+    </div>
+    <div class="tools" id="tools" role="toolbar" aria-label="Tools"></div>
+  </footer>
+</div>
+
+<div id="scrim" class="scrim" hidden></div>
+<section class="sheet" id="propSheet" hidden aria-label="Part settings"></section>
+<section class="sheet" id="toolSheet" hidden aria-label="Tool settings"></section>
+<section class="sheet" id="paintSheet" hidden aria-label="Paint"></section>
+<section class="sheet" id="menuSheet" hidden aria-label="Menu"></section>
+<section class="sheet" id="layersSheet" hidden aria-label="Layers"></section>
+<section class="sheet" id="designsSheet" hidden aria-label="Your designs"></section>
+<section class="sheet" id="newSheet" hidden aria-label="New design"></section>
+<section class="sheet" id="shareSheet" hidden aria-label="Share"></section>
+<section class="sheet" id="helpSheet" hidden aria-label="How to draw">
+  <div class="grab"></div>
+  <h2>How to draw</h2>
+  <p class="lede">Every part snaps to real sizes, so the facade you draw is a measured drawing. Sizes are in metres or feet, set in the menu.</p>
+  <ol class="help">
+    <li><b>Place parts.</b> Pick Wall, Roof, Window or another part, then tap the board to drop one, or drag to draw it at any size. A roof tapped above a wall fits itself to that wall.</li>
+    <li><b>Select and adjust.</b> With Select, tap a part, drag it to move, and drag its round handles to resize. Tap a part twice, or the sliders button, to type exact sizes, change its style, texture and color, repeat it or mirror it.</li>
+    <li><b>Snap.</b> Grid snaps to the grid size. Snap lines parts up with the edges and centers of other parts and the ground (dashed guides show it). Ortho keeps lines and dimensions straight.</li>
+    <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
+    <li><b>Measure.</b> Measure drags a dimension between two points. Drag its middle handle to move it away from the wall.</li>
+    <li><b>Move around.</b> Pinch to zoom, drag with two fingers, or drag empty board with Select. The corner button fits the drawing to the screen.</li>
+  </ol>
+  <button class="primary" data-close>Start drawing</button>
+</section>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script>
+(function () {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const noop = () => {};
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const r1 = v => Math.round(v * 10) / 10;
+  const f = n => Math.round(n * 10) / 10;
+  const canLink = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname);
+  const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  function randId(n) {
+    const a = new Uint8Array(n); let s = "";
+    try { crypto.getRandomValues(a); } catch (e) { for (let k = 0; k < n; k++) a[k] = (Math.random() * 256) | 0; }
+    for (let k = 0; k < n; k++) s += ABC[a[k] & 63];
+    return s;
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  function cleanText(s, max) { return String(s == null ? "" : s).replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff]/g, "").trim().slice(0, max); }
+  const hexOk = c => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c);
+  function shade(hex, t) {
+    const n = parseInt(hex.slice(1), 16), tg = t < 0 ? 0 : 255, k = Math.abs(t);
+    const ch = s => Math.round(((n >> s) & 255) + (tg - ((n >> s) & 255)) * k);
+    return "#" + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1);
+  }
+  function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  /* ---------- parts ---------- */
+  const LAYERS = [
+    { id: "structure", name: "Structure", note: "Walls, roofs, chimneys and steps" },
+    { id: "openings", name: "Openings", note: "Windows and doors" },
+    { id: "details", name: "Details", note: "Trim, plants and labels" },
+    { id: "sketch", name: "Sketch", note: "Lines and pen strokes" },
+    { id: "dims", name: "Dimensions", note: "Measurements" }
+  ];
+  const LAYER_IDS = LAYERS.map(l => l.id);
+  const TYPES = {
+    wall: { name: "Wall", kind: "rect", layer: "structure", w: 800, h: 300, color: "#c9a27e", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "shingle", "plain"] },
+    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#5b4a42", tex: "shingle", style: "gable", styles: ["gable", "hip", "flat", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "plain"] },
+    window: { name: "Window", kind: "rect", layer: "openings", w: 110, h: 140, color: "#f4efe4", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters"] },
+    door: { name: "Door", kind: "rect", layer: "openings", w: 100, h: 210, color: "#3f6b5a", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage"] },
+    trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#efe8da", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame"] },
+    plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#5f8a45", style: "shrub", styles: ["shrub", "tree", "hedge", "flowers", "ivy"] },
+    steps: { name: "Steps", kind: "rect", layer: "structure", w: 160, h: 51, color: "#b9b2a4", style: "steps", styles: ["steps", "stoop"] },
+    chimney: { name: "Chimney", kind: "rect", layer: "structure", w: 60, h: 180, color: "#8e4a39", tex: "brick", texs: ["brick", "stone", "stucco", "plain"] },
+    label: { name: "Label", kind: "label", layer: "details", w: 200, h: 30, color: "#3a2f22" },
+    line: { name: "Line", kind: "line", layer: "sketch", color: "#26301f" },
+    pen: { name: "Pen stroke", kind: "pen", layer: "sketch", color: "#26301f" },
+    dim: { name: "Dimension", kind: "dim", layer: "dims", color: "#2f5d7c" }
+  };
+  const SIZES = { // default sizes for some styles
+    plant: { shrub: [150, 90], tree: [260, 480], hedge: [300, 100], flowers: [110, 45], ivy: [120, 300] },
+    trim: { band: [800, 20], cornice: [840, 40], column: [40, 300], pilaster: [35, 300], quoins: [40, 300], frame: [150, 180] },
+    door: { garage: [260, 220], double: [160, 220], french: [160, 220] },
+    window: { round: [80, 80], arched: [100, 170] },
+    roof: { flat: [840, 25] }
+  };
+  const NAMES = {
+    gable: "Gable", hip: "Hip", flat: "Flat", shed: "Shed", mansard: "Mansard", gambrel: "Gambrel",
+    double: "Double hung", single: "Picture", casement: "Casement", arched: "Arched", round: "Round", shutters: "Shuttered",
+    panel: "Panel", glass: "Glass top", french: "French", garage: "Garage",
+    band: "Band", cornice: "Cornice", column: "Column", pilaster: "Pilaster", quoins: "Quoins", frame: "Surround",
+    shrub: "Shrub", tree: "Tree", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
+    steps: "Steps", stoop: "Stoop",
+    brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", plain: "Smooth"
+  };
+  const PALETTE = ["#f4efe4", "#e9dcc3", "#d9c7a8", "#c9a27e", "#b5654a", "#8e4a39", "#7a3b2e",
+    "#5b4a42", "#3d3f42", "#4c5560", "#2f5d7c", "#6f8fa6", "#3f6b5a", "#5f8a45",
+    "#9bb26b", "#d6b25e", "#e7a33e", "#c8553d", "#d9668a", "#26301f"];
+  const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "plain"];
+  const GRIDS = { m: [5, 10, 25, 50, 100], ft: [2.54, 7.62, 15.24, 30.48, 60.96] };
+  const GRID_NAMES = { m: ["5 cm", "10 cm", "25 cm", "50 cm", "1 m"], ft: ["1″", "3″", "6″", "1′", "2′"] };
+
+  /* ---------- state ---------- */
+  const STORE = "brick-blueprint-v1";
+  const DEF_SETTINGS = { units: "m", grid: 10, snap: true, osnap: true, ortho: true, sizes: true, sound: true, stats: true };
+  let store = null, D = null, sel = null, tool = "select";
+  let undoStack = [], redoStack = [];
+  const view = { s: 0.4, tx: 0, ty: 0 };
+  let guides = { x: [], y: [] };
+  const S = () => store.settings;
+
+  function newLayers() { const o = {}; LAYER_IDS.forEach(id => { o[id] = { hide: false, lock: false }; }); return o; }
+  function newDesign(name, parts) {
+    const d = { id: randId(10), name: name, at: Date.now(), sky: "day", layers: newLayers(), parts: [], next: 1 };
+    (parts || []).forEach(q => { const p = cleanPart(q, d.next); if (p) { d.parts.push(p); d.next++; } });
+    return d;
+  }
+  const num = v => (typeof v === "number" && isFinite(v)) ? clamp(r1(v), -50000, 50000) : null;
+  function cleanPart(q, id) {
+    if (!q || typeof q !== "object") return null;
+    const T = TYPES[q.t]; if (!T || !Object.prototype.hasOwnProperty.call(TYPES, q.t)) return null;
+    const p = { id: id, t: q.t, layer: LAYER_IDS.indexOf(q.layer) >= 0 ? q.layer : T.layer, color: hexOk(q.color) ? q.color.toLowerCase() : T.color };
+    if (T.kind === "rect" || T.kind === "label") {
+      const x = num(q.x), y = num(q.y), w = num(q.w), h = num(q.h);
+      if (x == null || y == null || w == null || h == null || w < 1 || h < 1) return null;
+      Object.assign(p, { x, y, w, h });
+      if (T.styles) p.style = T.styles.indexOf(q.style) >= 0 ? q.style : T.style;
+      if (T.texs) p.tex = T.texs.indexOf(q.tex) >= 0 ? q.tex : T.tex;
+      if (q.fx === true && T.kind === "rect") p.fx = true;
+      if (T.kind === "label") { p.text = cleanText(q.text, 60) || "Label"; p.w = labelW(p.text, p.h); }
+    } else if (T.kind === "line" || T.kind === "dim") {
+      const a = ["x1", "y1", "x2", "y2"].map(k => num(q[k]));
+      if (a.some(v => v == null)) return null;
+      [p.x1, p.y1, p.x2, p.y2] = a;
+      if (T.kind === "line") { p.lw = clamp(num(q.lw) || 3, 0.2, 200); if (q.dash === true) p.dash = true; }
+      else p.off = clamp(num(q.off) || 0, -5000, 5000);
+    } else if (T.kind === "pen") {
+      if (!Array.isArray(q.pts) || q.pts.length < 4) return null;
+      const pts = q.pts.slice(0, 4000).map(num);
+      if (pts.some(v => v == null)) return null;
+      if (pts.length % 2) pts.pop();
+      p.pts = pts; p.lw = clamp(num(q.lw) || 4, 0.2, 200);
+    }
+    return p;
+  }
+  function cleanDesign(o) {
+    if (!o || typeof o !== "object" || !Array.isArray(o.parts)) return null;
+    const d = newDesign(cleanText(o.name, 40) || "Untitled house", []);
+    if (typeof o.id === "string" && /^[A-Za-z0-9_-]{6,20}$/.test(o.id)) d.id = o.id;
+    if (typeof o.at === "number" && isFinite(o.at)) d.at = o.at;
+    d.sky = ["day", "dusk", "night"].indexOf(o.sky) >= 0 ? o.sky : "day";
+    if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
+    o.parts.slice(0, 2000).forEach(q => { const p = cleanPart(q, d.next); if (p) { d.parts.push(p); d.next++; } });
+    return d;
+  }
+  function load() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
+    store = { settings: Object.assign({}, DEF_SETTINGS), designs: [], cur: null, mem: {}, paint: { color: "#b5654a", tex: "", pen: 4 }, helped: false, hinted: {} };
+    if (d && typeof d === "object") {
+      const s = d.settings || {}, st = store.settings;
+      st.units = s.units === "ft" ? "ft" : "m";
+      st.grid = GRIDS[st.units].find(g => Math.abs(g - s.grid) < 0.01) || GRIDS[st.units][1];
+      ["snap", "osnap", "ortho", "sizes", "sound", "stats"].forEach(k => { if (typeof s[k] === "boolean") st[k] = s[k]; });
+      if (Array.isArray(d.designs)) d.designs.slice(0, 100).forEach(x => { const c = cleanDesign(x); if (c && !store.designs.some(y => y.id === c.id)) store.designs.push(c); });
+      store.cur = typeof d.cur === "string" ? d.cur : null;
+      if (d.mem && typeof d.mem === "object") Object.keys(TYPES).forEach(t => {
+        const m = d.mem[t]; if (!m || typeof m !== "object") return; const T = TYPES[t], o = {};
+        if (hexOk(m.color)) o.color = m.color; if (T.styles && T.styles.indexOf(m.style) >= 0) o.style = m.style; if (T.texs && T.texs.indexOf(m.tex) >= 0) o.tex = m.tex;
+        store.mem[t] = o;
+      });
+      if (d.paint && typeof d.paint === "object") {
+        if (hexOk(d.paint.color)) store.paint.color = d.paint.color;
+        if (ALL_TEX.indexOf(d.paint.tex) >= 0) store.paint.tex = d.paint.tex;
+        if ([2, 4, 8, 16].indexOf(d.paint.pen) >= 0) store.paint.pen = d.paint.pen;
+      }
+      store.helped = d.helped === true;
+      if (d.hinted && typeof d.hinted === "object") Object.keys(TYPES).concat(["select", "paint"]).forEach(k => { if (d.hinted[k] === true) store.hinted[k] = true; });
+    }
+    if (!store.designs.length) store.designs.push(newDesign("My first house", []));
+    D = store.designs.find(x => x.id === store.cur) || store.designs[0];
+    store.cur = D.id;
+  }
+  let saveT = 0, warnedFull = false;
+  function saveNow() {
+    clearTimeout(saveT); saveT = 0;
+    try { localStorage.setItem(STORE, JSON.stringify(store)); }
+    catch (e) { if (!warnedFull) { warnedFull = true; toast("This phone's storage for the game is full. Delete an old design to keep saving."); } }
+  }
+  function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 350); }
+
+  /* ---------- units ---------- */
+  function fmtLen(cm) {
+    if (S().units === "ft") {
+      const neg = cm < 0; let inch = Math.round(Math.abs(cm) / 2.54 * 2) / 2; let ft = Math.floor(inch / 12); inch -= ft * 12;
+      return (neg ? "−" : "") + (ft ? ft + "′ " : "") + (inch % 1 ? inch.toFixed(1) : inch) + "″";
+    }
+    return (cm / 100).toFixed(2) + " m";
+  }
+  function fmtIn(cm) {
+    if (S().units === "ft") {
+      const neg = cm < 0; let inch = Math.round(Math.abs(cm) / 2.54 * 4) / 4; const ft = Math.floor(inch / 12); inch = +(inch - ft * 12).toFixed(2);
+      return (neg ? "-" : "") + ft + "' " + inch + '"';
+    }
+    return String(+(cm / 100).toFixed(3));
+  }
+  function parseLen(s) {
+    s = String(s).trim().toLowerCase().replace(/,/g, ".").replace(/[’′‘]/g, "'").replace(/[”″“]/g, '"').replace(/\s+/g, " ");
+    if (!s) return NaN;
+    let m;
+    if ((m = s.match(/^(-?\d*\.?\d+) ?mm$/))) return +m[1] / 10;
+    if ((m = s.match(/^(-?\d*\.?\d+) ?cm$/))) return +m[1];
+    if ((m = s.match(/^(-?\d*\.?\d+) ?m$/))) return +m[1] * 100;
+    if ((m = s.match(/^(-?)(\d*\.?\d+) ?(?:'|ft|feet|foot) ?(?:(\d*\.?\d+) ?(?:"|in|inch|inches)?)?$/))) return (m[1] ? -1 : 1) * (+m[2] * 12 + (m[3] ? +m[3] : 0)) * 2.54;
+    if ((m = s.match(/^(-?\d*\.?\d+) ?(?:"|in|inch|inches)$/))) return +m[1] * 2.54;
+    if (/^-?\d*\.?\d+$/.test(s)) return S().units === "ft" ? +s * 30.48 : +s * 100;
+    return NaN;
+  }
+  function gsnap(v) { if (!S().snap) return r1(v); const g = S().grid; return r1(Math.round(v / g) * g); }
+
+  /* ---------- geometry ---------- */
+  const kindOf = p => TYPES[p.t].kind;
+  function labelW(text, h) { return r1(Math.max(h, String(text).length * h * 0.56)); }
+  function dimGeom(p) {
+    const dx = p.x2 - p.x1, dy = p.y2 - p.y1, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    return { L, ux, uy, nx, ny, A: { x: p.x1 + nx * p.off, y: p.y1 + ny * p.off }, B: { x: p.x2 + nx * p.off, y: p.y2 + ny * p.off } };
+  }
+  function box(p) {
+    const k = kindOf(p);
+    if (k === "rect" || k === "label") return { x: p.x, y: p.y, w: p.w, h: p.h };
+    let xs, ys;
+    if (k === "line") { xs = [p.x1, p.x2]; ys = [p.y1, p.y2]; }
+    else if (k === "dim") { const g = dimGeom(p); xs = [p.x1, p.x2, g.A.x, g.B.x]; ys = [p.y1, p.y2, g.A.y, g.B.y]; }
+    else { xs = []; ys = []; for (let i = 0; i < p.pts.length; i += 2) { xs.push(p.pts[i]); ys.push(p.pts[i + 1]); } }
+    const x = Math.min.apply(null, xs), y = Math.min.apply(null, ys);
+    return { x, y, w: Math.max.apply(null, xs) - x, h: Math.max.apply(null, ys) - y };
+  }
+  function bounds(parts) {
+    let b = null;
+    parts.forEach(p => { const q = box(p); if (!b) b = { x0: q.x, y0: q.y, x1: q.x + q.w, y1: q.y + q.h }; else { b.x0 = Math.min(b.x0, q.x); b.y0 = Math.min(b.y0, q.y); b.x1 = Math.max(b.x1, q.x + q.w); b.y1 = Math.max(b.y1, q.y + q.h); } });
+    return b;
+  }
+  function segDist(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+    const t = l2 ? clamp(((px - ax) * dx + (py - ay) * dy) / l2, 0, 1) : 0;
+    return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+  }
+  const visible = p => !D.layers[p.layer].hide;
+  const editable = p => visible(p) && !D.layers[p.layer].lock;
+  function hitPart(w) {
+    const tol = 10 / view.s;
+    for (let i = D.parts.length - 1; i >= 0; i--) {
+      const p = D.parts[i]; if (!editable(p)) continue;
+      const k = kindOf(p);
+      if (k === "rect" || k === "label") { const t = 3 / view.s; if (w.x >= p.x - t && w.x <= p.x + p.w + t && w.y >= p.y - t && w.y <= p.y + p.h + t) return p; }
+      else if (k === "line") { if (segDist(w.x, w.y, p.x1, p.y1, p.x2, p.y2) <= p.lw / 2 + tol) return p; }
+      else if (k === "dim") { const g = dimGeom(p); if (segDist(w.x, w.y, g.A.x, g.A.y, g.B.x, g.B.y) <= tol * 1.4) return p; }
+      else { for (let j = 0; j + 3 < p.pts.length; j += 2) if (segDist(w.x, w.y, p.pts[j], p.pts[j + 1], p.pts[j + 2], p.pts[j + 3]) <= p.lw / 2 + tol) return p; }
+    }
+    return null;
+  }
+  const selPart = () => sel == null ? null : D.parts.find(p => p.id === sel) || null;
+  const cxOf = p => p.x + p.w / 2;
+  function mainWall() { let m = null; D.parts.forEach(p => { if (p.t === "wall" && (!m || p.w * p.h > m.w * m.h)) m = p; }); return m; }
+  function wallAt(w, not) { for (let i = D.parts.length - 1; i >= 0; i--) { const p = D.parts[i]; if (p.t === "wall" && p !== not && visible(p) && w.x >= p.x && w.x <= p.x + p.w && w.y >= p.y && w.y <= p.y + p.h) return p; } return null; }
+  function wallBelow(w) {
+    let best = null;
+    D.parts.forEach(p => { if (p.t !== "wall" || !visible(p) || w.x < p.x || w.x > p.x + p.w) return; const top = p.y + p.h; if (top <= w.y + 60 && (!best || top > best.y + best.h)) best = p; });
+    return best;
+  }
+
+  /* ---------- drawing (world units are centimetres; SVG y runs down, so y is negated) ---------- */
+  const R = (x, y, w, h, fill, ex) => `<rect x="${f(x)}" y="${f(y)}" width="${f(Math.max(0, w))}" height="${f(Math.max(0, h))}" fill="${fill}"${ex ? " " + ex : ""}/>`;
+  const P = (d, fill, ex) => `<path d="${d}" fill="${fill}"${ex ? " " + ex : ""}/>`;
+  const poly = pts => "M" + pts.map(q => f(q[0]) + " " + f(q[1])).join("L") + "Z";
+  const stk = (c, w) => `stroke="${c}" stroke-width="${w}" stroke-linejoin="round"`;
+  function bx(p) { return { X: p.x, T: -(p.y + p.h), W: p.w, H: p.h, B: -p.y }; }
+
+  function patDef(tex, c, id) {
+    const m = shade(c, 0.38), d1 = shade(c, -0.12), d2 = shade(c, -0.28), l1 = shade(c, 0.12);
+    let w, h, b;
+    switch (tex) {
+      case "brick": w = 48; h = 16; b = R(0, 0, 48, 16, m) + R(0.6, 0.6, 22.8, 6.8, c) + R(24.6, 0.6, 22.8, 6.8, d1) + R(-11.4, 8.6, 22.8, 6.8, d1) + R(12.6, 8.6, 22.8, 6.8, l1) + R(36.6, 8.6, 22.8, 6.8, d1); break;
+      case "stone": w = 90; h = 44; b = R(0, 0, 90, 44, m) + R(0.8, 0.8, 38.4, 20.4, c) + R(40.8, 0.8, 48.4, 20.4, d1) + R(0.8, 22.8, 24.4, 20.4, l1) + R(26.8, 22.8, 36.4, 20.4, c) + R(64.8, 22.8, 24.4, 20.4, d2); break;
+      case "siding": w = 60; h = 15; b = R(0, 0, 60, 15, c) + R(0, 0, 60, 1.6, l1) + R(0, 12.6, 60, 2.4, d2); break;
+      case "board": w = 30; h = 60; b = R(0, 0, 30, 60, c) + R(0, 0, 5, 60, l1) + R(5, 0, 1.2, 60, d2); break;
+      case "stucco": w = 40; h = 40; b = R(0, 0, 40, 40, c) + [[5, 7], [17, 3], [31, 11], [9, 22], [24, 19], [36, 30], [14, 34], [28, 37], [3, 31]].map((q, i) => `<circle cx="${q[0]}" cy="${q[1]}" r="${i % 2 ? 0.9 : 0.7}" fill="${i % 3 ? d1 : l1}"/>`).join(""); break;
+      case "shingle": w = 40; h = 24; b = R(0, 0, 40, 24, d2) + R(0.5, 0, 19, 11.4, c) + R(20.5, 0, 19, 11.4, d1) + R(-9.5, 12, 19, 11.4, l1) + R(10.5, 12, 19, 11.4, c) + R(30.5, 12, 19, 11.4, l1); break;
+      case "tile": w = 24; h = 16; b = R(0, 0, 24, 16, d2) + `<path d="M0 0h24v9a6 6 0 0 1-12 0a6 6 0 0 1-12 0z" fill="${c}"/><path d="M2 2h8M14 2h8" stroke="${l1}" stroke-width="1.5"/>`; break;
+      case "slate": w = 40; h = 20; b = R(0, 0, 40, 20, d2) + R(0.5, 0.5, 19, 9, c) + R(20.5, 0.5, 19, 9, d1) + R(-9.5, 10.5, 19, 9, l1) + R(10.5, 10.5, 19, 9, c) + R(30.5, 10.5, 19, 9, l1); break;
+      case "metal": w = 40; h = 10; b = R(0, 0, 40, 10, c) + R(0, 0, 2.5, 10, l1) + R(2.5, 0, 1, 10, d2); break;
+      default: return "";
+    }
+    return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${w}" height="${h}">${b}</pattern>`;
+  }
+  function winPath(shape, X, T, W, H) {
+    if (shape === "round") return `M${f(X)} ${f(T + H / 2)}a${f(W / 2)} ${f(H / 2)} 0 1 0 ${f(W)} 0a${f(W / 2)} ${f(H / 2)} 0 1 0 ${f(-W)} 0z`;
+    if (shape === "arched") { const r = Math.min(W / 2, H); return `M${f(X)} ${f(T + H)}V${f(T + r)}A${f(W / 2)} ${f(r)} 0 0 1 ${f(X + W)} ${f(T + r)}V${f(T + H)}Z`; }
+    return `M${f(X)} ${f(T)}h${f(W)}v${f(H)}h${f(-W)}z`;
+  }
+  function wallSVG(p, o) { const { X, T, W, H } = bx(p); return R(X, T, W, H, o.pat(p.tex, p.color), stk(shade(p.color, -0.42), 1.5)); }
+  function roofSVG(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color, fill = o.pat(p.tex, c), edge = shade(c, -0.45), fas = shade(c, -0.25), st = stk(edge, 1.5);
+    let pts, extra = "";
+    switch (p.style) {
+      case "flat": return R(X, T, W, H, shade(c, 0.05), st) + R(X - 4, T, W + 8, Math.min(H * 0.35, 10), fas, st);
+      case "hip": pts = [[X, B], [X + W * 0.28, T], [X + W * 0.72, T], [X + W, B]]; break;
+      case "shed": pts = [[X, B], [X, B - H * 0.35], [X + W, T], [X + W, B]]; break;
+      case "mansard": pts = [[X, B], [X + W * 0.07, T + H * 0.3], [X + W * 0.18, T], [X + W * 0.82, T], [X + W * 0.93, T + H * 0.3], [X + W, B]]; extra = `<path d="M${f(X + W * 0.07)} ${f(T + H * 0.3)}H${f(X + W * 0.93)}" ${stk(edge, 2)} fill="none"/>`; break;
+      case "gambrel": pts = [[X, B], [X + W * 0.13, T + H * 0.45], [X + W * 0.5, T], [X + W * 0.87, T + H * 0.45], [X + W, B]]; break;
+      default: pts = [[X, B], [X + W / 2, T], [X + W, B]];
+    }
+    const fh = Math.min(H * 0.1, 14);
+    return P(poly(pts), fill, st) + extra + R(X, B - fh, W, fh, fas, stk(edge, 1));
+  }
+  function windowSVG(p, o) {
+    let { X, T, W, H, B } = bx(p), st = p.style, out = "";
+    let fc = p.color;
+    if (st === "shutters") {
+      const sw = W * 0.22, se = shade(fc, -0.35);
+      [X, X + W - sw].forEach(sx => {
+        out += R(sx, T, sw, H, fc, stk(se, 1));
+        const n = Math.max(2, Math.floor(H / 9)); let ls = "";
+        for (let i = 1; i < n; i++) ls += `M${f(sx + sw * 0.15)} ${f(T + H * i / n)}h${f(sw * 0.7)}`;
+        out += `<path d="${ls}" stroke="${se}" stroke-width="1" fill="none"/>`;
+      });
+      X += sw + 2; W -= 2 * sw + 4; st = "double"; fc = "#f4efe4";
+    }
+    const fr = clamp(Math.min(W, H) * 0.07, 3, 9), shape = st === "round" ? "round" : st === "arched" ? "arched" : "rect";
+    const iX = X + fr, iT = T + fr, iW = W - 2 * fr, iH = H - 2 * fr, inner = winPath(shape, iX, iT, iW, iH);
+    if (shape !== "round") out += R(X - fr * 0.8, B, W + fr * 1.6, fr * 1.1, shade(fc, -0.12), stk(shade(fc, -0.4), 0.8));
+    out += P(winPath(shape, X, T, W, H), fc, stk(shade(fc, -0.38), 1)) + P(inner, o.glass);
+    const mw = fr * 0.55; let m = "";
+    if (st === "double") m = R(iX, iT + iH / 2 - fr / 2, iW, fr, fc) + R(iX + iW / 2 - mw / 2, iT, mw, iH, fc);
+    else if (st === "casement") m = R(iX + iW / 2 - fr / 2, iT, fr, iH, fc);
+    else if (st === "arched") { const r = Math.min(iW / 2, iH); m = R(iX + iW / 2 - mw / 2, iT, mw, iH, fc) + R(iX, iT + r - mw / 2, iW, mw, fc); }
+    else if (st === "round") m = R(iX + iW / 2 - mw / 2, iT, mw, iH, fc) + R(iX, iT + iH / 2 - mw / 2, iW, mw, fc);
+    const shine = o.sky === "night" ? "" : `<path d="M${f(iX + iW * 0.12)} ${f(iT + iH * 0.75)}L${f(iX + iW * 0.5)} ${f(iT + iH * 0.08)}" stroke="rgba(255,255,255,.35)" stroke-width="${f(Math.max(2, iW * 0.09))}"/>`;
+    out += `<clipPath id="k${p.id}"><path d="${inner}"/></clipPath><g clip-path="url(#k${p.id})">${shine}${m}</g>`;
+    return out;
+  }
+  function doorSVG(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.38), lt = shade(c, 0.1), fr = clamp(W * 0.05, 3, 8), cas = "#ece4d3", ce = shade(cas, -0.35);
+    const st = stk(e, 1), cst = stk(ce, 1);
+    const knob = (x, y) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(clamp(W * 0.035, 2.5, 5))}" fill="#d4b062" stroke="#8a6d2c" stroke-width=".8"/>`;
+    const pan = (x, y, w, h) => R(x, y, w, h, lt, st);
+    const gl = (x, y, w, h) => R(x, y, w, h, o.glass, st);
+    let out = "";
+    if (p.style === "arched") {
+      const d = winPath("arched", X, T, W, H); let ls = "";
+      for (let i = 1; i < 5; i++) ls += `M${f(X + W * i / 5)} ${f(T)}V${f(B)}`;
+      out += P(winPath("arched", X - fr, T - fr, W + 2 * fr, H + fr), cas, cst) + P(d, c, st);
+      out += `<clipPath id="k${p.id}"><path d="${d}"/></clipPath><g clip-path="url(#k${p.id})"><path d="${ls}" stroke="${e}" stroke-width="1.2"/>${R(X, T + H * 0.6, W * 0.75, H * 0.035, "#3b3330")}${R(X, T + H * 0.86, W * 0.75, H * 0.035, "#3b3330")}</g>` + knob(X + W * 0.82, T + H * 0.68);
+      return out;
+    }
+    out += R(X - fr, T - fr, W + 2 * fr, H + fr, cas, cst);
+    if (p.style === "garage") {
+      out += R(X, T, W, H, c, st);
+      for (let i = 1; i < 4; i++) out += R(X, T + H * i / 4 - 1.5, W, 3, e);
+      const n = Math.max(2, Math.round(W / 70)), gw = W / n;
+      for (let i = 0; i < n; i++) out += gl(X + i * gw + gw * 0.12, T + H * 0.06, gw * 0.76, H * 0.13);
+      return out;
+    }
+    if (p.style === "double" || p.style === "french") {
+      const lw = W / 2;
+      [0, 1].forEach(i => {
+        const lx = X + i * lw;
+        out += R(lx, T, lw, H, c, st);
+        if (p.style === "french") {
+          const ix = lx + lw * 0.12, iy = T + H * 0.06, iw = lw * 0.76, ih = H * 0.86;
+          out += gl(ix, iy, iw, ih);
+          out += R(ix + iw / 2 - 1, iy, 2, ih, c);
+          for (let k = 1; k < 4; k++) out += R(ix, iy + ih * k / 4 - 1, iw, 2, c);
+        } else {
+          out += pan(lx + lw * 0.16, T + H * 0.07, lw * 0.68, H * 0.4) + pan(lx + lw * 0.16, T + H * 0.53, lw * 0.68, H * 0.4);
+        }
+        out += knob(i ? lx + lw * 0.14 : lx + lw * 0.86, T + H * 0.52);
+      });
+      return out;
+    }
+    out += R(X, T, W, H, c, st);
+    if (p.style === "glass") {
+      const gx = X + W * 0.16, gy = T + H * 0.07, gw = W * 0.68, gh = H * 0.4;
+      out += gl(gx, gy, gw, gh) + R(gx + gw / 2 - 1, gy, 2, gh, c) + R(gx, gy + gh / 2 - 1, gw, 2, c);
+      out += pan(X + W * 0.16, T + H * 0.55, W * 0.3, H * 0.38) + pan(X + W * 0.54, T + H * 0.55, W * 0.3, H * 0.38);
+    } else {
+      out += pan(X + W * 0.13, T + H * 0.07, W * 0.32, H * 0.38) + pan(X + W * 0.55, T + H * 0.07, W * 0.32, H * 0.38);
+      out += pan(X + W * 0.13, T + H * 0.52, W * 0.32, H * 0.4) + pan(X + W * 0.55, T + H * 0.52, W * 0.32, H * 0.4);
+    }
+    return out + knob(X + W * 0.84, T + H * 0.5);
+  }
+  function trimSVG(p) {
+    const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.35), lt = shade(c, 0.15), dk = shade(c, -0.15), st = stk(e, 1);
+    switch (p.style) {
+      case "cornice": {
+        const h1 = H * 0.36, h2 = H * 0.3, h3 = H * 0.34;
+        let out = R(X, T, W, h1, c, st) + R(X + W * 0.015, T + h1, W * 0.97, h2, dk, st);
+        const dw = Math.max(2, h2 * 0.6), gap = dw * 2; const n = Math.floor((W * 0.97 - gap) / gap);
+        for (let i = 0; i < n; i++) out += R(X + W * 0.015 + gap * 0.75 + i * gap, T + h1, dw, h2 * 0.8, lt);
+        return out + R(X + W * 0.03, T + h1 + h2, W * 0.94, h3, c, st);
+      }
+      case "column": {
+        let out = R(X + W * 0.15, T + H * 0.1, W * 0.7, H * 0.84, c, st);
+        for (let i = 1; i < 4; i++) out += `<path d="M${f(X + W * 0.15 + W * 0.7 * i / 4)} ${f(T + H * 0.11)}V${f(B - H * 0.07)}" stroke="${dk}" stroke-width="${f(Math.max(1, W * 0.04))}"/>`;
+        return out + R(X, T, W, H * 0.06, c, st) + R(X + W * 0.08, T + H * 0.06, W * 0.84, H * 0.04, dk, st) + R(X + W * 0.06, B - H * 0.07, W * 0.88, H * 0.03, dk, st) + R(X, B - H * 0.04, W, H * 0.04, c, st);
+      }
+      case "pilaster": return R(X, T, W, H, c, st) + R(X + W * 0.2, T + H * 0.08, W * 0.6, H * 0.84, lt, stk(dk, 1)) + R(X - 2, T, W + 4, H * 0.04, dk, st) + R(X - 2, B - H * 0.04, W + 4, H * 0.04, dk, st);
+      case "quoins": {
+        const n = Math.max(1, Math.round(H / 30)), bh = H / n; let out = "";
+        for (let i = 0; i < n; i++) out += R(X, T + i * bh + 0.75, i % 2 ? W * 0.62 : W, bh - 1.5, i % 2 ? c : lt, st);
+        return out;
+      }
+      case "frame": { const t = clamp(Math.min(W, H) * 0.12, 4, 20); return P(`M${f(X)} ${f(T)}h${f(W)}v${f(H)}h${f(-W)}zM${f(X + t)} ${f(T + t)}v${f(H - 2 * t)}h${f(W - 2 * t)}v${f(-(H - 2 * t))}z`, c, st + ' fill-rule="evenodd"'); }
+      default: return R(X, T, W, H, c, st) + R(X, T, W, Math.min(H * 0.25, 4), lt);
+    }
+  }
+  function stepsSVG(p) {
+    const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.35), st = stk(e, 1);
+    const n = Math.max(1, Math.round(H / 17)), sh = H / n; let out = "";
+    let sx = X, sw = W;
+    if (p.style === "stoop") { const cw = Math.max(8, W * 0.12); out += R(X, T, cw, H, shade(c, -0.15), st) + R(X + W - cw, T, cw, H, shade(c, -0.15), st); sx = X + cw; sw = W - 2 * cw; }
+    for (let i = 0; i < n; i++) { const y = B - (i + 1) * sh; out += R(sx, y, sw, sh, i % 2 ? c : shade(c, -0.06), st) + R(sx, y, sw, Math.min(2.5, sh * 0.2), shade(c, 0.2)); }
+    return out;
+  }
+  function chimneySVG(p, o) {
+    const { X, T, W, H } = bx(p), c = p.color, e = shade(c, -0.42), ch = Math.max(8, H * 0.06);
+    return R(X, T, W, H, o.pat(p.tex, c), stk(e, 1.5)) + R(X - W * 0.12, T, W * 1.24, ch, shade(c, -0.25), stk(e, 1)) + R(X + W * 0.3, T - ch * 1.2, W * 0.4, ch * 1.2, "#8a6a55", stk(e, 1));
+  }
+  function plantSVG(p) {
+    const { X, T, W, H, B } = bx(p), c = p.color, dk = shade(c, -0.22), lt = shade(c, 0.16), rnd = mulberry(p.id * 977 + 13);
+    const tones = [dk, c, lt];
+    const el = (cx, cy, rx, ry, fill) => `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(rx)}" ry="${f(ry)}" fill="${fill}"/>`;
+    let out = "";
+    switch (p.style) {
+      case "tree": {
+        out += P(`M${f(X + W * 0.45)} ${f(B)}L${f(X + W * 0.47)} ${f(T + H * 0.45)}L${f(X + W * 0.53)} ${f(T + H * 0.45)}L${f(X + W * 0.55)} ${f(B)}Z`, "#6b4a33");
+        [[0.5, 0.3, 0.42, 0.28], [0.28, 0.42, 0.26, 0.2], [0.72, 0.42, 0.26, 0.2], [0.4, 0.18, 0.25, 0.17], [0.62, 0.2, 0.24, 0.16], [0.5, 0.48, 0.3, 0.14]].forEach((q, i) => { out += el(X + W * q[0], T + H * q[1], W * q[2], H * q[3], tones[i % 3]); });
+        return out;
+      }
+      case "hedge": {
+        const n = Math.max(2, Math.ceil(W / 45)), bw = W / n, r = Math.min(H * 0.28, bw * 0.62);
+        out += R(X, T + r * 0.8, W, H - r * 0.8, dk, `rx="${f(Math.min(r, 12))}"`);
+        for (let i = 0; i < n; i++) out += el(X + bw * (i + 0.5), T + r, bw * 0.62, r, i % 2 ? c : lt);
+        return out;
+      }
+      case "flowers": {
+        const bxH = H * 0.42, cols = ["#d9668a", "#f2c14e", "#f4eef8", "#c8553d", "#a47ad1"], n = Math.max(3, Math.round(W / 16));
+        for (let i = 0; i < n; i++) out += el(X + W * (i + 0.5) / n, B - bxH - H * 0.12, W / n * 0.7, H * 0.16, tones[i % 3]);
+        for (let i = 0; i < n; i++) out += `<circle cx="${f(X + W * (i + 0.5) / n + (rnd() - 0.5) * 4)}" cy="${f(T + H * 0.12 + rnd() * H * 0.25)}" r="${f(clamp(Math.min(W / n * 0.35, H * 0.12), 1.5, 8))}" fill="${cols[(rnd() * cols.length) | 0]}"/>`;
+        return out + R(X, B - bxH, W, bxH, "#8a5a3b", stk("#5a3a25", 1));
+      }
+      case "ivy": {
+        const n = Math.max(2, Math.round(W / 40));
+        for (let s = 0; s < n; s++) {
+          const x0 = X + W * (s + 0.5) / n, amp = Math.min(W / n * 0.35, 18), top = T + H * (0.05 + rnd() * 0.3);
+          let d = `M${f(x0)} ${f(B)}`, leaves = "";
+          const steps = Math.max(3, Math.round((B - top) / 24));
+          for (let k = 1; k <= steps; k++) {
+            const y = B - (B - top) * k / steps, x = x0 + Math.sin(k * 1.3 + s) * amp;
+            d += `L${f(x)} ${f(y)}`;
+            const side = k % 2 ? 1 : -1, ls = clamp(W / n * 0.18, 3, 9);
+            leaves += `<ellipse cx="${f(x + side * ls)}" cy="${f(y)}" rx="${f(ls)}" ry="${f(ls * 0.6)}" fill="${tones[k % 3]}" transform="rotate(${side * 30} ${f(x + side * ls)} ${f(y)})"/>`;
+          }
+          out += `<path d="${d}" fill="none" stroke="#5c4a2e" stroke-width="1.5" stroke-linejoin="round"/>` + leaves;
+        }
+        return out;
+      }
+      default:
+        [[0.22, 0.68, 0.24, 0.34], [0.5, 0.5, 0.3, 0.46], [0.78, 0.68, 0.24, 0.34], [0.36, 0.38, 0.2, 0.3], [0.64, 0.4, 0.2, 0.3], [0.5, 0.78, 0.36, 0.24]].forEach((q, i) => { out += el(X + W * q[0], T + H * q[1], W * q[2], H * q[3], tones[i % 3]); });
+        return out;
+    }
+  }
+  function labelSVG(p) {
+    return `<text x="${f(p.x)}" y="${f(-(p.y + p.h * 0.22))}" font-size="${f(p.h)}" fill="${p.color}" font-family="Fraunces, Georgia, serif" font-weight="700">${esc(p.text)}</text>`;
+  }
+  function lineSVG(p) {
+    return `<line x1="${f(p.x1)}" y1="${f(-p.y1)}" x2="${f(p.x2)}" y2="${f(-p.y2)}" stroke="${p.color}" stroke-width="${f(p.lw)}" stroke-linecap="round"${p.dash ? ` stroke-dasharray="${f(p.lw * 3)} ${f(p.lw * 2.5)}"` : ""}/>`;
+  }
+  function penPath(pts) {
+    const n = pts.length / 2; let d = `M${f(pts[0])} ${f(-pts[1])}`;
+    if (n === 2) return d + `L${f(pts[2])} ${f(-pts[3])}`;
+    for (let i = 1; i < n - 1; i++) { const x = pts[i * 2], y = pts[i * 2 + 1], nx = pts[i * 2 + 2], ny = pts[i * 2 + 3]; d += `Q${f(x)} ${f(-y)} ${f((x + nx) / 2)} ${f(-(y + ny) / 2)}`; }
+    return d + `L${f(pts[n * 2 - 2])} ${f(-pts[n * 2 - 1])}`;
+  }
+  function penSVG(p) { return `<path d="${penPath(p.pts)}" fill="none" stroke="${p.color}" stroke-width="${f(p.lw)}" stroke-linecap="round" stroke-linejoin="round"/>`; }
+  function dimSVG(p, o) {
+    const g = dimGeom(p), ts = o.ts, c = o.sky === "night" && p.color === "#2f5d7c" ? "#9cc3e0" : p.color, sw = f(ts * 0.07);
+    const sg = p.off >= 0 ? 1 : -1, gap = ts * 0.25, ext = ts * 0.35;
+    const L = (a, b) => `M${f(a.x)} ${f(-a.y)}L${f(b.x)} ${f(-b.y)}`;
+    let d = L(g.A, g.B);
+    if (Math.abs(p.off) > gap) {
+      d += L({ x: p.x1 + g.nx * gap * sg, y: p.y1 + g.ny * gap * sg }, { x: g.A.x + g.nx * ext * sg, y: g.A.y + g.ny * ext * sg });
+      d += L({ x: p.x2 + g.nx * gap * sg, y: p.y2 + g.ny * gap * sg }, { x: g.B.x + g.nx * ext * sg, y: g.B.y + g.ny * ext * sg });
+    }
+    const tk = ts * 0.32, tx = (g.ux + g.nx) * tk / Math.SQRT2, ty = (g.uy + g.ny) * tk / Math.SQRT2;
+    [g.A, g.B].forEach(q => { d += L({ x: q.x - tx, y: q.y - ty }, { x: q.x + tx, y: q.y + ty }); });
+    let ang = Math.atan2(g.uy, g.ux) * 180 / Math.PI, side = 1;
+    if (ang > 90.5 || ang < -89.5) { ang -= 180; side = -1; }
+    const mx = (g.A.x + g.B.x) / 2 + g.nx * ts * 0.55 * side, my = (g.A.y + g.B.y) / 2 + g.ny * ts * 0.55 * side;
+    return `<path d="${d}" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" fill="none"/><text x="${f(mx)}" y="${f(-my)}" font-size="${f(ts)}" text-anchor="middle" dominant-baseline="middle" fill="${c}" font-family="Manrope, system-ui, sans-serif" font-weight="800" transform="rotate(${f(-ang)} ${f(mx)} ${f(-my)})" stroke="${o.halo}" stroke-width="${f(ts * 0.22)}" paint-order="stroke" stroke-linejoin="round">${esc(fmtLen(g.L))}</text>`;
+  }
+  const DRAW = { wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
+  const SKY = {
+    day: { top: "#dceaf3", bot: "#f4efe3", grass: "#8aa860", soil: "#d8cdb5", halo: "rgba(255,255,255,.85)", glass: "url(#gDay)" },
+    dusk: { top: "#7d6fa0", bot: "#f1b48a", grass: "#6f8752", soil: "#b9a58f", halo: "rgba(255,240,225,.85)", glass: "url(#gDusk)" },
+    night: { top: "#0d1626", bot: "#24344c", grass: "#2e4430", soil: "#2a2f33", halo: "rgba(13,22,38,.85)", glass: "url(#gNight)" }
+  };
+  function artSVG(parts, sky, layers) {
+    const pats = new Map(), sk = SKY[sky] || SKY.day;
+    const b = bounds(parts.filter(p => p.t !== "dim"));
+    const o = {
+      sky, halo: sk.halo, glass: sk.glass,
+      ts: b ? clamp(Math.max(b.x1 - b.x0, b.y1 - Math.min(b.y0, 0)) / 42, 10, 60) : 20,
+      pat(tex, c) { if (!tex || tex === "plain") return c; const id = "p_" + tex + "_" + c.slice(1); if (!pats.has(id)) pats.set(id, patDef(tex, c, id)); return `url(#${id})`; }
+    };
+    let body = R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 18, sk.grass) + `<path d="M-100000 0H100000" stroke="${shade(sk.grass, -0.35)}" stroke-width="1.5"/>`;
+    parts.forEach(p => {
+      if (layers && layers[p.layer] && layers[p.layer].hide) return;
+      let s = DRAW[p.t](p, o);
+      if (p.fx && kindOf(p) === "rect") s = `<g transform="translate(${f(2 * p.x + p.w)} 0) scale(-1 1)">${s}</g>`;
+      body += s;
+    });
+    return { defs: Array.from(pats.values()).join(""), body };
+  }
+
+  /* ---------- export ---------- */
+  const STATIC_DEFS = `<linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e8f2"/><stop offset="1" stop-color="#7c9fb6"/></linearGradient><linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c79b"/><stop offset="1" stop-color="#806f9c"/></linearGradient><linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a6"/><stop offset="1" stop-color="#f0ac52"/></linearGradient>`;
+  function exportSVG(d, pad) {
+    const parts = d.parts.filter(p => !d.layers[p.layer].hide);
+    const b = bounds(parts) || { x0: 0, y0: 0, x1: 800, y1: 400 };
+    pad = pad == null ? Math.max(60, (b.x1 - b.x0) * 0.06) : pad;
+    const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad, bot = Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
+    const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk.top}"/><stop offset="1" stop-color="${sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, "url(#sky)")}${a.body}</svg>`;
+    return { svg, W, H };
+  }
+  const thumbURL = d => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(exportSVG(d).svg);
+  function fileName(ext) { return (D.name.replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/\s+/g, "-") || "facade") + "." + ext; }
+  async function shareOrDownload(blob, name) {
+    try {
+      const file = new File([blob], name, { type: blob.type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: D.name }); return; }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 3000);
+  }
+  async function savePNG() {
+    const { svg, W, H } = exportSVG(D);
+    const k = Math.min(4, 2400 / Math.max(W, H)), cw = Math.round(W * k), ch = Math.round(H * k);
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    try {
+      const img = new Image(); img.width = cw; img.height = ch; img.src = url;
+      await (img.decode ? img.decode() : new Promise((res, rej) => { img.onload = res; img.onerror = rej; }));
+      const cv = document.createElement("canvas"); cv.width = cw; cv.height = ch;
+      cv.getContext("2d").drawImage(img, 0, 0, cw, ch);
+      const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+      if (!blob) throw new Error("no blob");
+      await shareOrDownload(blob, fileName("png"));
+      track("export", { kind: "png" });
+    } catch (e) { toast("The picture couldn't be made on this phone. Try Save SVG instead."); }
+    finally { URL.revokeObjectURL(url); }
+  }
+  function saveSVGFile() { shareOrDownload(new Blob([exportSVG(D).svg], { type: "image/svg+xml" }), fileName("svg")); track("export", { kind: "svg" }); }
+
+  /* Share links carry the whole design in the address (after #), compressed when the browser can. Nothing is uploaded. */
+  function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function unb64u(s) { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/")); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+  function compactDesign(d) { return { name: d.name, sky: d.sky, parts: d.parts.map(p => { const q = Object.assign({}, p); delete q.id; return q; }) }; }
+  async function encodeDesign(d) {
+    const bytes = new TextEncoder().encode(JSON.stringify(compactDesign(d)));
+    if (window.CompressionStream) {
+      try { const buf = await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer(); return "z" + b64u(new Uint8Array(buf)); } catch (e) {}
+    }
+    return "j" + b64u(bytes);
+  }
+  async function decodeDesign(code) {
+    if (!code || code.length > 200000 || !/^[zj][A-Za-z0-9_-]+$/.test(code)) return null;
+    const bytes = unb64u(code.slice(1));
+    let text;
+    if (code[0] === "z") {
+      if (!window.DecompressionStream) throw new Error("old");
+      const rd = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader();
+      const chunks = []; let n = 0;
+      for (;;) { const { done, value } = await rd.read(); if (done) break; n += value.length; if (n > 2000000) { rd.cancel(); return null; } chunks.push(value); }
+      const all = new Uint8Array(n); let k = 0; chunks.forEach(c => { all.set(c, k); k += c.length; });
+      text = new TextDecoder().decode(all);
+    } else text = new TextDecoder().decode(bytes);
+    return cleanDesign(JSON.parse(text));
+  }
+
+  /* ---------- templates ---------- */
+  const TEMPLATES = {
+    cottage: { name: "Garden cottage", sky: "day", parts: [
+      { t: "chimney", x: 560, y: 380, w: 60, h: 230, color: "#8e4a39", tex: "brick" },
+      { t: "wall", x: 0, y: 0, w: 800, h: 300, color: "#b5654a", tex: "brick" },
+      { t: "roof", x: -50, y: 300, w: 900, h: 270, color: "#5b4a42", tex: "shingle", style: "gable" },
+      { t: "door", x: 350, y: 0, w: 100, h: 210, color: "#3f6b5a", style: "panel" },
+      { t: "window", x: 95, y: 90, w: 150, h: 140, color: "#3f6b5a", style: "shutters" },
+      { t: "window", x: 555, y: 90, w: 150, h: 140, color: "#3f6b5a", style: "shutters" },
+      { t: "window", x: 360, y: 360, w: 80, h: 80, color: "#f4efe4", style: "round" },
+      { t: "plant", x: 105, y: 0, w: 130, h: 70, color: "#5f8a45", style: "shrub" },
+      { t: "plant", x: 565, y: 0, w: 130, h: 70, color: "#5f8a45", style: "shrub" },
+      { t: "plant", x: -300, y: 0, w: 260, h: 480, color: "#5f8a45", style: "tree" }] },
+    townhouse: { name: "City townhouse", sky: "dusk", parts: [
+      { t: "wall", x: 0, y: 0, w: 650, h: 940, color: "#d9c7a8", tex: "stucco" },
+      { t: "trim", x: 0, y: 0, w: 40, h: 920, color: "#efe8da", style: "quoins" },
+      { t: "trim", x: 610, y: 0, w: 40, h: 920, color: "#efe8da", style: "quoins", fx: true },
+      { t: "roof", x: -20, y: 960, w: 690, h: 210, color: "#4c5560", tex: "slate", style: "mansard" },
+      { t: "trim", x: -15, y: 920, w: 680, h: 40, color: "#efe8da", style: "cornice" },
+      { t: "trim", x: 0, y: 320, w: 650, h: 20, color: "#efe8da", style: "band" },
+      { t: "window", x: 280, y: 1010, w: 90, h: 110, color: "#efe8da", style: "arched" },
+      { t: "steps", x: 245, y: 0, w: 160, h: 51, color: "#b9b2a4", style: "stoop" },
+      { t: "door", x: 275, y: 51, w: 100, h: 230, color: "#2f5d7c", style: "arched" },
+      { t: "window", x: 80, y: 90, w: 110, h: 180, color: "#efe8da", style: "double" },
+      { t: "window", x: 460, y: 90, w: 110, h: 180, color: "#efe8da", style: "double" },
+      { t: "window", x: 80, y: 420, w: 110, h: 190, color: "#efe8da", style: "arched" },
+      { t: "window", x: 270, y: 420, w: 110, h: 190, color: "#efe8da", style: "arched" },
+      { t: "window", x: 460, y: 420, w: 110, h: 190, color: "#efe8da", style: "arched" },
+      { t: "window", x: 80, y: 690, w: 110, h: 170, color: "#efe8da", style: "double" },
+      { t: "window", x: 270, y: 690, w: 110, h: 170, color: "#efe8da", style: "double" },
+      { t: "window", x: 460, y: 690, w: 110, h: 170, color: "#efe8da", style: "double" },
+      { t: "plant", x: 80, y: 690, w: 110, h: 40, color: "#5f8a45", style: "flowers" },
+      { t: "plant", x: 460, y: 690, w: 110, h: 40, color: "#5f8a45", style: "flowers" }] },
+    modern: { name: "Modern house", sky: "day", parts: [
+      { t: "wall", x: 0, y: 0, w: 1000, h: 320, color: "#e9e5dc", tex: "board" },
+      { t: "wall", x: 450, y: 320, w: 550, h: 300, color: "#3d3f42", tex: "siding" },
+      { t: "roof", x: -20, y: 320, w: 470, h: 22, color: "#3d3f42", tex: "plain", style: "flat" },
+      { t: "roof", x: 430, y: 620, w: 590, h: 22, color: "#26301f", tex: "plain", style: "flat" },
+      { t: "window", x: 70, y: 60, w: 300, h: 220, color: "#3d3f42", style: "single" },
+      { t: "door", x: 440, y: 0, w: 110, h: 240, color: "#8a6a4a", style: "glass" },
+      { t: "door", x: 630, y: 0, w: 300, h: 240, color: "#8a6a4a", style: "garage" },
+      { t: "window", x: 520, y: 380, w: 410, h: 180, color: "#26301f", style: "casement" },
+      { t: "plant", x: -280, y: 0, w: 240, h: 460, color: "#5f8a45", style: "tree" },
+      { t: "plant", x: 60, y: 0, w: 320, h: 60, color: "#5f8a45", style: "hedge" }] }
+  };
+
+  /* ---------- view ---------- */
+  const stage = $("stage");
+  let stageW = 300, stageH = 300;
+  const toS = (x, y) => ({ x: x * view.s + view.tx, y: -y * view.s + view.ty });
+  const toW = (sx, sy) => ({ x: (sx - view.tx) / view.s, y: -(sy - view.ty) / view.s });
+  function measure() { const r = stage.getBoundingClientRect(); stageW = r.width || 300; stageH = r.height || 300; }
+  function fit() {
+    measure();
+    const b = bounds(D.parts.filter(visible));
+    let x0, x1, y0, y1;
+    if (b) { x0 = b.x0; x1 = b.x1; y0 = Math.min(b.y0, 0); y1 = Math.max(b.y1, 100); }
+    else { x0 = -100; x1 = 1100; y0 = 0; y1 = 600; }
+    const padT = 60, padB = 64, padX = 26;
+    const s = clamp(Math.min((stageW - padX * 2) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6);
+    view.s = s; view.tx = (stageW - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * 0.72;
+    renderView();
+  }
+
+  /* ---------- rendering ---------- */
+  let preview = null; // a part being drawn
+  function renderArt() {
+    const parts = preview ? D.parts.concat([preview]) : D.parts;
+    const a = artSVG(parts, D.sky, D.layers);
+    $("defs").innerHTML = a.defs; $("artBody").innerHTML = a.body;
+    stage.dataset.sky = D.sky;
+  }
+  function renderGrid() {
+    const g = $("grid"), sky = D.sky === "night";
+    let step = S().grid; while (step * view.s < 9) step *= 2;
+    const major = S().units === "ft" ? 30.48 * (view.s * 30.48 < 18 ? 5 : 1) : (view.s * 100 < 18 ? 500 : 100);
+    const tl = toW(0, 0), br = toW(stageW, stageH);
+    const groundY = toS(0, 0).y;
+    let minor = "", maj = "";
+    const yMax = Math.min(stageH, groundY);
+    if (yMax <= 0) { g.innerHTML = ""; return; }
+    for (let x = Math.ceil(tl.x / step) * step; x <= br.x; x += step) { const sx = f(toS(x, 0).x); const isM = Math.abs(x / major - Math.round(x / major)) < 1e-6; (isM ? (s => { maj += s; }) : (s => { minor += s; }))(`M${sx} 0V${f(yMax)}`); }
+    for (let y = Math.max(0, Math.floor(br.y / step) * step); y <= tl.y; y += step) { const sy = toS(0, y).y; if (sy > yMax) continue; const isM = Math.abs(y / major - Math.round(y / major)) < 1e-6; const s = `M0 ${f(sy)}H${f(stageW)}`; if (isM) maj += s; else minor += s; }
+    const c = sky ? "255,255,255" : "40,60,80";
+    g.innerHTML = `<path d="${minor}" stroke="rgba(${c},${sky ? 0.06 : 0.08})" stroke-width="1"/><path d="${maj}" stroke="rgba(${c},${sky ? 0.13 : 0.16})" stroke-width="1"/>`;
+  }
+  let handles = [];
+  function renderUI() {
+    const u = $("ui"); let s = "";
+    guides.x.forEach(x => { const sx = f(toS(x, 0).x); s += `<path d="M${sx} 0V${f(stageH)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`; });
+    guides.y.forEach(y => { const sy = f(toS(0, y).y); s += `<path d="M0 ${sy}H${f(stageW)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`; });
+    handles = [];
+    const p = selPart();
+    if (p && visible(p)) {
+      const k = kindOf(p), b = box(p), a = toS(b.x, b.y + b.h), z = toS(b.x + b.w, b.y);
+      const bw = z.x - a.x, bh = z.y - a.y;
+      s += `<rect x="${f(a.x - 3)}" y="${f(a.y - 3)}" width="${f(bw + 6)}" height="${f(bh + 6)}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" rx="3"/>`;
+      if (k === "rect") {
+        const mx = (a.x + z.x) / 2, my = (a.y + z.y) / 2;
+        handles = [[0, a.x, a.y], [1, z.x, a.y], [2, z.x, z.y], [3, a.x, z.y]];
+        if (bw > 44) handles.push([4, mx, a.y], [6, mx, z.y]);
+        if (bh > 44) handles.push([5, z.x, my], [7, a.x, my]);
+        if (S().sizes && !act) {
+          const tw = esc(fmtLen(p.w)), th = esc(fmtLen(p.h));
+          s += `<text x="${f(mx)}" y="${f(z.y + 20)}" text-anchor="middle" class="szt">${tw}</text>`;
+          s += `<text x="${f(z.x + 10)}" y="${f(my + 4)}" class="szt">${th}</text>`;
+        }
+      } else if (k === "line" || k === "dim") {
+        const p1 = toS(p.x1, p.y1), p2 = toS(p.x2, p.y2);
+        handles = [[0, p1.x, p1.y], [1, p2.x, p2.y]];
+        if (k === "dim") { const g = dimGeom(p), m = toS((g.A.x + g.B.x) / 2, (g.A.y + g.B.y) / 2); handles.push([2, m.x, m.y]); }
+      }
+      handles.forEach(h => { s += `<circle cx="${f(h[1])}" cy="${f(h[2])}" r="${h[0] === 2 && k === "dim" ? 8 : 7}" fill="var(--panel-solid)" stroke="var(--accent)" stroke-width="2.5"/>`; });
+    }
+    u.innerHTML = `<style>.szt{font:800 12px Manrope,system-ui,sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--panel-solid);stroke-width:4px;stroke-linejoin:round}</style>` + s;
+  }
+  function renderView() {
+    $("art").setAttribute("transform", `matrix(${view.s} 0 0 ${view.s} ${view.tx} ${view.ty})`);
+    renderGrid(); renderUI();
+  }
+  function sizeText(p) {
+    const k = kindOf(p);
+    if (k === "rect") return fmtLen(p.w) + " × " + fmtLen(p.h) + (p.y > 0.5 ? " · " + fmtLen(p.y) + " up" : "");
+    if (k === "label") return "“" + p.text + "”";
+    if (k === "line" || k === "dim") return fmtLen(Math.hypot(p.x2 - p.x1, p.y2 - p.y1)) + " long";
+    const b = box(p); return fmtLen(b.w) + " × " + fmtLen(b.h);
+  }
+  function partName(p) { const T = TYPES[p.t]; return (p.style && T.styles ? NAMES[p.style] + " " + T.name.toLowerCase() : T.name).replace(/^(\w)/, c => c.toUpperCase()); }
+  function renderDock() {
+    const p = selPart();
+    $("ctx").hidden = !p;
+    if (p) { $("ctxName").textContent = partName(p) + (p.tex && p.tex !== "plain" ? " · " + NAMES[p.tex] : ""); $("ctxSize").textContent = sizeText(p); }
+    $("undoBtn").disabled = !undoStack.length; $("redoBtn").disabled = !redoStack.length;
+    $("gridChip").textContent = "Grid " + GRID_NAMES[S().units][GRIDS[S().units].indexOf(S().grid)];
+    $("gridChip").setAttribute("aria-pressed", S().snap); $("osnapChip").setAttribute("aria-pressed", S().osnap); $("orthoChip").setAttribute("aria-pressed", S().ortho);
+    $("dname").textContent = D.name;
+    document.querySelectorAll(".tool").forEach(b => b.setAttribute("aria-pressed", b.dataset.t === tool));
+    document.querySelectorAll(".tool .dot").forEach(d => { d.style.background = store.paint.color; });
+  }
+  let rafQ = 0, rafArt = false;
+  function queue(art) { if (art) rafArt = true; if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; if (rafArt) renderArt(); rafArt = false; renderUI(); }); }
+  function render() { renderArt(); renderView(); renderDock(); }
+
+  /* ---------- undo ---------- */
+  const snapshot = () => JSON.stringify({ p: D.parts, n: D.next });
+  function restore(s) { const o = JSON.parse(s); D.parts = o.p; D.next = o.n; }
+  function pushUndo(before) { undoStack.push(before); if (undoStack.length > 150) undoStack.shift(); redoStack = []; }
+  function changed() { D.at = Date.now(); if (sel != null && !selPart()) sel = null; save(); render(); }
+  function withUndo(fn) { const before = snapshot(); fn(); if (snapshot() !== before) { pushUndo(before); changed(); return true; } return false; }
+  function undo() { if (!undoStack.length) return; redoStack.push(snapshot()); restore(undoStack.pop()); SFX.tap(); changed(); refreshProps(); }
+  function redo() { if (!redoStack.length) return; undoStack.push(snapshot()); restore(redoStack.pop()); SFX.tap(); changed(); refreshProps(); }
+
+  /* ---------- snapping ---------- */
+  let act = null;
+  const tol = () => 12 / view.s;
+  function snapTargets(skip) {
+    const xs = [], ys = [], pts = [];
+    if (S().osnap) {
+      ys.push(0);
+      D.parts.forEach(p => {
+        if (p === skip || !visible(p)) return;
+        const k = kindOf(p);
+        if (k === "rect" || k === "label") {
+          xs.push(p.x, p.x + p.w / 2, p.x + p.w); ys.push(p.y, p.y + p.h / 2, p.y + p.h);
+          [[p.x, p.y], [p.x + p.w, p.y], [p.x, p.y + p.h], [p.x + p.w, p.y + p.h], [p.x + p.w / 2, p.y], [p.x + p.w / 2, p.y + p.h], [p.x, p.y + p.h / 2], [p.x + p.w, p.y + p.h / 2]].forEach(q => pts.push({ x: q[0], y: q[1] }));
+          if (p.t === "roof" && p.style !== "flat") pts.push({ x: p.x + p.w / 2, y: p.y + p.h });
+        } else if (k === "line" || k === "dim") { pts.push({ x: p.x1, y: p.y1 }, { x: p.x2, y: p.y2 }); xs.push(p.x1, p.x2); ys.push(p.y1, p.y2); }
+      });
+    }
+    return { xs, ys, pts };
+  }
+  function snap1(raw, cands, axis) {
+    let best = null, bd = tol();
+    cands.forEach(c => { const d = Math.abs(raw - c); if (d < bd) { bd = d; best = c; } });
+    if (best != null) { guides[axis].push(best); return best; }
+    return gsnap(raw);
+  }
+  function snapEdge(raw, size, cands, axis) {
+    let best = null, bd = tol(), g = 0;
+    [0, size / 2, size].forEach(off => cands.forEach(c => { const d = Math.abs(raw + off - c); if (d < bd) { bd = d; best = c - off; g = c; } }));
+    if (best != null) { guides[axis].push(g); return r1(best); }
+    return gsnap(raw);
+  }
+  function snapPoint(w, ref) {
+    let x, y, hit = null, bd = tol() * 1.2;
+    act.tg.pts.forEach(q => { const d = Math.hypot(q.x - w.x, q.y - w.y); if (d < bd) { bd = d; hit = q; } });
+    if (hit) { x = hit.x; y = hit.y; guides.x.push(x); guides.y.push(y); }
+    else { x = snap1(w.x, act.tg.xs, "x"); y = snap1(w.y, act.tg.ys, "y"); }
+    if (ref && S().ortho) {
+      if (Math.abs(x - ref.x) >= Math.abs(y - ref.y)) y = ref.y; else x = ref.x;
+      guides = { x: [], y: [] };
+    }
+    return { x: r1(x), y: r1(y) };
+  }
+
+  /* ---------- pointer input ---------- */
+  const ptrs = new Map(); let pinch = null, lastTap = { t: 0, id: null }, stageRect = null;
+  function spos(e) { const r = stageRect || stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  stage.addEventListener("pointerdown", e => {
+    if (e.target.closest && e.target.closest("button")) return;
+    if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 1) return;
+    stageRect = stage.getBoundingClientRect();
+    try { stage.setPointerCapture(e.pointerId); } catch (x) {}
+    ptrs.set(e.pointerId, spos(e));
+    if (ptrs.size === 2) { cancelAct(); startPinch(); return; }
+    if (ptrs.size > 2) return;
+    e.preventDefault();
+    beginAct(spos(e), e.button === 1);
+  });
+  stage.addEventListener("pointermove", e => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, spos(e));
+    if (pinch) { movePinch(); return; }
+    if (act) moveAct(spos(e));
+  });
+  function up(e, cancel) {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.delete(e.pointerId);
+    if (pinch) { if (ptrs.size < 2) pinch = null; return; }
+    if (act) { if (cancel) cancelAct(); else endAct(spos(e)); }
+  }
+  stage.addEventListener("pointerup", e => up(e, false));
+  stage.addEventListener("pointercancel", e => up(e, true));
+  stage.addEventListener("wheel", e => {
+    e.preventDefault();
+    const p = spos(e), k = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022));
+    zoomAt(p, view.s * k);
+  }, { passive: false });
+  document.addEventListener("gesturestart", e => e.preventDefault());
+  function zoomAt(p, s) { s = clamp(s, 0.02, 8); const w = toW(p.x, p.y); view.s = s; view.tx = p.x - w.x * s; view.ty = p.y + w.y * s; renderView(); }
+  function startPinch() {
+    const [a, b] = Array.from(ptrs.values());
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, s0: view.s, w: toW(mid.x, mid.y) };
+  }
+  function movePinch() {
+    const [a, b] = Array.from(ptrs.values());
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+    view.s = clamp(pinch.s0 * d / pinch.d0, 0.02, 8); view.tx = mid.x - pinch.w.x * view.s; view.ty = mid.y + pinch.w.y * view.s;
+    renderView();
+  }
+  function hitHandle(sp) { let best = null, bd = 24; handles.forEach(h => { const d = Math.hypot(h[1] - sp.x, h[2] - sp.y); if (d < bd) { bd = d; best = h[0]; } }); return best; }
+  const DRAW_TOOLS = ["wall", "roof", "window", "door", "trim", "plant", "steps", "chimney", "label"];
+  function beginAct(sp, pan) {
+    const w = toW(sp.x, sp.y);
+    act = { sp0: sp, w0: w, moved: false, before: null };
+    if (pan) { act.k = "pan"; act.v0 = Object.assign({}, view); return; }
+    const p = selPart();
+    const h = p && editable(p) ? hitHandle(sp) : null;
+    if (h != null) { act.k = "handle"; act.h = h; act.orig = JSON.parse(JSON.stringify(p)); act.tg = snapTargets(p); return; }
+    const hit = hitPart(w);
+    if (tool === "select") {
+      if (hit) { if (sel !== hit.id) { sel = hit.id; SFX.tap(); renderDock(); renderUI(); } act.k = "move"; act.orig = JSON.parse(JSON.stringify(hit)); act.tg = snapTargets(hit); }
+      else { act.k = "pan"; act.v0 = Object.assign({}, view); }
+      return;
+    }
+    if (tool === "paint") { act.k = "paint"; return; }
+    if (hit && p && hit.id === p.id && tool !== "pen") { act.k = "move"; act.orig = JSON.parse(JSON.stringify(p)); act.tg = snapTargets(p); return; }
+    act.tg = snapTargets(null);
+    if (tool === "pen") { act.k = "pen"; act.pts = [r1(w.x), r1(w.y)]; return; }
+    if (tool === "line" || tool === "dim") { act.k = "line"; act.a = snapPoint(w); guides = { x: [], y: [] }; return; }
+    act.k = "draw"; act.a = snapPoint(w); guides = { x: [], y: [] };
+  }
+  function showReadout(sp, text) {
+    const r = $("readout"); r.hidden = false; r.textContent = text;
+    const w = r.offsetWidth, h = r.offsetHeight;
+    let x = clamp(sp.x - w / 2, 6, stageW - w - 6), y = sp.y - h - 56;
+    if (y < 6) y = sp.y + 44;
+    r.style.left = x + "px"; r.style.top = y + "px";
+  }
+  function moveAct(sp) {
+    if (!act.moved) {
+      if (Math.hypot(sp.x - act.sp0.x, sp.y - act.sp0.y) < 6) return;
+      act.moved = true; act.before = snapshot();
+    }
+    const w = toW(sp.x, sp.y), dx = w.x - act.w0.x, dy = w.y - act.w0.y;
+    guides = { x: [], y: [] };
+    switch (act.k) {
+      case "pan":
+        view.tx = act.v0.tx + (sp.x - act.sp0.x); view.ty = act.v0.ty + (sp.y - act.sp0.y); renderView(); return;
+      case "move": {
+        const p = selPart(), o = act.orig, k = kindOf(p);
+        if (k === "rect" || k === "label") {
+          p.x = snapEdge(o.x + dx, o.w, act.tg.xs, "x"); p.y = snapEdge(o.y + dy, o.h, act.tg.ys, "y");
+          showReadout(sp, "X " + fmtLen(p.x) + "   Y " + fmtLen(p.y));
+        } else {
+          let ddx, ddy;
+          if (k === "pen") { ddx = gsnap(dx); ddy = gsnap(dy); }
+          else { const q = snapPoint({ x: o.x1 + dx, y: o.y1 + dy }); ddx = q.x - o.x1; ddy = q.y - o.y1; }
+          if (k === "pen") p.pts = o.pts.map((v, i) => r1(v + (i % 2 ? ddy : ddx)));
+          else { p.x1 = r1(o.x1 + ddx); p.y1 = r1(o.y1 + ddy); p.x2 = r1(o.x2 + ddx); p.y2 = r1(o.y2 + ddy); }
+          showReadout(sp, "Moved " + fmtLen(Math.hypot(ddx, ddy)));
+        }
+        queue(true); renderDock(); return;
+      }
+      case "handle": {
+        const p = selPart(), o = act.orig, k = kindOf(p);
+        if (k === "rect") {
+          let L = o.x, Rr = o.x + o.w, Bo = o.y, To = o.y + o.h; const h = act.h;
+          const vx = snap1(w.x, act.tg.xs, "x"), vy = snap1(w.y, act.tg.ys, "y");
+          if (h === 0 || h === 3 || h === 7) L = Math.min(vx, Rr - 5);
+          if (h === 1 || h === 2 || h === 5) Rr = Math.max(vx, L + 5);
+          if (h === 0 || h === 1 || h === 4) To = Math.max(vy, Bo + 5);
+          if (h === 2 || h === 3 || h === 6) Bo = Math.min(vy, To - 5);
+          if (h === 4 || h === 6) guides.x = []; if (h === 5 || h === 7) guides.y = [];
+          p.x = r1(L); p.w = r1(Rr - L); p.y = r1(Bo); p.h = r1(To - Bo);
+          showReadout(sp, fmtLen(p.w) + " × " + fmtLen(p.h));
+        } else if (act.h === 2) {
+          const g = dimGeom(o); p.off = gsnap((w.x - o.x1) * g.nx + (w.y - o.y1) * g.ny);
+          showReadout(sp, "Offset " + fmtLen(p.off));
+        } else {
+          const other = act.h === 0 ? { x: o.x2, y: o.y2 } : { x: o.x1, y: o.y1 };
+          const q = snapPoint(w, other);
+          if (act.h === 0) { p.x1 = q.x; p.y1 = q.y; } else { p.x2 = q.x; p.y2 = q.y; }
+          showReadout(sp, lineText(p));
+        }
+        queue(true); renderDock(); return;
+      }
+      case "draw": {
+        const b = snapPoint(w), a = act.a;
+        const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), ww = Math.max(5, Math.abs(b.x - a.x)), hh = Math.max(5, Math.abs(b.y - a.y));
+        if (tool === "label") { preview = mk("label", { x: b.x, y: b.y }); }
+        else preview = mk(tool, { x, y, w: r1(ww), h: r1(hh) }, true);
+        showReadout(sp, tool === "label" ? "X " + fmtLen(b.x) + "   Y " + fmtLen(b.y) : fmtLen(ww) + " × " + fmtLen(hh));
+        queue(true); return;
+      }
+      case "line": {
+        const b = snapPoint(w, act.a);
+        preview = tool === "dim" ? mk("dim", { x1: act.a.x, y1: act.a.y, x2: b.x, y2: b.y }, true) : mk("line", { x1: act.a.x, y1: act.a.y, x2: b.x, y2: b.y }, true);
+        showReadout(sp, lineText(preview));
+        queue(true); return;
+      }
+      case "pen": {
+        const lx = act.pts[act.pts.length - 2], ly = act.pts[act.pts.length - 1];
+        if (Math.hypot(w.x - lx, w.y - ly) * view.s >= 2.5) act.pts.push(r1(w.x), r1(w.y));
+        if (act.pts.length >= 4) preview = mk("pen", { pts: act.pts.slice() }, true);
+        queue(true); return;
+      }
+    }
+  }
+  function lineText(p) { const L = Math.hypot(p.x2 - p.x1, p.y2 - p.y1); let a = Math.round(Math.atan2(p.y2 - p.y1, p.x2 - p.x1) * 180 / Math.PI); return fmtLen(L) + "  " + a + "°"; }
+  function endAct(sp) {
+    const a = act; act = null; $("readout").hidden = true; guides = { x: [], y: [] };
+    const w = toW(sp.x, sp.y);
+    if (!a.moved) {
+      if ((a.k === "move" || a.k === "handle") && DRAW_TOOLS.indexOf(tool) >= 0) a.k = "draw";
+      if ((a.k === "move" || a.k === "handle") && tool === "paint") a.k = "paint";
+      if (a.k === "pan" && tool === "select") { if (sel != null) { sel = null; renderDock(); } }
+      else if ((a.k === "move" || a.k === "handle") && tool === "select") {
+        const now = Date.now();
+        if (a.k === "move" && lastTap.id === sel && now - lastTap.t < 380) { openProps(); lastTap = { t: 0, id: null }; }
+        else lastTap = { t: now, id: sel };
+      }
+      else if (a.k === "paint") paintAt(w);
+      else if (a.k === "draw") tapPlace(tool, w);
+      else if (a.k === "line") toast(tool === "dim" ? "Drag from one point to another to measure." : "Drag to draw a line.");
+      preview = null; renderUI(); return;
+    }
+    if (a.k === "pan") return;
+    if (a.k === "draw" || a.k === "line" || a.k === "pen") {
+      const p = preview; preview = null;
+      if (p) {
+        if (a.k === "pen") p.pts = simplify(p.pts);
+        if (a.k === "line" && Math.hypot(p.x2 - p.x1, p.y2 - p.y1) < 1) { renderArt(); renderUI(); return; }
+        p.id = D.next++; D.parts.push(p); sel = p.id; sess.moves++;
+        unhideFor(p); remember(p);
+        SFX.place();
+        if (p.t === "label") { pushUndo(a.before); changed(); openProps(true); return; }
+      }
+    }
+    if (snapshot() !== a.before) { pushUndo(a.before); changed(); } else render();
+  }
+  function cancelAct() {
+    if (!act) return;
+    if (act.before) restore(act.before);
+    act = null; preview = null; guides = { x: [], y: [] }; $("readout").hidden = true;
+    render();
+  }
+  function simplify(pts) {
+    const t = 1.5 / view.s, out = [pts[0], pts[1]];
+    for (let i = 2; i < pts.length - 2; i += 2) if (Math.hypot(pts[i] - out[out.length - 2], pts[i + 1] - out[out.length - 1]) >= t) out.push(pts[i], pts[i + 1]);
+    out.push(pts[pts.length - 2], pts[pts.length - 1]);
+    return out.slice(0, 4000);
+  }
+  function remember(p) { const T = TYPES[p.t], m = store.mem[p.t] || (store.mem[p.t] = {}); m.color = p.color; if (T.styles) m.style = p.style; if (T.texs) m.tex = p.tex; save(); }
+  function unhideFor(p) { const l = D.layers[p.layer]; if (l.hide || l.lock) { l.hide = false; l.lock = false; toast("Turned the " + LAYERS.find(x => x.id === p.layer).name + " layer back on."); } }
+  function mk(type, props, temp) {
+    const T = TYPES[type], m = store.mem[type] || {};
+    const p = { id: temp ? -1 : D.next++, t: type, layer: T.layer, color: m.color || T.color };
+    if (T.styles) p.style = m.style || T.style;
+    if (T.texs) p.tex = m.tex || T.tex;
+    if (T.kind === "rect") Object.assign(p, { x: 0, y: 0, w: T.w, h: T.h });
+    if (type === "label") { p.text = "Label"; p.h = T.h; p.w = labelW(p.text, p.h); }
+    if (type === "line") { p.lw = r1(Math.max(0.5, 2 / view.s)); p.color = store.paint.color; }
+    if (type === "pen") { p.lw = r1(Math.max(0.5, store.paint.pen / view.s)); p.color = store.paint.color; }
+    if (type === "dim") p.off = r1(Math.max(20, 28 / view.s));
+    Object.assign(p, props);
+    return p;
+  }
+  function tapPlace(type, w) {
+    const T = TYPES[type], m = store.mem[type] || {}, st = m.style || T.style;
+    let sz = (SIZES[type] && SIZES[type][st]) || [T.w, T.h], ww = sz[0], hh = sz[1];
+    const wall = wallAt(w);
+    let x = w.x - ww / 2, y = w.y - hh / 2, fixed = false;
+    if (type === "roof") {
+      const wb = wallBelow(w);
+      if (wb) { ww = wb.w + 80; x = wb.x - 40; y = wb.y + wb.h; hh = st === "flat" ? 25 : Math.round(ww * (st === "shed" ? 0.2 : 0.3)); fixed = true; }
+    } else if (type === "door") { y = wall ? wall.y : 0; }
+    else if (type === "steps" || type === "plant" || type === "wall") { if (w.y - hh / 2 < (type === "wall" ? 150 : 40)) y = 0; }
+    else if (type === "trim" && wall && (st === "band" || st === "cornice")) { x = wall.x - (st === "cornice" ? 20 : 0); ww = wall.w + (st === "cornice" ? 40 : 0); fixed = true; y = w.y - hh / 2; }
+    else if (type === "trim" && wall && (st === "column" || st === "pilaster" || st === "quoins")) { y = wall.y; hh = wall.h; }
+    const tg = snapTargets(null);
+    act = { tg }; // snapping helpers read act.tg
+    if (!fixed) { x = snapEdge(x, ww, tg.xs, "x"); }
+    if (!fixed || type === "trim") { if (!(type === "door" || ((type === "steps" || type === "plant" || type === "wall") && y === 0))) y = snapEdge(y, hh, tg.ys, "y"); }
+    act = null; guides = { x: [], y: [] };
+    const props = type === "label" ? { x: r1(w.x), y: r1(w.y) } : { x: r1(x), y: r1(y), w: r1(ww), h: r1(hh) };
+    withUndo(() => { const p = mk(type, props); D.parts.push(p); sel = p.id; sess.moves++; unhideFor(p); });
+    SFX.place();
+    if (type === "label") openProps(true);
+  }
+  function paintAt(w) {
+    const p = hitPart(w);
+    if (!p) { toast("Tap a part to paint it. Tap Paint again to pick a color."); return; }
+    const T = TYPES[p.t], c = store.paint.color, tx = store.paint.tex;
+    const ok = withUndo(() => { p.color = c; if (tx && T.texs && T.texs.indexOf(tx) >= 0) p.tex = tx; });
+    sel = p.id; remember(p); SFX.place(); render();
+    if (!ok) toast("That part is already this color.");
+  }
+
+  /* ---------- part actions ---------- */
+  function clonePart(p) { const q = JSON.parse(JSON.stringify(p)); q.id = D.next++; return q; }
+  function shiftPart(q, dx, dy) {
+    const k = kindOf(q);
+    if (k === "rect" || k === "label") { q.x = r1(q.x + dx); q.y = r1(q.y + dy); }
+    else if (k === "pen") q.pts = q.pts.map((v, i) => r1(v + (i % 2 ? dy : dx)));
+    else { q.x1 = r1(q.x1 + dx); q.x2 = r1(q.x2 + dx); q.y1 = r1(q.y1 + dy); q.y2 = r1(q.y2 + dy); }
+  }
+  function insertAfter(p, q) { const i = D.parts.indexOf(p); D.parts.splice(i + 1, 0, q); }
+  function duplicate() { const p = selPart(); if (!p) return; withUndo(() => { const q = clonePart(p), b = box(p); shiftPart(q, gsnap(b.w + 40), 0); insertAfter(p, q); sel = q.id; }); SFX.place(); }
+  function mirror() {
+    const p = selPart(); if (!p) return;
+    const m = mainWall(), b = box(p), c = m && m.id !== p.id ? cxOf(m) : b.x + b.w / 2, k = kindOf(p);
+    withUndo(() => {
+      if (k === "rect" || k === "label") {
+        const nx = r1(2 * c - (p.x + p.w));
+        if (Math.abs(nx - p.x) < 1) { if (k === "rect") p.fx = !p.fx || undefined; return; }
+        const q = clonePart(p); q.x = nx; if (k === "rect") { if (p.fx) delete q.fx; else q.fx = true; } insertAfter(p, q); sel = q.id;
+      } else {
+        const q = clonePart(p);
+        if (k === "pen") q.pts = q.pts.map((v, i) => i % 2 ? v : r1(2 * c - v));
+        else { q.x1 = r1(2 * c - p.x1); q.x2 = r1(2 * c - p.x2); if (k === "dim") { const t = [q.x1, q.y1]; q.x1 = q.x2; q.y1 = q.y2; q.x2 = t[0]; q.y2 = t[1]; } }
+        insertAfter(p, q); sel = q.id;
+      }
+    });
+    SFX.place();
+    if (!(m && m.id !== p.id)) toast("Flipped around its own center. With a wall in place, Mirror copies across the main wall.");
+  }
+  function arrange(front) { const p = selPart(); if (!p) return; withUndo(() => { const i = D.parts.indexOf(p); D.parts.splice(i, 1); if (front) D.parts.push(p); else D.parts.unshift(p); }); SFX.tap(); }
+  function del() { const p = selPart(); if (!p) return; withUndo(() => { D.parts.splice(D.parts.indexOf(p), 1); sel = null; }); SFX.del(); closeSheets(); }
+  function centerOnWall() {
+    const p = selPart(); if (!p) return; const k = kindOf(p); if (k !== "rect" && k !== "label") return;
+    let wl = wallAt({ x: p.x + p.w / 2, y: p.y + p.h / 2 }, p) || wallBelow({ x: p.x + p.w / 2, y: p.y }) || mainWall();
+    if (!wl || wl === p) { toast("There's no wall to center on."); return; }
+    withUndo(() => { p.x = r1(wl.x + (wl.w - p.w) / 2); });
+    toast("Centered on the wall.");
+  }
+  function repeat(n, gap, up) {
+    const p = selPart(); if (!p) return; const b = box(p);
+    withUndo(() => { let last = p; for (let i = 1; i <= n; i++) { const q = clonePart(p); shiftPart(q, up ? 0 : i * (b.w + gap), up ? i * (b.h + gap) : 0); insertAfter(last, q); last = q; } });
+    SFX.place(); toast(n + (n === 1 ? " copy" : " copies") + " added.");
+  }
+
+  /* ---------- tools ---------- */
+  const IC = {
+    select: '<path d="M5 3l14 8.5-6.2 1.6L10 19.5z"/>',
+    wall: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/>',
+    roof: '<path d="M2 15 12 5l10 10"/><path d="M5 15h14"/><path d="M16 8V4h2.5v6.5"/>',
+    window: '<rect x="5" y="3" width="14" height="17" rx="1"/><path d="M12 3v17M5 11.5h14"/><path d="M3.5 20h17"/>',
+    door: '<path d="M6 21V3h12v18"/><path d="M3 21h18"/><circle cx="15" cy="12.5" r=".8" fill="currentColor"/>',
+    trim: '<path d="M5 4h14M6 6.5h12M8 6.5v12M16 6.5v12M12 6.5v12M5 21h14M6 18.5h12"/>',
+    plant: '<path d="M12 21v-9"/><path d="M12 13c0-5 3.5-8 8-8 0 5-3.5 8-8 8z"/><path d="M12 15.5c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5z"/>',
+    steps: '<path d="M3 20h18V5h-5v5h-5v5H6v5"/>',
+    chimney: '<path d="M3 20V12l9-7 9 7v8z"/><path d="M15 7.3V3h3v6.6"/>',
+    label: '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>',
+    line: '<path d="M5 19 19 5"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="5" r="2" fill="currentColor"/>',
+    pen: '<path d="M4 20l1.2-4.8L16 4.4l3.6 3.6L8.8 18.8z"/><path d="M14 6.4l3.6 3.6"/>',
+    paint: '<path d="M4 11.5 11 4.5l7 7-7 7z"/><path d="M4 11.5h14"/><path d="M20.5 14.5s1.8 2.6 1.8 3.8a1.8 1.8 0 0 1-3.6 0c0-1.2 1.8-3.8 1.8-3.8z"/>',
+    dim: '<path d="M3 12h18M3 7v10M21 7v10"/><path d="M6.5 9.5 3 12l3.5 2.5M17.5 9.5 21 12l-3.5 2.5"/>'
+  };
+  const TOOLS = [["select", "Select"], ["wall", "Wall"], ["roof", "Roof"], ["window", "Window"], ["door", "Door"], ["trim", "Trim"], ["plant", "Plant"], ["steps", "Steps"], ["chimney", "Chimney"], ["label", "Label"], ["line", "Line"], ["pen", "Pen"], ["paint", "Paint"], ["dim", "Measure"]];
+  const HINTS = {
+    select: "Tap a part to select it, drag to move it, tap it twice for exact sizes.",
+    wall: "Tap to place a wall, or drag to draw one at any size. Tap Wall again for textures.",
+    roof: "Tap just above a wall and the roof fits itself to it. Tap Roof again for styles.",
+    window: "Tap a wall to place a window, or drag one out. Tap Window again for styles.",
+    door: "Tap a wall and the door stands on its base. Tap Door again for styles.",
+    trim: "Bands and cornices stretch across the wall you tap. Tap Trim again for columns, quoins and more.",
+    plant: "Tap near the ground to plant it. Tap Plant again for trees, hedges, flower boxes and ivy.",
+    steps: "Tap under a door to place steps.", chimney: "Place it, then use Back so the roof covers its base.",
+    label: "Tap to place a label, then type its text.",
+    line: "Drag to draw a straight line. Ortho keeps it level or upright.",
+    pen: "Draw freehand. Tap Pen again for color and thickness.",
+    paint: "Tap any part to paint it. Tap Paint again to pick a color or texture.",
+    dim: "Drag between two points to measure. Snap locks onto corners and centers."
+  };
+  function buildTools() {
+    $("tools").innerHTML = TOOLS.map(t => `<button class="tool" data-t="${t[0]}" aria-label="${t[1]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[t[0]]}</svg><span>${t[1]}</span>${t[0] === "paint" || t[0] === "pen" ? '<i class="dot"></i>' : ""}</button>`).join("");
+  }
+  function setTool(t) {
+    if (t === tool && t !== "select") {
+      if (t === "paint" || t === "pen" || t === "line") { renderPaint(); openSheet("paintSheet"); }
+      else if (TYPES[t] && (TYPES[t].styles || TYPES[t].texs || TYPES[t].kind !== "label")) { renderToolSheet(t); openSheet("toolSheet"); }
+      return;
+    }
+    tool = t; SFX.tap(); renderDock();
+    if (!store.hinted[t]) { store.hinted[t] = true; save(); toast(HINTS[t]); }
+  }
+  $("tools").addEventListener("click", e => { const b = e.target.closest(".tool"); if (b) setTool(b.dataset.t); });
+
+  /* ---------- sheets ---------- */
+  function openSheet(id) { document.querySelectorAll(".sheet").forEach(s => { s.hidden = s.id !== id; }); $("scrim").hidden = false; const sh = $(id); sh.scrollTop = 0; }
+  function closeSheets() { document.querySelectorAll(".sheet").forEach(s => { s.hidden = true; }); $("scrim").hidden = true; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
+  $("scrim").addEventListener("click", closeSheets);
+  document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeSheets(); });
+  const chips = (k, list, cur) => `<div class="chips" data-k="${k}">${list.map(v => `<button data-v="${v}" aria-pressed="${v === cur}">${esc(NAMES[v] || v)}</button>`).join("")}</div>`;
+  const swatches = (cur) => `<div class="swatches" data-k="color">${PALETTE.map(c => `<button class="sw" data-v="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${c === cur}"></button>`).join("")}<label class="sw custom" aria-label="Any color"><input type="color" data-k="color" value="${cur}"></label></div>`;
+  const fld = (label, key, val, wide) => `<label class="fld${wide ? " wide" : ""}"><span>${label}</span><input data-f="${key}" value="${esc(val)}" ${key === "text" ? 'maxlength="60" autocomplete="off"' : `inputmode="${S().units === "ft" ? "text" : "decimal"}" autocomplete="off"`} enterkeyhint="done"></label>`;
+
+  function openProps(focusText) { const p = selPart(); if (!p) return; buildProps(p); openSheet("propSheet"); if (focusText) { const i = $("propSheet").querySelector('[data-f="text"]'); if (i) setTimeout(() => { i.focus(); i.select(); }, 60); } }
+  function refreshProps() { if ($("propSheet").hidden) return; const p = selPart(); if (p) buildProps(p); else closeSheets(); }
+  function buildProps(p) {
+    const T = TYPES[p.t], k = T.kind, u = S().units === "ft" ? "ft-in, like 3' 6\"" : "metres, or add cm";
+    let h = `<div class="grab"></div><h2>${esc(partName(p))}</h2><p class="lede">${esc(sizeText(p))}</p>`;
+    if (k === "label") h += `<div class="fields">${fld("Text", "text", p.text, true)}</div>`;
+    if (T.styles) h += `<h3>Style</h3>` + chips("style", T.styles, p.style);
+    if (T.texs) h += `<h3>Texture</h3>` + chips("tex", T.texs, p.tex);
+    h += `<h3>Color</h3>` + swatches(p.color);
+    h += `<h3>Size and position</h3><div class="fields">`;
+    if (k === "rect") h += fld("Width", "w", fmtIn(p.w)) + fld("Height", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld("Height above ground", "y", fmtIn(p.y));
+    else if (k === "label") h += fld("Letter size", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld("Height above ground", "y", fmtIn(p.y), true);
+    else if (k === "line" || k === "dim") h += fld("Start, across", "x1", fmtIn(p.x1)) + fld("Start, up", "y1", fmtIn(p.y1)) + fld("End, across", "x2", fmtIn(p.x2)) + fld("End, up", "y2", fmtIn(p.y2)) + fld("Length", "len", fmtIn(Math.hypot(p.x2 - p.x1, p.y2 - p.y1))) + (k === "dim" ? fld("Offset", "off", fmtIn(p.off)) : fld("Thickness", "lw", fmtIn(p.lw)));
+    else h += fld("Thickness", "lw", fmtIn(p.lw), true);
+    h += `</div><p class="note">Type sizes in ${u}. Height is measured from the ground line.</p>`;
+    if (k === "line") h += `<div class="row"><label>Dashed</label><button class="switch" data-sw="dash" role="switch" aria-checked="${!!p.dash}" aria-label="Dashed"></button></div>`;
+    h += `<h3>Layer</h3><div class="seg" data-k="layer">${LAYERS.map(l => `<button data-v="${l.id}" aria-pressed="${p.layer === l.id}">${l.name}</button>`).join("")}</div>`;
+    h += `<h3>Arrange</h3><div class="acts">${k === "rect" || k === "label" ? '<button data-a="center">Center on wall</button>' : ""}<button data-a="mirror">Mirror copy</button><button data-a="dup">Duplicate</button><button data-a="front">Bring to front</button><button data-a="back">Send to back</button><button data-a="del" class="danger">Delete</button></div>`;
+    h += `<h3>Repeat</h3><div class="rep">${fld("Copies", "repN", "2").replace('data-f="repN"', 'id="repN" inputmode="numeric"')}${fld("Gap", "repG", fmtIn(gsnap(60))).replace('data-f="repG"', 'id="repG"')}</div>
+      <div class="seg" id="repDir" style="margin-top:8px"><button data-v="right" aria-pressed="true">To the right</button><button data-v="up" aria-pressed="false">Upward</button></div>
+      <button class="secondary" data-a="repeat">Repeat</button>`;
+    h += `<button class="primary" data-close>Done</button>`;
+    const sh = $("propSheet"), top = sh.scrollTop; sh.innerHTML = h; sh.scrollTop = top;
+  }
+  $("propSheet").addEventListener("click", e => {
+    const p = selPart(); if (!p) return;
+    const b = e.target.closest("button"); if (!b) return;
+    const grp = b.parentElement && b.parentElement.dataset.k;
+    if (grp && b.dataset.v) {
+      withUndo(() => { p[grp] = b.dataset.v; if (grp === "style" && p.t !== "roof") { const z = SIZES[p.t] && SIZES[p.t][p.style]; if (z && p.t === "plant") { p.w = z[0]; p.h = z[1]; } } });
+      remember(p); SFX.tap(); buildProps(p); return;
+    }
+    if (b.parentElement && b.parentElement.id === "repDir") { b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); return; }
+    if (b.dataset.sw === "dash") { withUndo(() => { if (p.dash) delete p.dash; else p.dash = true; }); buildProps(p); return; }
+    const a = b.dataset.a;
+    if (a === "center") { centerOnWall(); buildProps(p); }
+    else if (a === "mirror") { mirror(); refreshProps(); }
+    else if (a === "dup") { duplicate(); refreshProps(); }
+    else if (a === "front") { arrange(true); }
+    else if (a === "back") { arrange(false); }
+    else if (a === "del") del();
+    else if (a === "repeat") {
+      const n = clamp(parseInt($("repN").value, 10) || 0, 0, 30), g = parseLen($("repG").value), up = $("repDir").querySelector('[aria-pressed="true"]').dataset.v === "up";
+      if (!n || !isFinite(g)) { toast("Enter how many copies (1 to 30) and the gap between them."); return; }
+      repeat(n, r1(g), up); closeSheets();
+    }
+  });
+  $("propSheet").addEventListener("change", e => {
+    const p = selPart(); if (!p) return; const t = e.target;
+    if (t.type === "color") { if (hexOk(t.value)) { withUndo(() => { p.color = t.value.toLowerCase(); }); remember(p); buildProps(p); } return; }
+    const key = t.dataset.f; if (!key || key === "repN" || key === "repG") return;
+    if (key === "text") { const v = cleanText(t.value, 60); if (v) withUndo(() => { p.text = v; p.w = labelW(v, p.h); }); buildProps(p); return; }
+    const v = parseLen(t.value);
+    if (!isFinite(v)) { toast("That size wasn't understood. Try " + (S().units === "ft" ? "3' 6\"" : "1.20") + "."); buildProps(p); return; }
+    withUndo(() => {
+      const val = clamp(r1(v), -50000, 50000);
+      if (key === "w" || key === "h") { p[key] = Math.max(1, Math.abs(val)); if (p.t === "label") p.w = labelW(p.text, p.h); }
+      else if (key === "len") { const L = Math.hypot(p.x2 - p.x1, p.y2 - p.y1) || 1, nl = Math.max(1, Math.abs(val)); p.x2 = r1(p.x1 + (p.x2 - p.x1) / L * nl); p.y2 = r1(p.y1 + (p.y2 - p.y1) / L * nl); if (L === 1 && p.x2 === p.x1) p.x2 = r1(p.x1 + nl); }
+      else if (key === "lw") p.lw = clamp(Math.abs(val), 0.2, 200);
+      else p[key] = val;
+    });
+    buildProps(p);
+  });
+  $("propSheet").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.tagName === "INPUT") e.target.blur(); });
+
+  function renderToolSheet(t) {
+    const T = TYPES[t], m = store.mem[t] || {};
+    let h = `<div class="grab"></div><h2>Next ${T.name.toLowerCase()}</h2><p class="lede">New ${T.name.toLowerCase()}s use these settings. A selected part keeps its own until you edit it.</p>`;
+    if (T.styles) h += `<h3>Style</h3>` + chips("style", T.styles, m.style || T.style);
+    if (T.texs) h += `<h3>Texture</h3>` + chips("tex", T.texs, m.tex || T.tex);
+    h += `<h3>Color</h3>` + swatches(m.color || T.color);
+    h += `<button class="primary" data-close>Done</button>`;
+    const sh = $("toolSheet"); sh.innerHTML = h; sh.dataset.t = t;
+  }
+  function toolSheetSet(k, v) { const t = $("toolSheet").dataset.t; const m = store.mem[t] || (store.mem[t] = {}); m[k] = v; save(); renderToolSheet(t); }
+  $("toolSheet").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || !b.dataset.v || !b.parentElement.dataset.k) return; SFX.tap(); toolSheetSet(b.parentElement.dataset.k, b.dataset.v); });
+  $("toolSheet").addEventListener("change", e => { if (e.target.type === "color" && hexOk(e.target.value)) toolSheetSet("color", e.target.value.toLowerCase()); });
+
+  function renderPaint() {
+    const pt = store.paint;
+    let h = `<div class="grab"></div><h2>Paint box</h2><p class="lede">Paint recolors any part you tap. Line and Pen draw in this color too.</p>`;
+    h += `<h3>Color</h3>` + swatches(pt.color);
+    h += `<h3>Texture for walls, roofs and chimneys</h3><div class="chips" data-k="tex"><button data-v="" aria-pressed="${!pt.tex}">Keep texture</button>${ALL_TEX.map(v => `<button data-v="${v}" aria-pressed="${v === pt.tex}">${NAMES[v]}</button>`).join("")}</div>`;
+    h += `<h3>Pen size</h3><div class="seg" data-k="pen">${[[2, "Fine"], [4, "Medium"], [8, "Bold"], [16, "Marker"]].map(q => `<button data-v="${q[0]}" aria-pressed="${pt.pen === q[0]}">${q[1]}</button>`).join("")}</div>`;
+    h += `<button class="primary" data-close>Done</button>`;
+    $("paintSheet").innerHTML = h;
+  }
+  $("paintSheet").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.dataset.v == null || !b.parentElement.dataset.k) return;
+    const k = b.parentElement.dataset.k;
+    if (k === "color") store.paint.color = b.dataset.v; else if (k === "tex") store.paint.tex = b.dataset.v; else if (k === "pen") store.paint.pen = +b.dataset.v;
+    SFX.tap(); save(); renderPaint(); renderDock();
+  });
+  $("paintSheet").addEventListener("change", e => { if (e.target.type === "color" && hexOk(e.target.value)) { store.paint.color = e.target.value.toLowerCase(); save(); renderPaint(); renderDock(); } });
+
+  function renderLayers() {
+    let h = `<div class="grab"></div><h2>Layers</h2><p class="lede">Hide a layer to get it out of the way (hidden layers are left out of pictures too). Lock a layer to keep it from being moved by accident.</p>`;
+    LAYERS.forEach(l => {
+      const st = D.layers[l.id], n = D.parts.filter(p => p.layer === l.id).length;
+      h += `<div class="lyr"><div><b>${l.name}</b><small>${l.note} · ${n}</small></div><button class="tog" data-l="${l.id}" data-k="hide" aria-pressed="${!st.hide}">${st.hide ? "Hidden" : "Shown"}</button><button class="tog" data-l="${l.id}" data-k="lock" aria-pressed="${st.lock}">${st.lock ? "Locked" : "Lock"}</button></div>`;
+    });
+    h += `<button class="primary" data-close>Done</button>`;
+    $("layersSheet").innerHTML = h;
+  }
+  $("layersSheet").addEventListener("click", e => {
+    const b = e.target.closest(".tog"); if (!b) return;
+    const l = D.layers[b.dataset.l]; l[b.dataset.k] = !l[b.dataset.k];
+    const p = selPart(); if (p && !editable(p)) sel = null;
+    SFX.tap(); save(); render(); renderLayers();
+  });
+
+  function renderMenu() {
+    const st = S();
+    let h = `<div class="grab"></div><h2>Brick <em style="color:var(--accent);font-weight:500">&amp;</em> Blueprint</h2>
+      <div class="field"><label for="nameIn">Design name</label><input id="nameIn" maxlength="40" value="${esc(D.name)}" autocomplete="off" enterkeyhint="done"></div>
+      <div class="links" style="margin-top:10px"><button data-m="designs">Your designs (${store.designs.length})</button><button data-m="new">New design</button></div>
+      <h3>Share</h3><div class="links three"><button data-m="link">Share link</button><button data-m="png">Save picture</button><button data-m="svg">Save SVG</button></div>
+      <h3>Sky</h3><div class="seg" data-s="sky">${[["day", "Day"], ["dusk", "Dusk"], ["night", "Night"]].map(q => `<button data-v="${q[0]}" aria-pressed="${D.sky === q[0]}">${q[1]}</button>`).join("")}</div>
+      <h3>Units</h3><div class="seg" data-s="units"><button data-v="m" aria-pressed="${st.units === "m"}">Metres</button><button data-v="ft" aria-pressed="${st.units === "ft"}">Feet &amp; inches</button></div>
+      <h3>Grid</h3><div class="seg" data-s="grid">${GRIDS[st.units].map((g, i) => `<button data-v="${g}" aria-pressed="${Math.abs(st.grid - g) < 0.01}">${GRID_NAMES[st.units][i]}</button>`).join("")}</div>
+      <div style="margin-top:8px">
+      <div class="row"><div><label>Show sizes</label><small>Width and height next to the selected part</small></div><button class="switch" data-t="sizes" role="switch" aria-checked="${st.sizes}" aria-label="Show sizes"></button></div>
+      <div class="row"><div><label>Sounds</label></div><button class="switch" data-t="sound" role="switch" aria-checked="${st.sound}" aria-label="Sounds"></button></div>
+      <div class="row"><div><label>Share anonymous play stats</label><small>Device type, visit length and parts placed. Never your drawings.</small></div><button class="switch" data-t="stats" role="switch" aria-checked="${st.stats}" aria-label="Share anonymous play stats"></button></div>
+      </div>
+      <div class="links" style="margin-top:12px"><button data-m="help">How to draw</button><button data-m="clear" class="danger">Clear drawing</button></div>
+      <button class="primary" data-close>Back to drawing</button>`;
+    $("menuSheet").innerHTML = h;
+  }
+  let clearArmed = 0;
+  $("menuSheet").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const grp = b.parentElement.dataset.s;
+    if (grp && b.dataset.v) {
+      if (grp === "sky") { D.sky = b.dataset.v; changed(); }
+      else if (grp === "units") { const old = S().units, i = GRIDS[old].indexOf(S().grid); S().units = b.dataset.v; S().grid = GRIDS[S().units][Math.max(0, i)]; save(); render(); }
+      else if (grp === "grid") { S().grid = +b.dataset.v; save(); render(); }
+      SFX.tap(); renderMenu(); return;
+    }
+    if (b.dataset.t) { S()[b.dataset.t] = !S()[b.dataset.t]; save(); if (b.dataset.t === "stats") statsToggled(); SFX.tap(); renderMenu(); render(); return; }
+    const m = b.dataset.m;
+    if (m === "designs") { renderDesigns(); openSheet("designsSheet"); }
+    else if (m === "new") { renderNew(); openSheet("newSheet"); }
+    else if (m === "png") { closeSheets(); savePNG(); }
+    else if (m === "svg") { closeSheets(); saveSVGFile(); }
+    else if (m === "link") openShare();
+    else if (m === "help") openSheet("helpSheet");
+    else if (m === "clear") {
+      if (!D.parts.length) { toast("The drawing is already empty."); return; }
+      if (Date.now() - clearArmed > 3000) { clearArmed = Date.now(); b.textContent = "Tap again to clear"; return; }
+      clearArmed = 0; withUndo(() => { D.parts = []; sel = null; }); closeSheets(); toast("Cleared. Undo brings it back.");
+    }
+  });
+  $("menuSheet").addEventListener("change", e => { if (e.target.id === "nameIn") { D.name = cleanText(e.target.value, 40) || "Untitled house"; changed(); } });
+  $("menuSheet").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.tagName === "INPUT") e.target.blur(); });
+
+  function when(t) { const d = new Date(t), now = new Date(); return d.toDateString() === now.toDateString() ? "Today, " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : d.toLocaleDateString([], { month: "short", day: "numeric", year: d.getFullYear() === now.getFullYear() ? undefined : "numeric" }); }
+  function renderDesigns() {
+    const list = store.designs.slice().sort((a, b) => b.at - a.at);
+    let h = `<div class="grab"></div><h2>Your designs</h2><p class="lede">Saved on this phone as you draw.</p><button class="secondary" style="margin:0 0 12px" data-n="1">New design</button><div class="cards">`;
+    list.forEach(d => {
+      h += `<div class="card${d.id === D.id ? " cur" : ""}" data-id="${esc(d.id)}"><img alt="" src="${thumbURL(d)}"><b>${esc(d.name)}</b><small>${esc(when(d.at))} · ${d.parts.length} parts</small><div class="cbtns"><button data-a="open">${d.id === D.id ? "Open" : "Open"}</button><button data-a="copy">Copy</button><button data-a="del" class="danger">Delete</button></div></div>`;
+    });
+    h += `</div><button class="primary" data-close>Done</button>`;
+    $("designsSheet").innerHTML = h;
+  }
+  $("designsSheet").addEventListener("click", e => {
+    if (e.target.closest("[data-n]")) { renderNew(); openSheet("newSheet"); return; }
+    const card = e.target.closest(".card"); if (!card) return;
+    const d = store.designs.find(x => x.id === card.dataset.id); if (!d) return;
+    const b = e.target.closest("button"), a = b ? b.dataset.a : "open";
+    if (a === "open") { switchTo(d); closeSheets(); }
+    else if (a === "copy") { const c = cleanDesign(JSON.parse(JSON.stringify(d))); c.id = randId(10); c.name = (d.name + " copy").slice(0, 40); c.at = Date.now(); store.designs.push(c); save(); renderDesigns(); toast("Copied."); }
+    else if (a === "del") {
+      if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Sure?"; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = "Delete"; } }, 3000); return; }
+      store.designs = store.designs.filter(x => x !== d);
+      if (!store.designs.length) store.designs.push(newDesign("My first house", []));
+      if (d === D) switchTo(store.designs[0]);
+      save(); renderDesigns();
+    }
+  });
+  function switchTo(d) { D = d; store.cur = d.id; sel = null; undoStack = []; redoStack = []; save(); render(); fit(); }
+  function renderNew() {
+    let h = `<div class="grab"></div><h2>New design</h2><p class="lede">Start from an empty lot, or from a house to take apart and remix.</p><div class="cards">`;
+    h += `<button class="card" data-tpl="blank"><img alt="" src="${thumbURL(newDesign("", []))}"><b>Empty lot</b><small>Start from scratch</small></button>`;
+    Object.keys(TEMPLATES).forEach(k => { const t = TEMPLATES[k], d = newDesign(t.name, t.parts); d.sky = t.sky; h += `<button class="card" data-tpl="${k}"><img alt="" src="${thumbURL(d)}"><b>${esc(t.name)}</b><small>${d.parts.length} parts</small></button>`; });
+    h += `</div><button class="secondary" data-close>Cancel</button>`;
+    $("newSheet").innerHTML = h;
+  }
+  $("newSheet").addEventListener("click", e => {
+    const c = e.target.closest("[data-tpl]"); if (!c) return;
+    const t = TEMPLATES[c.dataset.tpl];
+    const n = store.designs.length + 1;
+    const d = t ? newDesign(t.name, t.parts) : newDesign("House " + n, []);
+    if (t) d.sky = t.sky;
+    store.designs.push(d); switchTo(d); closeSheets(); SFX.place(); sess.games++;
+    track("design_new", { template: c.dataset.tpl });
+  });
+  async function openShare() {
+    let h = `<div class="grab"></div><h2>Share link</h2><p class="lede">The whole design travels inside this link, so nothing is uploaded. Whoever opens it gets their own copy to remix.</p><div class="linkbox" id="linkBox">Making the link…</div>
+      <div class="links" style="margin-top:12px"><button id="shareGo">Share</button><button id="copyGo">Copy</button></div><button class="primary" data-close>Done</button>`;
+    $("shareSheet").innerHTML = h; openSheet("shareSheet");
+    try {
+      const code = await encodeDesign(D);
+      const url = location.origin + location.pathname + "#d=" + code;
+      $("linkBox").textContent = url; $("shareSheet").dataset.url = url;
+      if (url.length > 60000) $("linkBox").insertAdjacentHTML("afterend", '<p class="note">This design is large, so the link is long. Some messaging apps may cut it off. Save picture or Save SVG always work.</p>');
+      track("share_link", { len: url.length });
+    } catch (e) { $("linkBox").textContent = "The link couldn't be made on this browser."; }
+  }
+  $("shareSheet").addEventListener("click", async e => {
+    const url = $("shareSheet").dataset.url; if (!url) return;
+    if (e.target.id === "shareGo") {
+      if (navigator.share) { try { await navigator.share({ title: D.name, text: "A house I drew in Brick & Blueprint", url }); } catch (x) {} }
+      else copyLink(url);
+    } else if (e.target.id === "copyGo") copyLink(url);
+  });
+  async function copyLink(url) {
+    try { await navigator.clipboard.writeText(url); toast("Link copied."); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($("linkBox")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Press and hold the link to copy it."); }
+  }
+  async function readLink() {
+    const m = location.hash.match(/^#d=([A-Za-z0-9_-]+)$/);
+    if (!m) return;
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    try {
+      const d = await decodeDesign(m[1]);
+      if (!d) throw new Error("bad");
+      d.id = randId(10); d.at = Date.now(); d.name = (d.name || "Shared house").slice(0, 40);
+      store.designs.push(d); switchTo(d);
+      toast("Opened a shared design: " + d.name + ". It's your copy now.");
+    } catch (e) { toast(e && e.message === "old" ? "This browser is too old to open that link. Try a current Safari." : "That design link is damaged and couldn't be opened."); }
+  }
+
+  /* ---------- toast & sound ---------- */
+  let toastT = 0;
+  function toast(msg, onTap) {
+    const t = $("toast"); t.textContent = msg; t.hidden = false; t.style.pointerEvents = onTap ? "auto" : "none"; t.style.cursor = onTap ? "pointer" : "";
+    t.onclick = onTap ? () => { t.hidden = true; onTap(); } : null;
+    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, Math.min(7000, 2200 + msg.length * 40));
+  }
+  const SFX = (function () {
+    let ac = null;
+    function ctx() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state === "suspended") ac.resume().catch(noop); return ac; }
+    function tone(fq, d, type, g, t0) {
+      if (!store || !S().sound) return; const a = ctx(); if (!a) return;
+      try { const o = a.createOscillator(), v = a.createGain(), t = a.currentTime + (t0 || 0); o.type = type || "sine"; o.frequency.value = fq; v.gain.setValueAtTime(g || 0.04, t); v.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(v); v.connect(a.destination); o.start(t); o.stop(t + d + 0.02); } catch (e) {}
+    }
+    return {
+      tap() { tone(900, 0.04, "triangle", 0.025); },
+      place() { tone(330, 0.09, "triangle", 0.06); tone(660, 0.07, "sine", 0.03, 0.03); },
+      del() { tone(260, 0.14, "sine", 0.05); },
+      done() { [523, 659, 784, 1047].forEach((q, i) => tone(q, 0.28, "triangle", 0.045, i * 0.1)); }
+    };
+  })();
+
+  /* ---------- play stats ----------
+     Same two destinations as the other games, both switched off by "Share anonymous play stats":
+     1. Google Analytics: city-level location, devices, sessions, and a few events (new design, export, share).
+     2. The shared Firebase database: /logs/sessions/<id>, one record per visit with app "facade", where
+        "games" counts new designs started and "moves" counts parts placed. Drawings are never sent. */
+  const FIREBASE_DB = "https://arborandarchchessgame-default-rtdb.firebaseio.com";
+  const FB = (window.ARBOR_FIREBASE || FIREBASE_DB || "").replace(/\/+$/, "");
+  const GA_ID = "G-K2XD82086T", STATS_VER = "facade-2026.11";
+  const statsOn = () => store && S().stats && canLink;
+  const sess = { id: randId(16), start: Date.now(), active: 0, visibleSince: document.hidden ? 0 : Date.now(), games: 0, moves: 0 };
+  function deviceInfo() {
+    const ua = navigator.userAgent || "", w = screen.width, h = screen.height, s = Math.min(w, h), l = Math.max(w, h);
+    const ipad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1), ios = /iPhone|iPod/.test(ua) || ipad;
+    const osv = (ua.match(/OS (\d+)[_.](\d+)/) || [])[0] || "";
+    const kind = /iPhone/.test(ua) ? "iPhone" : ipad ? "iPad" : /Android/.test(ua) ? "Android" : /Mobi/.test(ua) ? "Phone" : "Desktop";
+    return { kind, guess: kind === "iPhone" ? "iPhone " + s + "x" + l : kind, os: ios ? "iOS" : /Android/.test(ua) ? "Android" : /Windows/.test(ua) ? "Windows" : /Mac OS X/.test(ua) ? "macOS" : "Other",
+      osv: osv.replace(/^OS /, "").replace("_", "."), w: s, h: l, dpr: window.devicePixelRatio || 1,
+      app: !!(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)),
+      lang: (navigator.language || "").slice(0, 12), tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || "").slice(0, 40) };
+  }
+  const activeSecs = () => Math.round((sess.active + (sess.visibleSince ? Date.now() - sess.visibleSince : 0)) / 1000);
+  function fbLog(path, method, body, keep) { if (!statsOn() || !FB) return; try { fetch(FB + "/logs/" + path + ".json", { method, body: JSON.stringify(body), keepalive: !!keep }).catch(noop); } catch (e) {} }
+  function logSession(keep) { fbLog("sessions/" + sess.id, "PUT", { start: sess.start, last: { ".sv": "timestamp" }, active: activeSecs(), games: Math.min(sess.games, 10000), moves: Math.min(sess.moves, 1000000), ver: STATS_VER, app: "facade", dev: deviceInfo() }, keep); }
+  let errCount = 0;
+  function reportError(msg, where) {
+    try { msg = String(msg || ""); if (errCount >= 5 || !msg || msg === "Script error.") return; errCount++; const d = deviceInfo();
+      fbLog("errors", "POST", { at: { ".sv": "timestamp" }, sid: sess.id, msg: msg.slice(0, 300), where: String(where || "").slice(0, 200), ver: STATS_VER, dev: (d.guess + " / " + d.os + " " + d.osv).slice(0, 60) }); } catch (e) {}
+  }
+  window.addEventListener("error", e => reportError(e.message, (e.filename || "").split("/").pop() + ":" + e.lineno + ":" + e.colno));
+  window.addEventListener("unhandledrejection", e => { const r = e.reason; reportError("Unhandled promise: " + (r && r.message ? r.message : r), r && r.stack ? String(r.stack).split("\n")[1] : ""); });
+  function loadGA() {
+    if (!GA_ID || !statsOn() || window.gtag) return;
+    window["ga-disable-" + GA_ID] = false; window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date()); window.gtag("config", GA_ID, { app_name: "Brick & Blueprint", app_version: STATS_VER, allow_google_signals: false, allow_ad_personalization_signals: false });
+    const sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID; document.head.appendChild(sc);
+  }
+  function track(name, params) { try { if (window.gtag && statsOn() && GA_ID) window.gtag("event", name, params || {}); } catch (e) {} }
+  let statsStarted = false;
+  function startStats() {
+    if (statsStarted) return; statsStarted = true;
+    loadGA(); logSession();
+    setInterval(() => { if (!document.hidden) logSession(); }, 120000);
+  }
+  function statsToggled() { if (statsOn()) { startStats(); loadGA(); logSession(); } else if (GA_ID) window["ga-disable-" + GA_ID] = true; }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { if (sess.visibleSince) { sess.active += Date.now() - sess.visibleSince; sess.visibleSince = 0; } saveNow(); logSession(true); }
+    else { sess.visibleSince = Date.now(); logSession(); }
+  });
+  window.addEventListener("pagehide", () => { saveNow(); logSession(true); });
+
+  /* ---------- wiring ---------- */
+  $("undoBtn").addEventListener("click", undo);
+  $("redoBtn").addEventListener("click", redo);
+  $("menuBtn").addEventListener("click", () => { SFX.tap(); renderMenu(); openSheet("menuSheet"); });
+  $("brandBtn").addEventListener("click", () => { SFX.tap(); renderMenu(); openSheet("menuSheet"); });
+  $("layersBtn").addEventListener("click", () => { SFX.tap(); renderLayers(); openSheet("layersSheet"); });
+  $("fitBtn").addEventListener("click", () => { SFX.tap(); fit(); });
+  $("helpBtn").addEventListener("click", () => openSheet("helpSheet"));
+  $("gridChip").addEventListener("click", () => { S().snap = !S().snap; save(); renderDock(); toast(S().snap ? "Grid snap on." : "Grid snap off: parts move freely."); });
+  $("osnapChip").addEventListener("click", () => { S().osnap = !S().osnap; save(); renderDock(); toast(S().osnap ? "Snap on: parts line up with each other and the ground." : "Snap to other parts is off."); });
+  $("orthoChip").addEventListener("click", () => { S().ortho = !S().ortho; save(); renderDock(); toast(S().ortho ? "Ortho on: lines stay level or upright." : "Ortho off: lines go at any angle."); });
+  $("cEdit").addEventListener("click", () => { SFX.tap(); openProps(); });
+  $("cCopy").addEventListener("click", duplicate);
+  $("cMirror").addEventListener("click", mirror);
+  $("cFront").addEventListener("click", () => arrange(true));
+  $("cBack").addEventListener("click", () => arrange(false));
+  $("cDel").addEventListener("click", del);
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT") return;
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && e.key.toLowerCase() === "z") { e.preventDefault(); if (e.shiftKey) redo(); else undo(); }
+    else if (mod && e.key.toLowerCase() === "y") { e.preventDefault(); redo(); }
+    else if (mod && e.key.toLowerCase() === "d") { e.preventDefault(); duplicate(); }
+    else if ((e.key === "Delete" || e.key === "Backspace") && sel != null) { e.preventDefault(); del(); }
+    else if (e.key === "Escape") { if (!$("scrim").hidden) closeSheets(); else { sel = null; tool = "select"; render(); } }
+  });
+  let rsT = 0;
+  window.addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { const ow = stageW, oh = stageH; measure(); view.tx += (stageW - ow) / 2; view.ty += (stageH - oh) / 2; renderView(); }, 60); });
+
+  /* ---------- boot ---------- */
+  load();
+  buildTools();
+  render();
+  requestAnimationFrame(() => { fit(); });
+ 
+  if (statsOn()) startStats();
+  readLink();
+  if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => openSheet("helpSheet"), 300); }
+  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS };
+
+  if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
+    navigator.serviceWorker.register("sw.js").catch(noop);
+  }
+})();
+</script>
+</body>
+</html>
