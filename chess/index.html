@@ -124,6 +124,29 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .brand small{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-top:4px; font-weight:700}
 .iconbtn{width:calc(42px * var(--u)); height:calc(42px * var(--u)); border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .iconbtn svg{width:22px; height:22px}
+.iconbtn{position:relative}
+.hbtns{display:flex; gap:8px; flex:none}
+.badge{position:absolute; top:-3px; right:-3px; min-width:19px; height:19px; padding:0 5px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel-solid)}
+.glist{display:grid; gap:8px}
+.gsec{font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin:10px 0 0; font-weight:800}
+.gi{display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:14px; border:1.5px solid var(--panel-line); background:var(--panel); cursor:pointer}
+.gi.cur{border-color:var(--accent)}
+.gi .av{width:42px; height:42px; border-radius:10px; background:var(--light); display:grid; place-items:center; box-shadow:inset 0 0 0 1px var(--grout)}
+.gi .av.b{background:var(--dark)}
+.gi .av svg{width:36px; height:36px}
+.gi b{display:block; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.gi .sub{display:block; font-size:12.5px; color:var(--ink2); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.gi .end{display:grid; justify-items:end; gap:4px}
+.gi .st{font-size:12px; font-weight:800; padding:4px 8px; border-radius:8px; background:var(--panel-line); white-space:nowrap}
+.gi .st.go{background:var(--accent); color:var(--accent-ink)}
+.gi .rm{border:0; background:transparent; color:var(--ink2); font-size:12px; font-weight:700; padding:2px 0; cursor:pointer}
+.gi .rm[data-armed]{color:var(--check)}
+.gempty{font-size:13.5px; color:var(--ink2); font-weight:600; padding:6px 2px}
+.names{display:grid; gap:10px}
+.field{display:grid; gap:5px; font-size:12.5px; font-weight:700; color:var(--ink2)}
+.field input{font:inherit; font-size:16px; font-weight:600; color:var(--ink); padding:11px 12px; border-radius:12px; border:1.5px solid var(--panel-line); background:var(--panel); -webkit-user-select:text; user-select:text; width:100%}
+.field input:focus{outline:2px solid var(--accent); outline-offset:1px}
+.toast.tap{cursor:pointer; text-decoration:underline; text-underline-offset:3px}
 
 /* Player slabs */
 .player{display:flex; align-items:center; gap:10px; padding:calc(7px * var(--u)) 10px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line); min-height:calc(52px * var(--u)); transition:box-shadow .3s, transform .4s; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
@@ -301,9 +324,15 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
           <small id="modeLabel">Pass &amp; play</small>
         </div>
       </div>
-      <button class="iconbtn" id="menuBtn" aria-label="Menu and settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
-      </button>
+      <div class="hbtns">
+        <button class="iconbtn" id="gamesBtn" aria-label="Your games">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+          <span class="badge" id="gamesBadge" hidden></span>
+        </button>
+        <button class="iconbtn" id="menuBtn" aria-label="Menu and settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        </button>
+      </div>
     </header>
 
     <section class="player" id="pTop" aria-live="polite"></section>
@@ -366,6 +395,11 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <button data-v="0">Limestone<br><small>you move first</small></button>
       <button data-v="1">Basalt<br><small>friend moves first</small></button>
     </div>
+    <h3>Names (optional)</h3>
+    <div class="names">
+      <label class="field" for="friendName"><span>Friend's name, for your games list</span><input id="friendName" maxlength="24" autocomplete="off" autocapitalize="words" placeholder="e.g. Sam"></label>
+      <label class="field" for="myName"><span>Your name, shown to them</span><input id="myName" maxlength="24" autocomplete="nickname" autocapitalize="words" placeholder="e.g. Alex"></label>
+    </div>
   </div>
   <div id="pvpOpts">
     <h3>Board view</h3>
@@ -391,8 +425,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   <div class="row"><div><label for="swAmb">Drifting nature</label><small>Petals, leaves, snow or fireflies</small></div><button class="switch" role="switch" id="swAmb" data-k="ambience"></button></div>
   <div class="row"><div><label for="swStats">Share anonymous play stats</label><small>Device type, play time and game results, to help improve the game. No names or exact location.</small></div><button class="switch" role="switch" id="swStats" data-k="stats"></button></div>
   <div class="row"><div><label for="swMoves">Show legal moves</label><small>Seeds mark where a piece can go</small></div><button class="switch" role="switch" id="swMoves" data-k="moves"></button></div>
-  <h3>Pass &amp; play board view</h3>
-  <div class="seg viewSeg">
+  <h3>Same phone board view</h3>
+  <p class="note" id="viewOff" hidden>Board views apply to Same phone games, where two players share this phone. In this game the board always faces you.</p>
+  <div class="seg viewSeg" id="menuViewSeg">
     <button data-v="fixed">Same side</button>
     <button data-v="face">Face to face</button>
     <button data-v="auto">Turn board</button>
@@ -404,6 +439,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   </div>
   <p class="note">To keep it on your iPhone: open the link in Safari, tap Share, then Add to Home Screen. It then opens full screen and plays offline.</p>
   <button class="secondary" data-close>Done</button>
+</section>
+
+<!-- Your games -->
+<section class="sheet" id="gamesSheet" hidden role="dialog" aria-labelledby="gamesTitle">
+  <div class="grab"></div>
+  <h2 id="gamesTitle">Your games</h2>
+  <p class="lede">Play several friends at once. Each game has its own link and keeps up to date while the app is open.</p>
+  <div class="glist" id="gamesList"></div>
+  <button class="primary" id="inviteNewBtn">Invite a new friend</button>
+  <button class="secondary" data-close>Back to the board</button>
 </section>
 
 <!-- Piece guide -->
@@ -879,7 +924,7 @@ var Chess = (function () {
   };
 
   /* ---------- state ---------- */
-  var settings = { season: "auto", sound: true, ambience: !reduceMotion, moves: true, view: "fixed", stats: true };
+  var settings = { season: "auto", sound: true, ambience: !reduceMotion, moves: true, view: "fixed", stats: true, myName: "" };
   var game = { mode: "pvp", ai: 1, level: 1, result: null, me: 0, id: "", sent: false, invited: false, pub: 0, t0: Date.now(), logged: false };
   var pos = new C.Pos(), hist = [], keys = [], legal = [];
   var holdFlip = false, selected = -1, thinking = false, token = 0, manualFlip = false, hintMove = 0, drag = null, pending = null;
@@ -891,33 +936,73 @@ var Chess = (function () {
     catch (e) { return newId() + newId(); }
   })();
 
+  /* Games are kept in slots: "local" for the game on this phone (computer or same phone) and
+     "f:<id>" for each friend game, so several friend games can run side by side. */
+  var SLOTS = "arbor-arch-slots";
+  var slots = {}, activeKey = "local";
+  function keyOf(g) { return g.mode === "link" ? "f:" + g.id : "local"; }
+  function snapshot() {
+    return { game: JSON.parse(JSON.stringify(game)), moves: hist.map(function (h) { return h.m; }), last: hist.length ? hist[hist.length - 1].san : "", updated: Date.now() };
+  }
+  function persistSlots() { try { localStorage.setItem(SLOTS, JSON.stringify({ active: activeKey, slots: slots })); } catch (e) {} }
   function save() {
-    try {
-      localStorage.setItem(STORE, JSON.stringify({ settings: settings, game: game, moves: hist.map(function (h) { return h.m; }) }));
-    } catch (e) {}
+    activeKey = keyOf(game);
+    var prev = slots[activeKey], snap = snapshot();
+    if (prev && prev.moves && prev.moves.length === snap.moves.length && prev.updated) snap.updated = prev.updated;
+    slots[activeKey] = snap;
+    try { localStorage.setItem(STORE, JSON.stringify({ settings: settings, game: game, moves: snap.moves })); } catch (e) {}
+    persistSlots();
+    renderBadge();
+  }
+  function cleanGame(g) {
+    g = g || {};
+    return {
+      mode: g.mode === "ai" || g.mode === "link" ? g.mode : "pvp", ai: g.ai ? 1 : 0, level: Math.min(2, Math.max(0, g.level | 0)), result: g.result || null,
+      me: g.me ? 1 : 0, id: typeof g.id === "string" ? g.id : "", sent: !!g.sent, invited: !!g.invited, pub: g.pub | 0,
+      t0: +g.t0 || Date.now(), logged: !!g.logged, name: typeof g.name === "string" ? g.name.slice(0, 24) : ""
+    };
+  }
+  /* Load a stored game into the live position without rendering. */
+  function applySlot(s) {
+    token++; thinking = false;
+    pos = new C.Pos(); hist = []; keys = [];
+    (s.moves || []).every(function (m) { var lg = pos.legal(); if (lg.indexOf(m) < 0) return false; record(m, lg); return true; });
+    legal = pos.legal();
+    game = cleanGame(s.game);
+    selected = -1; hintMove = 0; manualFlip = false; holdFlip = false;
+    pieceEls.forEach(function (el) { el.remove(); }); pieceEls.clear();
   }
   function load() {
-    var data = null;
+    var data = null, sd = null;
     try { data = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
-    if (!data) return false;
-    if (data.settings) for (var k in settings) if (k in data.settings) settings[k] = data.settings[k];
-    if (data.game) {
-      var g = data.game;
-      game.mode = g.mode === "ai" || g.mode === "link" ? g.mode : "pvp";
-      game.ai = g.ai ? 1 : 0; game.level = Math.min(2, Math.max(0, g.level | 0)); game.result = g.result || null;
-      game.me = g.me ? 1 : 0; game.id = typeof g.id === "string" ? g.id : ""; game.sent = !!g.sent;
-      game.invited = !!g.invited; game.pub = g.pub | 0;
-      game.t0 = +g.t0 || Date.now(); game.logged = !!g.logged;
-    }
-    (data.moves || []).every(function (m) {
-      var lg = pos.legal();
-      if (lg.indexOf(m) < 0) return false;
-      record(m, lg);
-      return true;
-    });
-    legal = pos.legal();
+    try { sd = JSON.parse(localStorage.getItem(SLOTS) || "null"); } catch (e) {}
+    if (!data && !sd) return false;
+    if (data && data.settings) for (var k in settings) if (k in data.settings) settings[k] = data.settings[k];
+    if (sd && sd.slots && typeof sd.slots === "object") { slots = sd.slots; activeKey = typeof sd.active === "string" ? sd.active : "local"; }
+    var src = slots[activeKey] || (data ? { game: data.game, moves: data.moves } : null);
+    if (src) applySlot(src);
+    if (!sd) slots[keyOf(game)] = snapshot();
     return true;
   }
+  function switchTo(k) {
+    var s = slots[k]; if (!s) return;
+    if (k !== activeKey) { save(); disconnect(); applySlot(s); activeKey = k; syncURL(); connect(); }
+    closeSheets(); render(); save(); syncWatchers(); maybeAI();
+  }
+  function removeSlot(k) {
+    if (k === "local" || !slots[k]) return;
+    if (watchers[k]) { watchers[k].es.close(); delete watchers[k]; }
+    delete slots[k];
+    if (k === activeKey) {
+      disconnect();
+      applySlot(slots.local || { game: { mode: "pvp" }, moves: [] });
+      activeKey = "local"; syncURL(); render();
+    }
+    save(); persistSlots(); paintGames();
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function encName(s) { try { return btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); } catch (e) { return ""; } }
+  function decName(s) { try { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return decodeURIComponent(escape(atob(s))).slice(0, 24); } catch (e) { return ""; } }
 
   /* ---------- piece art ---------- */
   var PAL = [
@@ -1231,7 +1316,7 @@ var Chess = (function () {
 
   function sideName(c) {
     if (game.mode === "ai") return c === game.ai ? LEVELS[game.level].name : "You";
-    if (game.mode === "link") return c === game.me ? "You" : "Friend" + (friendHere() ? '<i class="ld" title="Online"></i>' : "");
+    if (game.mode === "link") return c === game.me ? "You" : esc(game.name || "Friend") + (friendHere() ? '<i class="ld" title="Online"></i>' : "");
     return SIDE[c];
   }
   function renderPlayers() {
@@ -1283,7 +1368,7 @@ var Chess = (function () {
   function renderTools() {
     $("undoBtn").disabled = !canUndo();
     $("hintBtn").disabled = !!game.result || thinking || !humanTurn();
-    $("modeLabel").textContent = game.mode === "ai" ? "vs " + LEVELS[game.level].name : game.mode === "link" ? (hasLive ? (live.connected ? "Live with a friend" : "Friend · connecting") : "Friend by message") : "Same phone";
+    $("modeLabel").textContent = game.mode === "ai" ? "vs " + LEVELS[game.level].name : game.mode === "link" ? (hasLive ? (live.connected ? "Live with " + (game.name || "a friend") : "Friend · connecting") : "Friend by message") : "Same phone";
     var ns = needSend();
     $("sendBtn").hidden = !ns; $("history").hidden = ns;
     if (ns) $("sendLabel").textContent = !game.invited ? "Invite your friend" : game.result ? (game.result.type === "resign" ? "Send your resignation" : "Send the final move") : "Send your move";
@@ -1305,11 +1390,14 @@ var Chess = (function () {
   function encMoves() {
     return hist.map(function (h) { var m = h.m, pr = (m >> 12) & 7; return ABC[m & 63] + ABC[(m >> 6) & 63] + (pr ? "~" + "..nbrq"[pr] : ""); }).join("");
   }
-  function linkURL() {
+  function stateStr() {
     var s = "g=" + game.id + "." + encMoves();
     if (game.result && game.result.type === "resign") s += ".r" + (game.result.winner ^ 1);
-    s += ".c" + game.me;
-    return location.href.split("#")[0] + "#" + s;
+    return s + ".c" + game.me;
+  }
+  function linkURL() {
+    var n = settings.myName ? encName(settings.myName) : "";
+    return location.href.split("#")[0] + "#" + stateStr() + (n ? ".n" + n : "");
   }
   function syncURL() {
     if (!canLink) return;
@@ -1320,7 +1408,7 @@ var Chess = (function () {
   }
   function newId() { var s = ""; for (var i = 0; i < 8; i++) s += ABC[(Math.random() * 64) | 0]; return s; }
   function decodeLink(h) {
-    var mt = /^g=([A-Za-z0-9_-]{4,16})\.([A-Za-z0-9_~-]*)(?:\.r([01]))?(?:\.c([01]))?$/.exec(h);
+    var mt = /^g=([A-Za-z0-9_-]{4,16})\.([A-Za-z0-9_~-]*)(?:\.r([01]))?(?:\.c([01]))?(?:\.n([A-Za-z0-9_-]{1,128}))?$/.exec(h);
     if (!mt) return null;
     var code = mt[2], p = new C.Pos(), ms = [], i = 0;
     while (i < code.length) {
@@ -1331,7 +1419,7 @@ var Chess = (function () {
       if (!m) return { bad: true };
       ms.push(m); p.make(m);
     }
-    return { id: mt[1], ms: ms, resign: mt[3] == null ? -1 : +mt[3], sender: mt[4] == null ? -1 : +mt[4] };
+    return { id: mt[1], ms: ms, resign: mt[3] == null ? -1 : +mt[3], sender: mt[4] == null ? -1 : +mt[4], name: mt[5] ? decName(mt[5]) : "" };
   }
   function adopt(ms) {
     token++; thinking = false;
@@ -1346,15 +1434,15 @@ var Chess = (function () {
     if (!/^#g=/.test(location.hash)) return null;
     var L = decodeLink(location.hash.slice(1));
     if (!L || L.bad) { toast("That game link is damaged. Ask your friend to send it again."); return null; }
-    var id = L.id, resign = L.resign;
+    var id = L.id, resign = L.resign, fk = "f:" + id;
+    if (slots[fk] && activeKey !== fk) { save(); disconnect(); applySlot(slots[fk]); activeKey = fk; }
     var same = game.mode === "link" && game.id === id, before = same ? hist.length : 0;
     if (same && L.ms.length < hist.length) { syncURL(); return { news: 0 }; }
-    var keep = same ? { me: game.me, pub: game.pub } : null;
+    var keep = same ? { me: game.me, pub: game.pub, name: game.name } : null;
     var res = adopt(L.ms);
     var me = keep ? keep.me : L.sender >= 0 ? L.sender ^ 1 : resign >= 0 ? resign ^ 1 : pos.turn;
-    if (!keep) logAbandoned();
     game = { mode: "link", ai: me ^ 1, me: me, id: id, level: game.level, sent: true, result: res, invited: true, pub: Math.max(keep ? keep.pub : 0, hist.length),
-      t0: keep && game.t0 ? game.t0 : Date.now(), logged: keep ? !!game.logged : false };
+      t0: keep && game.t0 ? game.t0 : Date.now(), logged: keep ? !!game.logged : false, name: keep && keep.name ? keep.name : L.name || "" };
     if (!keep) track("game_start", { mode: "friend", side: SIDE[me], joined_by_link: true });
     if (resign >= 0) game.result = { type: "resign", winner: resign ^ 1 };
     manualFlip = false;
@@ -1364,7 +1452,7 @@ var Chess = (function () {
   }
   function announceLink(r) {
     if (!r) return;
-    if (r.resign >= 0 && r.resign !== game.me) { toast("Your friend resigned. You win!"); return; }
+    if (r.resign >= 0 && r.resign !== game.me) { toast((game.name || "Your friend") + " resigned. You win!"); return; }
     if (game.result) { setTimeout(showOver, 700); return; }
     if (!hist.length) { toast(game.me === 0 ? "Your friend invited you. You play Limestone and move first." : "Waiting for your friend's first move."); return; }
     if (r.news && r.last && r.last.color !== game.me) toast("Your friend played " + r.last.san + ". Your move.");
@@ -1458,7 +1546,7 @@ var Chess = (function () {
   }
   function publish(t) {
     if (!hasLive || game.mode !== "link") return Promise.reject(new Error("offline"));
-    var g = linkURL().split("#")[1], req;
+    var g = stateStr(), req;
     if (FB) {
       var stamp = { ".sv": "timestamp" };
       req = t === "s"
@@ -1796,6 +1884,7 @@ var Chess = (function () {
     $("modeLink").setAttribute("aria-pressed", draft.mode === "link");
     $("linkOpts").hidden = draft.mode !== "link";
     $("linkWarn").hidden = canLink;
+    $("friendName").value = ""; $("myName").value = settings.myName || "";
     $("relayNote").textContent = FB ? "Moves sync through the game's own Firebase database, on a private, randomly named game." : "Moves travel through the free ntfy.sh relay on a private, randomly named channel.";
     $("startBtn").disabled = draft.mode === "link" && !canLink;
     $("startBtn").style.opacity = $("startBtn").disabled ? ".45" : "";
@@ -1821,29 +1910,53 @@ var Chess = (function () {
     s.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; settings.view = b.dataset.v; manualFlip = false; paintView(); render(); save(); });
   });
   $("newBtn").addEventListener("click", function () {
-    draft.mode = game.mode; draft.level = game.level; draft.side = game.mode === "ai" ? String(game.ai ^ 1) : draft.side;
-    if (game.mode === "link") draft.linkSide = String(game.me);
+    var base = game.mode === "link" ? (slots.local ? cleanGame(slots.local.game) : null) : game;
+    draft.mode = base ? base.mode : "ai"; draft.level = base ? base.level : 1;
+    if (base && base.mode === "ai") draft.side = String(base.ai ^ 1);
     paintNew(); openSheet("newSheet");
+  });
+  $("gamesBtn").addEventListener("click", function () { paintGames(); openSheet("gamesSheet"); });
+  $("inviteNewBtn").addEventListener("click", function () { draft.mode = "link"; paintNew(); openSheet("newSheet"); });
+  $("gamesList").addEventListener("click", function (e) {
+    var rm = e.target.closest("[data-rm]");
+    if (rm) {
+      e.stopPropagation();
+      if (rm.hasAttribute("data-armed")) removeSlot(rm.getAttribute("data-rm"));
+      else { rm.setAttribute("data-armed", ""); rm.textContent = "Tap to confirm"; }
+      return;
+    }
+    var row = e.target.closest("[data-k]"); if (row) switchTo(row.getAttribute("data-k"));
+  });
+  $("gamesList").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var row = e.target.closest("[data-k]"); if (row) { e.preventDefault(); switchTo(row.getAttribute("data-k")); }
   });
   $("startBtn").addEventListener("click", function () {
     if (draft.mode === "link" && !canLink) return;
     var human = draft.mode === "link" ? +draft.linkSide : draft.side === "r" ? (Math.random() < 0.5 ? 0 : 1) : +draft.side;
+    var friend = "";
+    if (draft.mode === "link") {
+      friend = $("friendName").value.trim().slice(0, 24);
+      settings.myName = $("myName").value.trim().slice(0, 24);
+    }
     closeSheets();
-    newGame(draft.mode, draft.level, human);
+    newGame(draft.mode, draft.level, human, friend);
     if (draft.mode === "link") sendLink();
   });
-  function newGame(mode, level, human) {
-    logAbandoned();
+  function newGame(mode, level, human, name) {
+    if (game.mode !== "link" && mode !== "link") logAbandoned();
+    save();
+    disconnect();
     token++; thinking = false;
     pos = new C.Pos(); hist = []; keys = []; legal = pos.legal();
-    game = { mode: mode, ai: human ^ 1, level: level, result: null, me: human, id: mode === "link" ? newId() + newId().slice(0, 4) : "", sent: false, invited: false, pub: 0, t0: Date.now(), logged: false };
+    game = { mode: mode, ai: human ^ 1, level: level, result: null, me: human, id: mode === "link" ? newId() + newId().slice(0, 4) : "", sent: false, invited: false, pub: 0, t0: Date.now(), logged: false, name: name || "" };
     track("game_start", { mode: modeName(), level: mode === "ai" ? LEVELS[level].name : "", side: SIDE[human] });
     syncURL();
     if (mode === "link") connect(); else disconnect();
 
     selected = -1; hintMove = 0; manualFlip = false;
     pieceEls.forEach(function (el) { el.remove(); }); pieceEls.clear();
-    render(); save();
+    render(); save(); syncWatchers();
     var c = $("board").getBoundingClientRect();
     burstAt(c.left + c.width / 2, c.top + c.height / 2, 26, true);
     rustle(0.7);
@@ -1857,6 +1970,8 @@ var Chess = (function () {
     }).join("");
     ["swSound", "swAmb", "swMoves", "swStats"].forEach(function (id) { var b = $(id); b.setAttribute("aria-checked", !!settings[b.dataset.k]); });
     $("resignBtn").disabled = !!game.result || (!hist.length);
+    $("viewOff").hidden = game.mode === "pvp";
+    $("menuViewSeg").hidden = game.mode !== "pvp";
     paintView();
   }
   $("menuBtn").addEventListener("click", function () { paintMenu(); openSheet("menuSheet"); });
@@ -1919,11 +2034,103 @@ var Chess = (function () {
   $("flipBtn").addEventListener("click", function () { manualFlip = !manualFlip; tock(0.4, 1.3); render(); });
 
   var toastT = 0;
-  function toast(msg) {
+  function toast(msg, onTap) {
     var old = document.querySelector(".toast"); if (old) old.remove();
     var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
-    clearTimeout(toastT); toastT = setTimeout(function () { t.remove(); }, 2400);
+    if (onTap) { t.classList.add("tap"); t.setAttribute("role", "button"); t.addEventListener("click", function () { t.remove(); onTap(); }); }
+    clearTimeout(toastT); toastT = setTimeout(function () { t.remove(); }, onTap ? 5000 : 2400);
   }
+
+  /* ---------- your games list ---------- */
+  function slotInfo(k, s) {
+    var g = cleanGame(s.game), n = (s.moves || []).length, turn = n % 2, st, go = false, title, sub, r = g.result;
+    if (g.mode === "link") {
+      title = g.name || "Friend";
+      if (r) st = r.winner === -1 ? "Draw" : r.winner === g.me ? "You won" : "They won";
+      else if (!g.invited) st = "Not invited";
+      else if (turn === g.me) { st = "Your move"; go = true; }
+      else st = "Their move";
+      sub = "You play " + SIDE[g.me] + (n ? " · move " + Math.ceil(n / 2) + (s.last ? ", " + s.last : "") : " · not started");
+    } else {
+      title = g.mode === "ai" ? "vs " + LEVELS[g.level].name : "Same phone";
+      if (r) st = r.winner === -1 ? "Draw" : g.mode === "ai" ? (r.winner === g.ai ? "Computer won" : "You won") : SIDE[r.winner] + " won";
+      else st = n ? "In progress" : "New";
+      sub = "On this phone" + (n ? " · move " + Math.ceil(n / 2) : "");
+    }
+    return { title: title, st: st, go: go, sub: sub, me: g.mode === "link" ? g.me : g.mode === "ai" ? g.ai ^ 1 : 0 };
+  }
+  function gameRow(k, s) {
+    var i = slotInfo(k, s);
+    return '<div class="gi' + (k === activeKey ? " cur" : "") + '" role="button" tabindex="0" data-k="' + esc(k) + '">' +
+      '<div class="av' + (i.me ? " b" : "") + '">' + pieceSVG(K | (i.me << 3)) + "</div>" +
+      "<div><b>" + esc(i.title) + '</b><span class="sub">' + esc(i.sub) + "</span></div>" +
+      '<div class="end"><span class="st' + (i.go ? " go" : "") + '">' + esc(i.st) + "</span>" +
+      (k !== "local" ? '<button class="rm" data-rm="' + esc(k) + '">Remove</button>' : "") + "</div></div>";
+  }
+  function paintGames() {
+    var fk = Object.keys(slots).filter(function (k) { return k.slice(0, 2) === "f:"; }), info = {};
+    fk.forEach(function (k) { info[k] = slotInfo(k, slots[k]); });
+    fk.sort(function (a, b) { return (info[b].go - info[a].go) || ((slots[b].updated || 0) - (slots[a].updated || 0)); });
+    var h = '<div class="gsec">With friends</div>';
+    h += fk.length ? fk.map(function (k) { return gameRow(k, slots[k]); }).join("") : '<div class="gempty">No friend games yet. Invite someone below. You can have several going at once.</div>';
+    if (slots.local) h += '<div class="gsec">On this phone</div>' + gameRow("local", slots.local);
+    $("gamesList").innerHTML = h;
+  }
+  function renderBadge() {
+    var n = 0;
+    Object.keys(slots).forEach(function (k) { if (k.slice(0, 2) === "f:" && k !== activeKey && slotInfo(k, slots[k]).go) n++; });
+    var b = $("gamesBadge"); if (b) { b.hidden = !n; b.textContent = n; }
+  }
+
+  /* Background watchers: friend games that aren't on screen keep listening for moves (Firebase only). */
+  var watchers = {};
+  function syncWatchers() {
+    if (!FB || !hasLive) return;
+    var want = {};
+    Object.keys(slots).forEach(function (k) {
+      if (k.slice(0, 2) !== "f:" || k === activeKey) return;
+      var s = slots[k]; if (!s || !s.game || s.game.result) return;
+      want[k] = 1;
+      if (!watchers[k]) watchers[k] = watchSlot(k);
+    });
+    Object.keys(watchers).forEach(function (k) { if (!want[k]) { watchers[k].es.close(); delete watchers[k]; } });
+  }
+  function watchSlot(k) {
+    var w = { mirror: {} };
+    try { w.es = new EventSource(FB + "/games/" + k.slice(2) + ".json"); } catch (e) { return { es: { close: function () {} } }; }
+    var on = function (e) {
+      var d; try { d = JSON.parse(e.data); } catch (x) { return; }
+      if (!d || typeof d.path !== "string") return;
+      fbApply(w.mirror, d.path, d.data, e.type === "patch");
+      var v = w.mirror.v || {};
+      if (v.state && typeof v.state.g === "string") bgMerge(k, v.state.g);
+    };
+    w.es.addEventListener("put", on); w.es.addEventListener("patch", on);
+    return w;
+  }
+  function bgMerge(k, g) {
+    var s = slots[k]; if (!s || k === activeKey) return;
+    var L = decodeLink(g), sg = s.game || {}, ms = s.moves || [], i;
+    if (!L || L.bad || L.id !== sg.id) return;
+    var resigned = L.resign >= 0 && !sg.result;
+    if (L.ms.length <= ms.length && !resigned) return;
+    for (i = 0; i < ms.length; i++) if (ms[i] !== L.ms[i]) return;
+    var p = new C.Pos(), last = "", res = null;
+    L.ms.forEach(function (m) { last = C.san(p, m, p.legal()); p.make(m); });
+    if (L.resign >= 0) res = { type: "resign", winner: L.resign ^ 1 };
+    else if (!p.legal().length) res = p.inCheck() ? { type: "mate", winner: p.turn ^ 1 } : { type: "stalemate", winner: -1 };
+    else if (p.half >= 100) res = { type: "fifty", winner: -1 };
+    else if (p.insufficient()) res = { type: "material", winner: -1 };
+    s.moves = L.ms.slice(); s.last = last; s.updated = Date.now();
+    sg.result = res; sg.sent = true; sg.invited = true; sg.pub = Math.max(sg.pub | 0, L.ms.length);
+    s.game = sg;
+    persistSlots(); renderBadge();
+    if (!$("gamesSheet").hidden) paintGames();
+    var who = sg.name || "Your friend";
+    toast(res ? who + "'s game is over. Tap to see it." : who + " played " + last + ". Tap to open.", function () { switchTo(k); });
+    if (res) syncWatchers();
+  }
+
 
   /* ---------- play stats ----------
      Two destinations, both switched off by the "Share anonymous play stats" setting:
@@ -2057,6 +2264,8 @@ var Chess = (function () {
   var incoming = readLink();
   if (!incoming) syncURL();
   connect();
+  syncWatchers();
+  renderBadge();
   applySeason();
   render();
   if (incoming) announceLink(incoming);
@@ -2065,7 +2274,7 @@ var Chess = (function () {
   window.addEventListener("hashchange", function () {
     var r = readLink();
     if (!r) return;
-    connect();
+    connect(); syncWatchers();
     closeSheets(); render(); announceLink(r);
   });
 
