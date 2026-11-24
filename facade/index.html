@@ -83,6 +83,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   background:linear-gradient(180deg,#dceaf3,#f4efe3)}
 #stage[data-sky="dusk"]{background:linear-gradient(180deg,#7d6fa0,#f1b48a)}
 #stage[data-sky="night"]{background:linear-gradient(180deg,#0d1626,#24344c)}
+#stage[data-sky="plan"]{background:#f7f4ea}
+.viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:3px; padding:3px; border-radius:12px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); box-shadow:0 6px 16px -10px var(--shadow)}
+.viewseg button{border:0; background:transparent; padding:7px 13px; border-radius:9px; font-weight:800; font-size:12.5px; cursor:pointer; color:var(--ink2)}
+.viewseg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.libgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.libitem{border:1.5px solid var(--panel-line); background:var(--panel); border-radius:12px; padding:6px; display:flex; flex-direction:column; gap:3px; cursor:pointer; min-width:0; text-align:center}
+.libitem img{width:100%; aspect-ratio:1; object-fit:contain; border-radius:8px; background:#f7f4ea; display:block}
+.libitem b{font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.libitem small{font-size:11px; color:var(--ink2); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.libitem[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 1.5px var(--accent)}
 #cv{position:absolute; inset:0; width:100%; height:100%; display:block}
 .corner{position:absolute; right:10px; top:10px; z-index:2; display:grid; gap:8px}
 .mini{width:38px; height:38px; border-radius:12px; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; padding:0; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
@@ -213,7 +223,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <g id="art"><defs id="defs"></defs><g id="artBody"></g></g>
       <g id="ui"></g>
     </svg>
-        <div class="corner">
+        <div class="viewseg" id="viewSeg" role="group" aria-label="View"><button data-v="front" aria-pressed="true">Front</button><button data-v="plan" aria-pressed="false">Plan</button></div>
+    <div class="corner">
       <button class="mini" id="fitBtn" aria-label="Fit drawing to screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       <button class="mini" id="helpBtn" aria-label="How to draw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h0"/></svg></button>
     </div>
@@ -231,6 +242,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <div class="ctxbtns">
         <button id="cEdit" aria-label="Edit part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
         <button id="cCopy" aria-label="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
+        <button id="cRot" aria-label="Rotate 90 degrees" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></button>
         <button id="cMirror" aria-label="Mirror copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3v18" stroke-dasharray="2 2.5"/><path d="M8 7 3 17h5z"/><path d="m16 7 5 10h-5z"/></svg></button>
         <button id="cFront" aria-label="Bring to front"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="1.5" opacity=".5"/><rect x="10" y="10" width="11" height="11" rx="1.5" fill="currentColor"/></svg></button>
         <button id="cBack" aria-label="Send to back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="1.5" fill="currentColor" opacity=".5"/><rect x="10" y="10" width="11" height="11" rx="1.5"/></svg></button>
@@ -244,6 +256,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 <div id="scrim" class="scrim" hidden></div>
 <section class="sheet" id="propSheet" hidden aria-label="Part settings"></section>
 <section class="sheet" id="toolSheet" hidden aria-label="Tool settings"></section>
+<section class="sheet" id="libSheet" hidden aria-label="Library"></section>
 <section class="sheet" id="paintSheet" hidden aria-label="Paint"></section>
 <section class="sheet" id="menuSheet" hidden aria-label="Menu"></section>
 <section class="sheet" id="layersSheet" hidden aria-label="Layers"></section>
@@ -259,6 +272,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     <li><b>Select and adjust.</b> With Select, tap a part, drag it to move, and drag its round handles to resize. Tap a part twice, or the sliders button, to type exact sizes, change its style, texture and color, repeat it or mirror it.</li>
     <li><b>Snap.</b> Grid snaps to the grid size. Snap lines parts up with the edges and centers of other parts and the ground (dashed guides show it). Ortho keeps lines and dimensions straight.</li>
     <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
+    <li><b>Front and Plan.</b> The switch at the top left flips between the front of the house and its floor plan. Each has its own tools, and rooms show their floor area as you size them.</li>
+    <li><b>Library.</b> Ready-made windows, doors, roofs, trim and plants for the front, and doors, windows, appliances, bathroom fixtures and furniture for the plan. Pick one, then tap the board to place it.</li>
     <li><b>Measure.</b> Measure drags a dimension between two points. Drag its middle handle to move it away from the wall.</li>
     <li><b>Move around.</b> Pinch to zoom, drag with two fingers, or drag empty board with Select. The corner button fits the drawing to the screen.</li>
   </ol>
@@ -310,17 +325,30 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#5f8a45", style: "shrub", styles: ["shrub", "tree", "hedge", "flowers", "ivy"] },
     steps: { name: "Steps", kind: "rect", layer: "structure", w: 160, h: 51, color: "#b9b2a4", style: "steps", styles: ["steps", "stoop"] },
     chimney: { name: "Chimney", kind: "rect", layer: "structure", w: 60, h: 180, color: "#8e4a39", tex: "brick", texs: ["brick", "stone", "stucco", "plain"] },
-    label: { name: "Label", kind: "label", layer: "details", w: 200, h: 30, color: "#3a2f22" },
-    line: { name: "Line", kind: "line", layer: "sketch", color: "#26301f" },
-    pen: { name: "Pen stroke", kind: "pen", layer: "sketch", color: "#26301f" },
-    dim: { name: "Dimension", kind: "dim", layer: "dims", color: "#2f5d7c" }
+    room: { name: "Room", kind: "rect", layer: "structure", mode: "plan", w: 400, h: 350, color: "#e2cfa8", tex: "wood", texs: ["wood", "ftile", "carpet", "stone", "concrete", "plain"] },
+    pwall: { name: "Wall", kind: "line", layer: "structure", mode: "plan", color: "#3a3631" },
+    pdoor: { name: "Door", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 90, h: 90, color: "#8a6a4a", style: "swing", styles: ["swing", "pair", "sliding"] },
+    pwindow: { name: "Window", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 120, h: 15, color: "#6f8fa6" },
+    stairs: { name: "Stairs", kind: "rect", layer: "structure", mode: "plan", rot: true, w: 100, h: 300, color: "#d9cfbd", style: "straight", styles: ["straight", "spiral"] },
+    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#c9b79c", style: "sofa", styles: ["sofa", "armchair", "bed", "table", "desk", "wardrobe", "rug", "tv"] },
+    fixture: { name: "Fixture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 40, h: 70, color: "#f4f2ec", style: "toilet", styles: ["toilet", "sink", "bath", "shower", "stove", "fridge", "counter", "dishwasher", "washer", "dryer"] },
+    pplant: { name: "Plant", kind: "rect", layer: "details", mode: "plan", bare: true, w: 60, h: 60, color: "#5f8a45", style: "pot", styles: ["pot", "tree"] },
+    label: { name: "Label", kind: "label", layer: "details", mode: "both", w: 200, h: 30, color: "#3a2f22" },
+    line: { name: "Line", kind: "line", layer: "sketch", mode: "both", color: "#26301f" },
+    pen: { name: "Pen stroke", kind: "pen", layer: "sketch", mode: "both", color: "#26301f" },
+    dim: { name: "Dimension", kind: "dim", layer: "dims", mode: "both", color: "#2f5d7c" }
   };
   const SIZES = { // default sizes for some styles
     plant: { shrub: [150, 90], tree: [260, 480], hedge: [300, 100], flowers: [110, 45], ivy: [120, 300] },
     trim: { band: [800, 20], cornice: [840, 40], column: [40, 300], pilaster: [35, 300], quoins: [40, 300], frame: [150, 180] },
     door: { garage: [260, 220], double: [160, 220], french: [160, 220] },
     window: { round: [80, 80], arched: [100, 170] },
-    roof: { flat: [840, 25] }
+    roof: { flat: [840, 25] },
+    pdoor: { swing: [90, 90], pair: [160, 80], sliding: [180, 15] },
+    stairs: { straight: [100, 300], spiral: [160, 160] },
+    furn: { sofa: [210, 90], armchair: [85, 85], bed: [160, 200], table: [200, 160], desk: [140, 70], wardrobe: [120, 60], rug: [240, 170], tv: [180, 45] },
+    fixture: { toilet: [40, 70], sink: [60, 45], bath: [170, 75], shower: [90, 90], stove: [60, 60], fridge: [70, 70], counter: [240, 60], dishwasher: [60, 60], washer: [60, 60], dryer: [60, 60] },
+    pplant: { pot: [60, 60], tree: [300, 300] }
   };
   const NAMES = {
     gable: "Gable", hip: "Hip", flat: "Flat", shed: "Shed", mansard: "Mansard", gambrel: "Gambrel",
@@ -329,12 +357,17 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     band: "Band", cornice: "Cornice", column: "Column", pilaster: "Pilaster", quoins: "Quoins", frame: "Surround",
     shrub: "Shrub", tree: "Tree", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
     steps: "Steps", stoop: "Stoop",
+    swing: "Swing", pair: "Double", sliding: "Sliding", straight: "Straight", spiral: "Spiral",
+    sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console",
+    toilet: "Toilet", sink: "Sink", bath: "Bathtub", shower: "Shower", stove: "Stove", fridge: "Fridge", counter: "Counter", dishwasher: "Dishwasher", washer: "Washer", dryer: "Dryer", pot: "Potted plant",
+    wood: "Wood", ftile: "Tile", carpet: "Carpet", concrete: "Concrete",
     brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", plain: "Smooth"
   };
   const PALETTE = ["#f4efe4", "#e9dcc3", "#d9c7a8", "#c9a27e", "#b5654a", "#8e4a39", "#7a3b2e",
     "#5b4a42", "#3d3f42", "#4c5560", "#2f5d7c", "#6f8fa6", "#3f6b5a", "#5f8a45",
     "#9bb26b", "#d6b25e", "#e7a33e", "#c8553d", "#d9668a", "#26301f"];
-  const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "plain"];
+  const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "wood", "ftile", "carpet", "concrete", "plain"];
+  const modeOf = t => TYPES[t].mode || "front";
   const GRIDS = { m: [5, 10, 25, 50, 100], ft: [2.54, 7.62, 15.24, 30.48, 60.96] };
   const GRID_NAMES = { m: ["5 cm", "10 cm", "25 cm", "50 cm", "1 m"], ft: ["1″", "3″", "6″", "1′", "2′"] };
 
@@ -348,15 +381,24 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   const S = () => store.settings;
 
   function newLayers() { const o = {}; LAYER_IDS.forEach(id => { o[id] = { hide: false, lock: false }; }); return o; }
-  function newDesign(name, parts) {
-    const d = { id: randId(10), name: name, at: Date.now(), sky: "day", layers: newLayers(), parts: [], next: 1 };
-    (parts || []).forEach(q => { const p = cleanPart(q, d.next); if (p) { d.parts.push(p); d.next++; } });
+  /* A design holds two drawings: front (the facade) and plan (the floor plan). d.parts is the one on screen. */
+  function aliasParts(d) {
+    Object.defineProperty(d, "parts", { configurable: true, enumerable: false,
+      get() { return this.mode === "plan" ? this.plan : this.front; },
+      set(v) { if (this.mode === "plan") this.plan = v; else this.front = v; } });
+    return d;
+  }
+  function newDesign(name, parts, plan) {
+    const d = aliasParts({ id: randId(10), name: name, at: Date.now(), sky: "day", mode: "front", layers: newLayers(), front: [], plan: [], next: 1 });
+    (parts || []).slice(0, 2000).forEach(q => { const p = cleanPart(q, d.next, "front"); if (p) { d.front.push(p); d.next++; } });
+    (plan || []).slice(0, 2000).forEach(q => { const p = cleanPart(q, d.next, "plan"); if (p) { d.plan.push(p); d.next++; } });
     return d;
   }
   const num = v => (typeof v === "number" && isFinite(v)) ? clamp(r1(v), -50000, 50000) : null;
-  function cleanPart(q, id) {
-    if (!q || typeof q !== "object") return null;
-    const T = TYPES[q.t]; if (!T || !Object.prototype.hasOwnProperty.call(TYPES, q.t)) return null;
+  function cleanPart(q, id, mode) {
+    if (!q || typeof q !== "object" || typeof q.t !== "string" || !Object.prototype.hasOwnProperty.call(TYPES, q.t)) return null;
+    const T = TYPES[q.t];
+    if (mode && T.mode !== "both" && modeOf(q.t) !== mode) return null;
     const p = { id: id, t: q.t, layer: LAYER_IDS.indexOf(q.layer) >= 0 ? q.layer : T.layer, color: hexOk(q.color) ? q.color.toLowerCase() : T.color };
     if (T.kind === "rect" || T.kind === "label") {
       const x = num(q.x), y = num(q.y), w = num(q.w), h = num(q.h);
@@ -365,6 +407,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       if (T.styles) p.style = T.styles.indexOf(q.style) >= 0 ? q.style : T.style;
       if (T.texs) p.tex = T.texs.indexOf(q.tex) >= 0 ? q.tex : T.tex;
       if (q.fx === true && T.kind === "rect") p.fx = true;
+      if (T.rot && [1, 2, 3].indexOf(q.rot) >= 0) p.rot = q.rot;
+      if (q.t === "room") p.text = cleanText(q.text, 40) || "Room";
       if (T.kind === "label") { p.text = cleanText(q.text, 60) || "Label"; p.w = labelW(p.text, p.h); }
     } else if (T.kind === "line" || T.kind === "dim") {
       const a = ["x1", "y1", "x2", "y2"].map(k => num(q[k]));
@@ -382,13 +426,15 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     return p;
   }
   function cleanDesign(o) {
-    if (!o || typeof o !== "object" || !Array.isArray(o.parts)) return null;
-    const d = newDesign(cleanText(o.name, 40) || "Untitled house", []);
+    if (!o || typeof o !== "object") return null;
+    const front = Array.isArray(o.front) ? o.front : Array.isArray(o.parts) ? o.parts : null, plan = Array.isArray(o.plan) ? o.plan : [];
+    if (!front) return null;
+    const d = newDesign(cleanText(o.name, 40) || "Untitled house", front, plan);
+    d.mode = o.mode === "plan" ? "plan" : "front";
     if (typeof o.id === "string" && /^[A-Za-z0-9_-]{6,20}$/.test(o.id)) d.id = o.id;
     if (typeof o.at === "number" && isFinite(o.at)) d.at = o.at;
     d.sky = ["day", "dusk", "night"].indexOf(o.sky) >= 0 ? o.sky : "day";
     if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
-    o.parts.slice(0, 2000).forEach(q => { const p = cleanPart(q, d.next); if (p) { d.parts.push(p); d.next++; } });
     return d;
   }
   function load() {
@@ -413,7 +459,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
         if ([2, 4, 8, 16].indexOf(d.paint.pen) >= 0) store.paint.pen = d.paint.pen;
       }
       store.helped = d.helped === true;
-      if (d.hinted && typeof d.hinted === "object") Object.keys(TYPES).concat(["select", "paint"]).forEach(k => { if (d.hinted[k] === true) store.hinted[k] = true; });
+      if (d.hinted && typeof d.hinted === "object") Object.keys(TYPES).concat(["select", "paint", "plan"]).forEach(k => { if (d.hinted[k] === true) store.hinted[k] = true; });
     }
     if (!store.designs.length) store.designs.push(newDesign("My first house", []));
     D = store.designs.find(x => x.id === store.cur) || store.designs[0];
@@ -500,7 +546,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   const selPart = () => sel == null ? null : D.parts.find(p => p.id === sel) || null;
   const cxOf = p => p.x + p.w / 2;
   function mainWall() { let m = null; D.parts.forEach(p => { if (p.t === "wall" && (!m || p.w * p.h > m.w * m.h)) m = p; }); return m; }
-  function wallAt(w, not) { for (let i = D.parts.length - 1; i >= 0; i--) { const p = D.parts[i]; if (p.t === "wall" && p !== not && visible(p) && w.x >= p.x && w.x <= p.x + p.w && w.y >= p.y && w.y <= p.y + p.h) return p; } return null; }
+  function wallAt(w, not) { for (let i = D.parts.length - 1; i >= 0; i--) { const p = D.parts[i]; if ((p.t === "wall" || p.t === "room") && p !== not && visible(p) && w.x >= p.x && w.x <= p.x + p.w && w.y >= p.y && w.y <= p.y + p.h) return p; } return null; }
   function wallBelow(w) {
     let best = null;
     D.parts.forEach(p => { if (p.t !== "wall" || !visible(p) || w.x < p.x || w.x > p.x + p.w) return; const top = p.y + p.h; if (top <= w.y + 60 && (!best || top > best.y + best.h)) best = p; });
@@ -526,6 +572,10 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       case "shingle": w = 40; h = 24; b = R(0, 0, 40, 24, d2) + R(0.5, 0, 19, 11.4, c) + R(20.5, 0, 19, 11.4, d1) + R(-9.5, 12, 19, 11.4, l1) + R(10.5, 12, 19, 11.4, c) + R(30.5, 12, 19, 11.4, l1); break;
       case "tile": w = 24; h = 16; b = R(0, 0, 24, 16, d2) + `<path d="M0 0h24v9a6 6 0 0 1-12 0a6 6 0 0 1-12 0z" fill="${c}"/><path d="M2 2h8M14 2h8" stroke="${l1}" stroke-width="1.5"/>`; break;
       case "slate": w = 40; h = 20; b = R(0, 0, 40, 20, d2) + R(0.5, 0.5, 19, 9, c) + R(20.5, 0.5, 19, 9, d1) + R(-9.5, 10.5, 19, 9, l1) + R(10.5, 10.5, 19, 9, c) + R(30.5, 10.5, 19, 9, l1); break;
+      case "wood": w = 120; h = 30; b = R(0, 0, 120, 30, c) + R(0, 0, 120, 1, d1) + R(0, 15, 120, 1, d1) + R(80, 0, 1.2, 15, d2) + R(30, 15, 1.2, 15, d2) + R(10, 6, 40, 0.6, l1) + R(64, 22, 40, 0.6, l1); break;
+      case "ftile": w = 30; h = 30; b = R(0, 0, 30, 30, m) + R(0.7, 0.7, 28.6, 28.6, c); break;
+      case "carpet": w = 12; h = 12; b = R(0, 0, 12, 12, c) + `<circle cx="3" cy="3" r=".9" fill="${d1}"/><circle cx="9" cy="8" r=".9" fill="${l1}"/>`; break;
+      case "concrete": w = 100; h = 100; b = R(0, 0, 100, 100, c) + R(0, 99, 100, 1, d1) + R(99, 0, 1, 100, d1) + [[12, 20], [40, 8], [70, 33], [25, 60], [58, 74], [85, 55], [33, 88]].map(q => `<circle cx="${q[0]}" cy="${q[1]}" r=".9" fill="${d1}"/>`).join(""); break;
       case "metal": w = 40; h = 10; b = R(0, 0, 40, 10, c) + R(0, 0, 2.5, 10, l1) + R(2.5, 0, 1, 10, d2); break;
       default: return "";
     }
@@ -712,7 +762,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     return `<text x="${f(p.x)}" y="${f(-(p.y + p.h * 0.22))}" font-size="${f(p.h)}" fill="${p.color}" font-family="Fraunces, Georgia, serif" font-weight="700">${esc(p.text)}</text>`;
   }
   function lineSVG(p) {
-    return `<line x1="${f(p.x1)}" y1="${f(-p.y1)}" x2="${f(p.x2)}" y2="${f(-p.y2)}" stroke="${p.color}" stroke-width="${f(p.lw)}" stroke-linecap="round"${p.dash ? ` stroke-dasharray="${f(p.lw * 3)} ${f(p.lw * 2.5)}"` : ""}/>`;
+    return `<line x1="${f(p.x1)}" y1="${f(-p.y1)}" x2="${f(p.x2)}" y2="${f(-p.y2)}" stroke="${p.color}" stroke-width="${f(p.lw)}" stroke-linecap="${p.t === "pwall" ? "square" : "round"}"${p.dash ? ` stroke-dasharray="${f(p.lw * 3)} ${f(p.lw * 2.5)}"` : ""}/>`;
   }
   function penPath(pts) {
     const n = pts.length / 2; let d = `M${f(pts[0])} ${f(-pts[1])}`;
@@ -737,43 +787,127 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const mx = (g.A.x + g.B.x) / 2 + g.nx * ts * 0.55 * side, my = (g.A.y + g.B.y) / 2 + g.ny * ts * 0.55 * side;
     return `<path d="${d}" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" fill="none"/><text x="${f(mx)}" y="${f(-my)}" font-size="${f(ts)}" text-anchor="middle" dominant-baseline="middle" fill="${c}" font-family="Manrope, system-ui, sans-serif" font-weight="800" transform="rotate(${f(-ang)} ${f(mx)} ${f(-my)})" stroke="${o.halo}" stroke-width="${f(ts * 0.22)}" paint-order="stroke" stroke-linejoin="round">${esc(fmtLen(g.L))}</text>`;
   }
-  const DRAW = { wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
+  /* Floor plan symbols. Rotatable ones draw in their own frame: length L across, depth Dp down, back edge at the top. */
+  const PAPER = "#f7f4ea", INK = "#3a3631";
+  function fmtArea(cm2) { return S().units === "ft" ? Math.round(cm2 / 929.0304) + " ft²" : (cm2 / 10000).toFixed(1) + " m²"; }
+  function roomSVG(p, o) {
+    const { X, T, W, H } = bx(p), fs = clamp(Math.min(W, H) / 7, 12, 40), cx = X + W / 2, cy = T + H / 2, halo = `stroke="${shade(p.color, 0.5)}" stroke-width="${f(fs * 0.28)}" paint-order="stroke" stroke-linejoin="round"`;
+    o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.1)}" text-anchor="middle" font-size="${f(fs)}" font-family="Fraunces, Georgia, serif" font-weight="700" fill="${INK}" ${halo}>${esc(p.text || "Room")}</text>` +
+      `<text x="${f(cx)}" y="${f(cy + fs * 0.85)}" text-anchor="middle" font-size="${f(fs * 0.68)}" font-family="Manrope, system-ui, sans-serif" font-weight="800" fill="#5a5148" ${halo}>${esc(fmtArea(p.w * p.h))}</text>`;
+    return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 15));
+  }
+  function pdoorSVG(p, o, L, Dp) {
+    const c = p.color, arc = `fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="6 4"`;
+    if (p.style === "sliding") return R(0, Dp / 2 - 9, L, 18, PAPER) + R(0, Dp / 2 - 5, L * 0.55, 4, c) + R(L * 0.45, Dp / 2 + 1, L * 0.55, 4, c) + R(-2, Dp / 2 - 9, 4, 18, INK) + R(L - 2, Dp / 2 - 9, 4, 18, INK);
+    const gap = R(0, Dp - 9, L, 18, PAPER) + R(-2, Dp - 9, 4, 18, INK) + R(L - 2, Dp - 9, 4, 18, INK);
+    if (p.style === "pair") { const h = L / 2; return gap + `<path d="M2 ${f(Dp)}V0M${f(L - 2)} ${f(Dp)}V0" stroke="${c}" stroke-width="4"/><path d="M2 0A${f(h - 2)} ${f(Dp)} 0 0 1 ${f(h)} ${f(Dp)}M${f(L - 2)} 0A${f(h - 2)} ${f(Dp)} 0 0 0 ${f(h)} ${f(Dp)}" ${arc}/>`; }
+    return gap + `<path d="M2 ${f(Dp)}V0" stroke="${c}" stroke-width="4"/><path d="M2 0A${f(L - 2)} ${f(Dp)} 0 0 1 ${f(L)} ${f(Dp)}" ${arc}/>`;
+  }
+  function pwindowSVG(p, o, L, Dp) {
+    return R(0, 0, L, Dp, PAPER) + R(0, 0, L, Dp, "none", stk(INK, 1.5)) + `<path d="M0 ${f(Dp / 2)}H${f(L)}" stroke="${p.color}" stroke-width="2.5"/>` + R(0, 0, 3, Dp, INK) + R(L - 3, 0, 3, Dp, INK);
+  }
+  function stairsSVG(p, o, L, Dp) {
+    const c = p.color, e = shade(c, -0.5);
+    if (p.style === "spiral") {
+      const r = Math.min(L, Dp) / 2, cx = L / 2, cy = Dp / 2; let d = "";
+      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; d += `M${f(cx + Math.cos(a) * r * 0.2)} ${f(cy + Math.sin(a) * r * 0.2)}L${f(cx + Math.cos(a) * r)} ${f(cy + Math.sin(a) * r)}`; }
+      return `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(r)}" fill="${c}" stroke="${e}" stroke-width="1.5"/><path d="${d}" stroke="${e}" stroke-width="1"/><circle cx="${f(cx)}" cy="${f(cy)}" r="${f(r * 0.2)}" fill="${shade(c, -0.2)}" stroke="${e}" stroke-width="1"/>`;
+    }
+    let d = ""; const n = Math.max(2, Math.round(Dp / 28));
+    for (let i = 1; i < n; i++) d += `M0 ${f(Dp * i / n)}H${f(L)}`;
+    const ah = Math.min(10, L * 0.15);
+    return R(0, 0, L, Dp, c, stk(e, 1.5)) + `<path d="${d}" stroke="${e}" stroke-width="1"/><path d="M${f(L / 2)} ${f(Dp - 8)}V${f(8)}M${f(L / 2 - ah)} ${f(8 + ah * 1.4)}L${f(L / 2)} 8L${f(L / 2 + ah)} ${f(8 + ah * 1.4)}" fill="none" stroke="${e}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  function furnSVG(p, o, L, Dp) {
+    const c = p.color, e = shade(c, -0.42), lt = shade(c, 0.22), st = stk(e, 1.2);
+    switch (p.style) {
+      case "bed": { let s = R(0, 0, L, Dp, c, st + ' rx="4"'); if (L < 120) s += R(L * 0.15, Dp * 0.05, L * 0.7, Dp * 0.14, lt, st + ' rx="6"'); else s += R(L * 0.07, Dp * 0.05, L * 0.39, Dp * 0.14, lt, st + ' rx="6"') + R(L * 0.54, Dp * 0.05, L * 0.39, Dp * 0.14, lt, st + ' rx="6"'); return s + R(0, Dp * 0.27, L, Dp * 0.73, shade(c, 0.1), st) + R(0, Dp * 0.27, L, Dp * 0.09, lt, st); }
+      case "table": {
+        const tw = L * 0.66, td = Dp * 0.56, tx = (L - tw) / 2, ty = (Dp - td) / 2, n = Math.max(1, Math.round(tw / 60)), cw = Math.min(45, tw / n * 0.72), cd = Dp * 0.19; let s = "";
+        for (let i = 0; i < n; i++) { const cx = tx + tw * (i + 0.5) / n; s += R(cx - cw / 2, ty - cd, cw, cd, lt, st + ' rx="4"') + R(cx - cw / 2, ty + td, cw, cd, lt, st + ' rx="4"'); }
+        if (L > 150) s += R(tx - cd, Dp / 2 - cw / 2, cd, cw, lt, st + ' rx="4"') + R(tx + tw, Dp / 2 - cw / 2, cd, cw, lt, st + ' rx="4"');
+        return s + R(tx, ty, tw, td, c, st + ' rx="4"');
+      }
+      case "desk": return R(0, 0, L, Dp * 0.62, c, st) + `<circle cx="${f(L / 2)}" cy="${f(Dp * 0.8)}" r="${f(Math.min(L, Dp) * 0.2)}" fill="${lt}" stroke="${e}" stroke-width="1.2"/>`;
+      case "wardrobe": return R(0, 0, L, Dp, c, st) + `<path d="M0 0L${f(L)} ${f(Dp)}M${f(L)} 0L0 ${f(Dp)}" stroke="${e}" stroke-width=".8"/>`;
+      case "rug": return R(0, 0, L, Dp, c, st + ' rx="4"') + R(L * 0.07, Dp * 0.1, L * 0.86, Dp * 0.8, "none", stk(lt, 3)) + R(L * 0.16, Dp * 0.24, L * 0.68, Dp * 0.52, "none", stk(shade(c, -0.2), 2));
+      case "tv": return R(0, 0, L, Dp, c, st) + R(L * 0.12, Dp * 0.12, L * 0.76, Dp * 0.2, "#26301f");
+      default: {
+        const a = Math.min(L * 0.15, 20); let s = R(0, 0, L, Dp, c, st + ' rx="6"') + R(a, Dp * 0.3, L - 2 * a, Dp * 0.7, lt, st);
+        const n = p.style === "sofa" ? Math.max(2, Math.round((L - 2 * a) / 70)) : 1;
+        for (let i = 1; i < n; i++) s += `<path d="M${f(a + (L - 2 * a) * i / n)} ${f(Dp * 0.3)}V${f(Dp)}" stroke="${e}" stroke-width="1.2"/>`;
+        return s;
+      }
+    }
+  }
+  function fixtureSVG(p, o, L, Dp) {
+    const c = p.color, e = shade(c, -0.55), lt = shade(c, -0.08), st = stk(e, 1.2), m = Math.min(L, Dp);
+    const txt = t => `<text x="${f(L / 2)}" y="${f(Dp / 2)}" text-anchor="middle" dominant-baseline="middle" font-size="${f(m * 0.24)}" font-family="Manrope, system-ui, sans-serif" font-weight="800" fill="${e}">${t}</text>`;
+    const circ = (x, y, r, fill, sw) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fill}" stroke="${e}" stroke-width="${sw || 1.2}"/>`;
+    switch (p.style) {
+      case "sink": return R(0, 0, L, Dp, c, st) + `<ellipse cx="${f(L / 2)}" cy="${f(Dp * 0.56)}" rx="${f(L * 0.36)}" ry="${f(Dp * 0.32)}" fill="${lt}" stroke="${e}" stroke-width="1.2"/>` + circ(L / 2, Dp * 0.56, 2, e) + R(L / 2 - 2, Dp * 0.06, 4, Dp * 0.16, e);
+      case "bath": return R(0, 0, L, Dp, c, st + ' rx="4"') + R(L * 0.05, Dp * 0.12, L * 0.9, Dp * 0.76, lt, st + ` rx="${f(Dp * 0.3)}"`) + circ(L * 0.14, Dp / 2, 2.5, e);
+      case "shower": return R(0, 0, L, Dp, c, st) + `<path d="M0 0L${f(L)} ${f(Dp)}M${f(L)} 0L0 ${f(Dp)}" stroke="${lt}" stroke-width="1.2"/>` + circ(L / 2, Dp / 2, 4, c);
+      case "stove": return R(0, 0, L, Dp, c, st) + R(0, 0, L, Dp * 0.1, lt) + [[0.28, 0.35], [0.72, 0.35], [0.28, 0.75], [0.72, 0.75]].map(q => circ(L * q[0], Dp * q[1], m * 0.15, "none", 2)).join("");
+      case "fridge": return R(0, 0, L, Dp, c, st) + R(0, 0, L, Dp * 0.12, lt, st) + txt("REF");
+      case "counter": return R(0, 0, L, Dp, c, st) + `<path d="M0 ${f(Dp * 0.86)}H${f(L)}" stroke="${lt}" stroke-width="1.5"/>`;
+      case "dishwasher": return R(0, 0, L, Dp, c, st) + txt("DW");
+      case "washer": return R(0, 0, L, Dp, c, st) + circ(L / 2, Dp * 0.55, m * 0.3, lt) + R(L * 0.1, Dp * 0.06, L * 0.3, Dp * 0.08, lt);
+      case "dryer": return R(0, 0, L, Dp, c, st) + circ(L / 2, Dp * 0.55, m * 0.3, "none") + txt("D");
+      default: return R(L * 0.06, 0, L * 0.88, Dp * 0.3, c, st + ' rx="3"') + `<ellipse cx="${f(L / 2)}" cy="${f(Dp * 0.63)}" rx="${f(L * 0.44)}" ry="${f(Dp * 0.35)}" fill="${c}" stroke="${e}" stroke-width="1.2"/><ellipse cx="${f(L / 2)}" cy="${f(Dp * 0.66)}" rx="${f(L * 0.28)}" ry="${f(Dp * 0.23)}" fill="${lt}" stroke="${e}" stroke-width="1"/>`;
+    }
+  }
+  function pplantSVG(p) {
+    const { X, T, W, H } = bx(p), c = p.color, tones = [shade(c, -0.22), c, shade(c, 0.18)], cx = X + W / 2, cy = T + H / 2;
+    const el = (x, y, rx, ry, fill) => `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rx)}" ry="${f(ry)}" fill="${fill}"/>`;
+    if (p.style === "tree") { let s = el(cx, cy, W * 0.5, H * 0.5, tones[0]); [[0.32, 0.35], [0.66, 0.32], [0.38, 0.68], [0.68, 0.66], [0.5, 0.5]].forEach((q, i) => { s += el(X + W * q[0], T + H * q[1], W * 0.24, H * 0.24, tones[1 + i % 2]); }); return s + `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(W, H) * 0.04)}" fill="#6b4a33"/>`; }
+    let s = `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(W, H) * 0.32)}" fill="#b5654a" stroke="#7a3b2e" stroke-width="1.5"/>`;
+    for (let i = 0; i < 7; i++) { const a = i * Math.PI * 2 / 7, x = cx + Math.cos(a) * W * 0.26, y = cy + Math.sin(a) * H * 0.26; s += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(W * 0.2)}" ry="${f(H * 0.09)}" fill="${tones[i % 3]}" transform="rotate(${f(a * 180 / Math.PI)} ${f(x)} ${f(y)})"/>`; }
+    return s;
+  }
+  const DRAW = { room: roomSVG, pdoor: pdoorSVG, pwindow: pwindowSVG, stairs: stairsSVG, furn: furnSVG, fixture: fixtureSVG, pplant: pplantSVG, pwall: lineSVG, wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
   const SKY = {
     day: { top: "#dceaf3", bot: "#f4efe3", grass: "#8aa860", soil: "#d8cdb5", halo: "rgba(255,255,255,.85)", glass: "url(#gDay)" },
     dusk: { top: "#7d6fa0", bot: "#f1b48a", grass: "#6f8752", soil: "#b9a58f", halo: "rgba(255,240,225,.85)", glass: "url(#gDusk)" },
     night: { top: "#0d1626", bot: "#24344c", grass: "#2e4430", soil: "#2a2f33", halo: "rgba(13,22,38,.85)", glass: "url(#gNight)" }
   };
-  function artSVG(parts, sky, layers) {
+  function artSVG(parts, sky, layers, mode, noGround) {
     const pats = new Map(), sk = SKY[sky] || SKY.day;
     const b = bounds(parts.filter(p => p.t !== "dim"));
     const o = {
-      sky, halo: sk.halo, glass: sk.glass,
+      top: "", sky: mode === "plan" ? "plan" : sky, halo: mode === "plan" ? "rgba(247,244,234,.9)" : sk.halo, glass: sk.glass,
       ts: b ? clamp(Math.max(b.x1 - b.x0, b.y1 - Math.min(b.y0, 0)) / 42, 10, 60) : 20,
       pat(tex, c) { if (!tex || tex === "plain") return c; const id = "p_" + tex + "_" + c.slice(1); if (!pats.has(id)) pats.set(id, patDef(tex, c, id)); return `url(#${id})`; }
     };
-    let body = R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 18, sk.grass) + `<path d="M-100000 0H100000" stroke="${shade(sk.grass, -0.35)}" stroke-width="1.5"/>`;
+    let body = mode === "plan" || noGround ? "" : R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 18, sk.grass) + `<path d="M-100000 0H100000" stroke="${shade(sk.grass, -0.35)}" stroke-width="1.5"/>`;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
-      let s = DRAW[p.t](p, o);
-      if (p.fx && kindOf(p) === "rect") s = `<g transform="translate(${f(2 * p.x + p.w)} 0) scale(-1 1)">${s}</g>`;
+      const T = TYPES[p.t]; let s;
+      if (T.rot) {
+        const r = p.rot || 0, L = r % 2 ? p.h : p.w, Dp = r % 2 ? p.w : p.h;
+        s = `<g transform="translate(${f(p.x + p.w / 2)} ${f(-(p.y + p.h / 2))}) rotate(${r * 90})${p.fx ? " scale(-1 1)" : ""} translate(${f(-L / 2)} ${f(-Dp / 2)})">${DRAW[p.t](p, o, L, Dp)}</g>`;
+      } else s = DRAW[p.t](p, o);
+      if (p.fx && !T.rot && kindOf(p) === "rect") s = `<g transform="translate(${f(2 * p.x + p.w)} 0) scale(-1 1)">${s}</g>`;
       body += s;
     });
-    return { defs: Array.from(pats.values()).join(""), body };
+    return { defs: Array.from(pats.values()).join(""), body: body + o.top };
   }
 
   /* ---------- export ---------- */
   const STATIC_DEFS = `<linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e8f2"/><stop offset="1" stop-color="#7c9fb6"/></linearGradient><linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c79b"/><stop offset="1" stop-color="#806f9c"/></linearGradient><linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a6"/><stop offset="1" stop-color="#f0ac52"/></linearGradient>`;
-  function exportSVG(d, pad) {
-    const parts = d.parts.filter(p => !d.layers[p.layer].hide);
+  function exportSVG(d, pad, mode) {
+    mode = mode || d.mode;
+    const plan = mode === "plan", parts = (plan ? d.plan : d.front).filter(p => !d.layers[p.layer].hide);
     const b = bounds(parts) || { x0: 0, y0: 0, x1: 800, y1: 400 };
     pad = pad == null ? Math.max(60, (b.x1 - b.x0) * 0.06) : pad;
-    const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad, bot = Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
-    const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk.top}"/><stop offset="1" stop-color="${sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, "url(#sky)")}${a.body}</svg>`;
+    const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad, bot = plan ? b.y0 - pad : Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
+    const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null, mode);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk.top}"/><stop offset="1" stop-color="${sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, plan ? PAPER : "url(#sky)")}${a.body}</svg>`;
     return { svg, W, H };
   }
-  const thumbURL = d => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(exportSVG(d).svg);
-  function fileName(ext) { return (D.name.replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/\s+/g, "-") || "facade") + "." + ext; }
+  const svgURL = svg => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  function thumbURL(d) { const m = d[d.mode].length || !(d.front.length || d.plan.length) ? d.mode : d.front.length ? "front" : "plan"; return svgURL(exportSVG(d, null, m).svg); }
+  function fileName(ext) { return (D.name.replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/\s+/g, "-") || "facade") + (D.mode === "plan" ? "-plan" : "") + "." + ext; }
   async function shareOrDownload(blob, name) {
     try {
       const file = new File([blob], name, { type: blob.type });
@@ -804,7 +938,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   /* Share links carry the whole design in the address (after #), compressed when the browser can. Nothing is uploaded. */
   function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function unb64u(s) { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/")); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
-  function compactDesign(d) { return { name: d.name, sky: d.sky, parts: d.parts.map(p => { const q = Object.assign({}, p); delete q.id; return q; }) }; }
+  const strip = list => list.map(p => { const q = Object.assign({}, p); delete q.id; return q; });
+  function compactDesign(d) { return { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; }
   async function encodeDesign(d) {
     const bytes = new TextEncoder().encode(JSON.stringify(compactDesign(d)));
     if (window.CompressionStream) {
@@ -839,7 +974,34 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       { t: "window", x: 360, y: 360, w: 80, h: 80, color: "#f4efe4", style: "round" },
       { t: "plant", x: 105, y: 0, w: 130, h: 70, color: "#5f8a45", style: "shrub" },
       { t: "plant", x: 565, y: 0, w: 130, h: 70, color: "#5f8a45", style: "shrub" },
-      { t: "plant", x: -300, y: 0, w: 260, h: 480, color: "#5f8a45", style: "tree" }] },
+      { t: "plant", x: -300, y: 0, w: 260, h: 480, color: "#5f8a45", style: "tree" }],
+      plan: [
+      { t: "room", x: 0, y: 0, w: 450, h: 350, color: "#d9b98c", tex: "wood", text: "Living room" },
+      { t: "room", x: 450, y: 0, w: 350, h: 350, color: "#e9e4da", tex: "ftile", text: "Kitchen" },
+      { t: "room", x: 0, y: 350, w: 450, h: 300, color: "#cfc6d9", tex: "carpet", text: "Bedroom" },
+      { t: "room", x: 450, y: 350, w: 200, h: 300, color: "#dfe8ec", tex: "ftile", text: "Bath" },
+      { t: "room", x: 650, y: 350, w: 150, h: 300, color: "#d9b98c", tex: "wood", text: "Closet" },
+      { t: "furn", x: 70, y: 60, w: 240, h: 170, color: "#b8466a", style: "rug" },
+      { t: "furn", x: 60, y: 245, w: 210, h: 90, color: "#7a8f7a", style: "sofa" },
+      { t: "furn", x: 330, y: 190, w: 85, h: 85, color: "#7a8f7a", style: "armchair", rot: 3 },
+      { t: "fixture", x: 732, y: 20, w: 60, h: 240, color: "#e8e2d4", style: "counter", rot: 1 },
+      { t: "fixture", x: 732, y: 262, w: 60, h: 60, color: "#f4f2ec", style: "stove", rot: 1 },
+      { t: "fixture", x: 600, y: 270, w: 70, h: 70, color: "#f4f2ec", style: "fridge" },
+      { t: "furn", x: 490, y: 90, w: 160, h: 140, color: "#c9b79c", style: "table" },
+      { t: "furn", x: 40, y: 440, w: 160, h: 200, color: "#d8cbb5", style: "bed" },
+      { t: "furn", x: 310, y: 580, w: 120, h: 60, color: "#c9b79c", style: "wardrobe" },
+      { t: "fixture", x: 465, y: 567, w: 170, h: 75, color: "#f4f2ec", style: "bath" },
+      { t: "fixture", x: 570, y: 450, w: 70, h: 40, color: "#f4f2ec", style: "toilet", rot: 1 },
+      { t: "fixture", x: 460, y: 440, w: 45, h: 60, color: "#f4f2ec", style: "sink", rot: 3 },
+      { t: "pdoor", x: 355, y: 0, w: 90, h: 90, color: "#3f6b5a", style: "swing" },
+      { t: "pdoor", x: 330, y: 350, w: 80, h: 80, color: "#8a6a4a", style: "swing", rot: 2 },
+      { t: "pdoor", x: 470, y: 350, w: 80, h: 80, color: "#8a6a4a", style: "swing" },
+      { t: "pdoor", x: 690, y: 350, w: 70, h: 70, color: "#8a6a4a", style: "swing" },
+      { t: "pwindow", x: 110, y: -7.5, w: 120, h: 15 },
+      { t: "pwindow", x: 570, y: -7.5, w: 120, h: 15 },
+      { t: "pwindow", x: 150, y: 642.5, w: 120, h: 15 },
+      { t: "pwindow", x: 520, y: 642.5, w: 80, h: 15 },
+      { t: "pplant", x: 20, y: 20, w: 50, h: 50, style: "pot" }] },
     townhouse: { name: "City townhouse", sky: "dusk", parts: [
       { t: "wall", x: 0, y: 0, w: 650, h: 940, color: "#d9c7a8", tex: "stucco" },
       { t: "trim", x: 0, y: 0, w: 40, h: 920, color: "#efe8da", style: "quoins" },
@@ -883,11 +1045,12 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     measure();
     const b = bounds(D.parts.filter(visible));
     let x0, x1, y0, y1;
-    if (b) { x0 = b.x0; x1 = b.x1; y0 = Math.min(b.y0, 0); y1 = Math.max(b.y1, 100); }
-    else { x0 = -100; x1 = 1100; y0 = 0; y1 = 600; }
+    const plan = D.mode === "plan";
+    if (b) { x0 = b.x0; x1 = b.x1; y0 = plan ? b.y0 : Math.min(b.y0, 0); y1 = plan ? b.y1 : Math.max(b.y1, 100); }
+    else { x0 = -100; x1 = 1100; y0 = plan ? -100 : 0; y1 = plan ? 800 : 600; }
     const padT = 60, padB = 64, padX = 26;
     const s = clamp(Math.min((stageW - padX * 2) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6);
-    view.s = s; view.tx = (stageW - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * 0.72;
+    view.s = s; view.tx = (stageW - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
     renderView();
   }
 
@@ -895,9 +1058,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   let preview = null; // a part being drawn
   function renderArt() {
     const parts = preview ? D.parts.concat([preview]) : D.parts;
-    const a = artSVG(parts, D.sky, D.layers);
+    const a = artSVG(parts, D.sky, D.layers, D.mode);
     $("defs").innerHTML = a.defs; $("artBody").innerHTML = a.body;
-    stage.dataset.sky = D.sky;
+    stage.dataset.sky = D.mode === "plan" ? "plan" : D.sky;
   }
   function renderGrid() {
     const g = $("grid"), sky = D.sky === "night";
@@ -906,11 +1069,11 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const tl = toW(0, 0), br = toW(stageW, stageH);
     const groundY = toS(0, 0).y;
     let minor = "", maj = "";
-    const yMax = Math.min(stageH, groundY);
+    const plan = D.mode === "plan", yMax = plan ? stageH : Math.min(stageH, groundY);
     if (yMax <= 0) { g.innerHTML = ""; return; }
     for (let x = Math.ceil(tl.x / step) * step; x <= br.x; x += step) { const sx = f(toS(x, 0).x); const isM = Math.abs(x / major - Math.round(x / major)) < 1e-6; (isM ? (s => { maj += s; }) : (s => { minor += s; }))(`M${sx} 0V${f(yMax)}`); }
-    for (let y = Math.max(0, Math.floor(br.y / step) * step); y <= tl.y; y += step) { const sy = toS(0, y).y; if (sy > yMax) continue; const isM = Math.abs(y / major - Math.round(y / major)) < 1e-6; const s = `M0 ${f(sy)}H${f(stageW)}`; if (isM) maj += s; else minor += s; }
-    const c = sky ? "255,255,255" : "40,60,80";
+    for (let y = plan ? Math.floor(br.y / step) * step : Math.max(0, Math.floor(br.y / step) * step); y <= tl.y; y += step) { const sy = toS(0, y).y; if (sy > yMax) continue; const isM = Math.abs(y / major - Math.round(y / major)) < 1e-6; const s = `M0 ${f(sy)}H${f(stageW)}`; if (isM) maj += s; else minor += s; }
+    const c = plan ? "47,93,124" : sky ? "255,255,255" : "40,60,80";
     g.innerHTML = `<path d="${minor}" stroke="rgba(${c},${sky ? 0.06 : 0.08})" stroke-width="1"/><path d="${maj}" stroke="rgba(${c},${sky ? 0.13 : 0.16})" stroke-width="1"/>`;
   }
   let handles = [];
@@ -949,15 +1112,20 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   }
   function sizeText(p) {
     const k = kindOf(p);
+    if (k === "rect" && D.mode === "plan") return fmtLen(p.w) + " × " + fmtLen(p.h) + (p.t === "room" ? " · " + fmtArea(p.w * p.h) : "");
     if (k === "rect") return fmtLen(p.w) + " × " + fmtLen(p.h) + (p.y > 0.5 ? " · " + fmtLen(p.y) + " up" : "");
     if (k === "label") return "“" + p.text + "”";
     if (k === "line" || k === "dim") return fmtLen(Math.hypot(p.x2 - p.x1, p.y2 - p.y1)) + " long";
     const b = box(p); return fmtLen(b.w) + " × " + fmtLen(b.h);
   }
-  function partName(p) { const T = TYPES[p.t]; return (p.style && T.styles ? NAMES[p.style] + " " + T.name.toLowerCase() : T.name).replace(/^(\w)/, c => c.toUpperCase()); }
+  function partName(p) { const T = TYPES[p.t]; if (p.t === "room") return p.text || "Room"; if (T.bare) return NAMES[p.style]; return (p.style && T.styles ? NAMES[p.style] + " " + T.name.toLowerCase() : T.name).replace(/^(\w)/, c => c.toUpperCase()); }
   function renderDock() {
     const p = selPart();
     $("ctx").hidden = !p;
+    const rot = !!(p && TYPES[p.t].rot);
+    $("cRot").hidden = !rot; $("cFront").hidden = rot; $("cBack").hidden = rot;
+    document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === D.mode));
+    const lb = document.querySelector('.tool[data-t="lib"] span'); if (lb) lb.textContent = tool === "lib" && libItem ? libItem.n : "Library";
     if (p) { $("ctxName").textContent = partName(p) + (p.tex && p.tex !== "plain" ? " · " + NAMES[p.tex] : ""); $("ctxSize").textContent = sizeText(p); }
     $("undoBtn").disabled = !undoStack.length; $("redoBtn").disabled = !redoStack.length;
     $("gridChip").textContent = "Grid " + GRID_NAMES[S().units][GRIDS[S().units].indexOf(S().grid)];
@@ -971,8 +1139,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   function render() { renderArt(); renderView(); renderDock(); }
 
   /* ---------- undo ---------- */
-  const snapshot = () => JSON.stringify({ p: D.parts, n: D.next });
-  function restore(s) { const o = JSON.parse(s); D.parts = o.p; D.next = o.n; }
+  const snapshot = () => JSON.stringify({ f: D.front, p: D.plan, n: D.next });
+  function restore(s) { const o = JSON.parse(s); D.front = o.f; D.plan = o.p; D.next = o.n; }
   function pushUndo(before) { undoStack.push(before); if (undoStack.length > 150) undoStack.shift(); redoStack = []; }
   function changed() { D.at = Date.now(); if (sel != null && !selPart()) sel = null; save(); render(); }
   function withUndo(fn) { const before = snapshot(); fn(); if (snapshot() !== before) { pushUndo(before); changed(); return true; } return false; }
@@ -985,7 +1153,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   function snapTargets(skip) {
     const xs = [], ys = [], pts = [];
     if (S().osnap) {
-      ys.push(0);
+      if (D.mode !== "plan") ys.push(0);
       D.parts.forEach(p => {
         if (p === skip || !visible(p)) return;
         const k = kindOf(p);
@@ -1069,7 +1237,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     renderView();
   }
   function hitHandle(sp) { let best = null, bd = 24; handles.forEach(h => { const d = Math.hypot(h[1] - sp.x, h[2] - sp.y); if (d < bd) { bd = d; best = h[0]; } }); return best; }
-  const DRAW_TOOLS = ["wall", "roof", "window", "door", "trim", "plant", "steps", "chimney", "label"];
+  const DRAW_TOOLS = ["wall", "roof", "window", "door", "trim", "plant", "steps", "chimney", "label", "room", "pdoor", "pwindow", "stairs", "furn", "fixture", "pplant", "lib"];
+  let libItem = null;
+  const curType = () => tool === "lib" ? (libItem ? libItem.t : "select") : tool;
   function beginAct(sp, pan) {
     const w = toW(sp.x, sp.y);
     act = { sp0: sp, w0: w, moved: false, before: null };
@@ -1087,7 +1257,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (hit && p && hit.id === p.id && tool !== "pen") { act.k = "move"; act.orig = JSON.parse(JSON.stringify(p)); act.tg = snapTargets(p); return; }
     act.tg = snapTargets(null);
     if (tool === "pen") { act.k = "pen"; act.pts = [r1(w.x), r1(w.y)]; return; }
-    if (tool === "line" || tool === "dim") { act.k = "line"; act.a = snapPoint(w); guides = { x: [], y: [] }; return; }
+    if (tool === "line" || tool === "dim" || tool === "pwall") { act.k = "line"; act.a = snapPoint(w); guides = { x: [], y: [] }; return; }
     act.k = "draw"; act.a = snapPoint(w); guides = { x: [], y: [] };
   }
   function showReadout(sp, text) {
@@ -1148,14 +1318,15 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       case "draw": {
         const b = snapPoint(w), a = act.a;
         const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), ww = Math.max(5, Math.abs(b.x - a.x)), hh = Math.max(5, Math.abs(b.y - a.y));
-        if (tool === "label") { preview = mk("label", { x: b.x, y: b.y }); }
-        else preview = mk(tool, { x, y, w: r1(ww), h: r1(hh) }, true);
-        showReadout(sp, tool === "label" ? "X " + fmtLen(b.x) + "   Y " + fmtLen(b.y) : fmtLen(ww) + " × " + fmtLen(hh));
+        const ct = curType();
+        if (ct === "label") { preview = mk("label", { x: b.x, y: b.y }, true); }
+        else preview = mk(ct, { x, y, w: r1(ww), h: r1(hh) }, true);
+        showReadout(sp, ct === "label" ? "X " + fmtLen(b.x) + "   Y " + fmtLen(b.y) : fmtLen(ww) + " × " + fmtLen(hh));
         queue(true); return;
       }
       case "line": {
         const b = snapPoint(w, act.a);
-        preview = tool === "dim" ? mk("dim", { x1: act.a.x, y1: act.a.y, x2: b.x, y2: b.y }, true) : mk("line", { x1: act.a.x, y1: act.a.y, x2: b.x, y2: b.y }, true);
+        preview = mk(tool === "dim" || tool === "pwall" ? tool : "line", { x1: act.a.x, y1: act.a.y, x2: b.x, y2: b.y }, true);
         showReadout(sp, lineText(preview));
         queue(true); return;
       }
@@ -1181,8 +1352,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
         else lastTap = { t: now, id: sel };
       }
       else if (a.k === "paint") paintAt(w);
-      else if (a.k === "draw") tapPlace(tool, w);
-      else if (a.k === "line") toast(tool === "dim" ? "Drag from one point to another to measure." : "Drag to draw a line.");
+      else if (a.k === "draw") tapPlace(curType(), w);
+      else if (a.k === "line") toast(tool === "dim" ? "Drag from one point to another to measure." : tool === "pwall" ? "Drag to draw a wall." : "Drag to draw a line.");
       preview = null; renderUI(); return;
     }
     if (a.k === "pan") return;
@@ -1219,6 +1390,10 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (T.styles) p.style = m.style || T.style;
     if (T.texs) p.tex = m.tex || T.tex;
     if (T.kind === "rect") Object.assign(p, { x: 0, y: 0, w: T.w, h: T.h });
+    const pre = tool === "lib" && libItem && libItem.t === type ? libItem : null;
+    if (pre) { if (pre.s) p.style = pre.s; if (pre.ex) Object.assign(p, pre.ex); }
+    if (type === "room") p.text = "Room " + (D.parts.filter(q => q.t === "room").length + 1);
+    if (type === "pwall") p.lw = 15;
     if (type === "label") { p.text = "Label"; p.h = T.h; p.w = labelW(p.text, p.h); }
     if (type === "line") { p.lw = r1(Math.max(0.5, 2 / view.s)); p.color = store.paint.color; }
     if (type === "pen") { p.lw = r1(Math.max(0.5, store.paint.pen / view.s)); p.color = store.paint.color; }
@@ -1227,8 +1402,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     return p;
   }
   function tapPlace(type, w) {
-    const T = TYPES[type], m = store.mem[type] || {}, st = m.style || T.style;
-    let sz = (SIZES[type] && SIZES[type][st]) || [T.w, T.h], ww = sz[0], hh = sz[1];
+    if (!TYPES[type]) { renderLib(); openSheet("libSheet"); return; }
+    const T = TYPES[type], m = store.mem[type] || {}, pre = tool === "lib" && libItem && libItem.t === type ? libItem : null, st = pre && pre.s ? pre.s : m.style || T.style;
+    let sz = pre ? [pre.w, pre.h] : (SIZES[type] && SIZES[type][st]) || [T.w, T.h], ww = sz[0], hh = sz[1];
     const wall = wallAt(w);
     let x = w.x - ww / 2, y = w.y - hh / 2, fixed = false;
     if (type === "roof") {
@@ -1283,7 +1459,12 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       }
     });
     SFX.place();
-    if (!(m && m.id !== p.id)) toast("Flipped around its own center. With a wall in place, Mirror copies across the main wall.");
+    if (!(m && m.id !== p.id)) toast(D.mode === "plan" ? "Flipped. Doors now swing the other way." : "Flipped around its own center. With a wall in place, Mirror copies across the main wall.");
+  }
+  function rotate() {
+    const p = selPart(); if (!p || !TYPES[p.t].rot) return;
+    withUndo(() => { const cx = p.x + p.w / 2, cy = p.y + p.h / 2, w = p.w; p.w = p.h; p.h = w; p.x = r1(cx - p.w / 2); p.y = r1(cy - p.h / 2); p.rot = ((p.rot || 0) + 1) % 4; if (!p.rot) delete p.rot; });
+    SFX.tap();
   }
   function arrange(front) { const p = selPart(); if (!p) return; withUndo(() => { const i = D.parts.indexOf(p); D.parts.splice(i, 1); if (front) D.parts.push(p); else D.parts.unshift(p); }); SFX.tap(); }
   function del() { const p = selPart(); if (!p) return; withUndo(() => { D.parts.splice(D.parts.indexOf(p), 1); sel = null; }); SFX.del(); closeSheets(); }
@@ -1315,9 +1496,20 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     line: '<path d="M5 19 19 5"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="5" r="2" fill="currentColor"/>',
     pen: '<path d="M4 20l1.2-4.8L16 4.4l3.6 3.6L8.8 18.8z"/><path d="M14 6.4l3.6 3.6"/>',
     paint: '<path d="M4 11.5 11 4.5l7 7-7 7z"/><path d="M4 11.5h14"/><path d="M20.5 14.5s1.8 2.6 1.8 3.8a1.8 1.8 0 0 1-3.6 0c0-1.2 1.8-3.8 1.8-3.8z"/>',
-    dim: '<path d="M3 12h18M3 7v10M21 7v10"/><path d="M6.5 9.5 3 12l3.5 2.5M17.5 9.5 21 12l-3.5 2.5"/>'
+    dim: '<path d="M3 12h18M3 7v10M21 7v10"/><path d="M6.5 9.5 3 12l3.5 2.5M17.5 9.5 21 12l-3.5 2.5"/>',
+    lib: '<rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><path d="M17.25 13.5v7.5M13.5 17.25h7.5"/>',
+    room: '<rect x="3.5" y="3.5" width="17" height="17"/><path d="M3.5 12h7M14 12h6.5M10.5 3.5V8"/>',
+    pwall: '<path d="M5 19 19 5" stroke-width="4" stroke-linecap="square"/>',
+    pdoor: '<path d="M5 20V5"/><path d="M5 5a15 15 0 0 1 15 15" stroke-dasharray="2.5 2"/><path d="M3 20h18"/>',
+    pwindow: '<rect x="2.5" y="9" width="19" height="6"/><path d="M2.5 12h19"/>',
+    stairs: '<rect x="6" y="3" width="12" height="18"/><path d="M6 7.5h12M6 12h12M6 16.5h12"/>',
+    furn: '<path d="M4 10V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><rect x="2.5" y="10" width="19" height="7" rx="2"/><path d="M5 17v2M19 17v2"/>',
+    fixture: '<rect x="7" y="3" width="10" height="5" rx="1"/><ellipse cx="12" cy="14.5" rx="5.5" ry="6.5"/>'
   };
-  const TOOLS = [["select", "Select"], ["wall", "Wall"], ["roof", "Roof"], ["window", "Window"], ["door", "Door"], ["trim", "Trim"], ["plant", "Plant"], ["steps", "Steps"], ["chimney", "Chimney"], ["label", "Label"], ["line", "Line"], ["pen", "Pen"], ["paint", "Paint"], ["dim", "Measure"]];
+  const TOOLS = {
+    front: [["select", "Select"], ["lib", "Library"], ["wall", "Wall"], ["roof", "Roof"], ["window", "Window"], ["door", "Door"], ["trim", "Trim"], ["plant", "Plant"], ["steps", "Steps"], ["label", "Label"], ["line", "Line"], ["pen", "Pen"], ["paint", "Paint"], ["dim", "Measure"]],
+    plan: [["select", "Select"], ["lib", "Library"], ["room", "Room"], ["pwall", "Wall"], ["pdoor", "Door"], ["pwindow", "Window"], ["stairs", "Stairs"], ["furn", "Furniture"], ["fixture", "Fixtures"], ["label", "Label"], ["line", "Line"], ["pen", "Pen"], ["paint", "Paint"], ["dim", "Measure"]]
+  };
   const HINTS = {
     select: "Tap a part to select it, drag to move it, tap it twice for exact sizes.",
     wall: "Tap to place a wall, or drag to draw one at any size. Tap Wall again for textures.",
@@ -1331,12 +1523,21 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     line: "Drag to draw a straight line. Ortho keeps it level or upright.",
     pen: "Draw freehand. Tap Pen again for color and thickness.",
     paint: "Tap any part to paint it. Tap Paint again to pick a color or texture.",
-    dim: "Drag between two points to measure. Snap locks onto corners and centers."
+    dim: "Drag between two points to measure. Snap locks onto corners and centers.",
+    room: "Drag to draw a room, or tap to drop one. Its floor area updates as you size it. Tap it twice to name it.",
+    pwall: "Drag to draw a wall. Ortho keeps it straight.",
+    pdoor: "Tap on a wall to place a door. Rotate and Mirror turn its swing. Tap Door again for double and sliding doors.",
+    pwindow: "Tap on a wall to place a window. Rotate it for side walls.",
+    stairs: "Tap to place stairs. The arrow points up. Tap Stairs again for a spiral.",
+    furn: "Tap to place furniture. Tap Furniture again for beds, tables and more, or open the Library.",
+    fixture: "Tap to place a fixture. Tap Fixtures again for kitchen, bath and laundry, or open the Library.",
+    pplant: "Tap to place a plant."
   };
   function buildTools() {
-    $("tools").innerHTML = TOOLS.map(t => `<button class="tool" data-t="${t[0]}" aria-label="${t[1]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[t[0]]}</svg><span>${t[1]}</span>${t[0] === "paint" || t[0] === "pen" ? '<i class="dot"></i>' : ""}</button>`).join("");
+    $("tools").innerHTML = TOOLS[D.mode].map(t => `<button class="tool" data-t="${t[0]}" aria-label="${t[1]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[t[0]]}</svg><span>${t[1]}</span>${t[0] === "paint" || t[0] === "pen" ? '<i class="dot"></i>' : ""}</button>`).join("");
   }
   function setTool(t) {
+    if (t === "lib") { renderLib(); openSheet("libSheet"); return; }
     if (t === tool && t !== "select") {
       if (t === "paint" || t === "pen" || t === "line") { renderPaint(); openSheet("paintSheet"); }
       else if (TYPES[t] && (TYPES[t].styles || TYPES[t].texs || TYPES[t].kind !== "label")) { renderToolSheet(t); openSheet("toolSheet"); }
@@ -1346,6 +1547,58 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (!store.hinted[t]) { store.hinted[t] = true; save(); toast(HINTS[t]); }
   }
   $("tools").addEventListener("click", e => { const b = e.target.closest(".tool"); if (b) setTool(b.dataset.t); });
+  function setMode(m) {
+    if (D.mode === m) return;
+    cancelAct(); D.mode = m; sel = null; tool = "select"; libItem = null;
+    buildTools(); save(); render(); fit(); SFX.tap();
+    if (m === "plan" && !store.hinted.plan) { store.hinted.plan = true; save(); toast("Floor plan: draw rooms from above. Front and Plan belong to the same design."); }
+  }
+  $("viewSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMode(b.dataset.v); });
+
+  /* ---------- library ---------- */
+  const LIB = {
+    front: [
+      ["Windows", [["window", "double", 110, 140, "Double hung"], ["window", "single", 180, 140, "Picture"], ["window", "casement", 120, 140, "Casement"], ["window", "arched", 100, 170, "Arched"], ["window", "round", 80, 80, "Round"], ["window", "shutters", 150, 140, "Shuttered"], ["window", "double", 70, 90, "Small"], ["window", "single", 240, 60, "Clerestory"]]],
+      ["Doors", [["door", "panel", 100, 210, "Panel"], ["door", "glass", 100, 210, "Glass top"], ["door", "double", 160, 220, "Double"], ["door", "french", 160, 220, "French"], ["door", "arched", 110, 230, "Arched"], ["door", "garage", 260, 220, "Garage"], ["door", "garage", 500, 220, "Double garage"]]],
+      ["Roofs and structure", [["roof", "gable", 900, 270, "Gable roof"], ["roof", "hip", 900, 240, "Hip roof"], ["roof", "mansard", 900, 260, "Mansard roof"], ["roof", "gambrel", 900, 300, "Gambrel roof"], ["roof", "flat", 840, 25, "Flat roof"], ["chimney", null, 60, 180, "Brick chimney", { tex: "brick" }], ["chimney", null, 70, 180, "Stone chimney", { tex: "stone", color: "#9c968a" }], ["steps", "steps", 160, 51, "Steps"], ["steps", "stoop", 200, 68, "Stoop"]]],
+      ["Trim", [["trim", "cornice", 840, 40, "Cornice"], ["trim", "band", 800, 20, "Band"], ["trim", "column", 40, 300, "Column"], ["trim", "pilaster", 35, 300, "Pilaster"], ["trim", "quoins", 40, 300, "Quoins"], ["trim", "frame", 150, 180, "Surround"]]],
+      ["Garden", [["plant", "shrub", 150, 90, "Shrub"], ["plant", "tree", 260, 480, "Tree"], ["plant", "hedge", 300, 100, "Hedge"], ["plant", "flowers", 110, 45, "Flower box"], ["plant", "ivy", 120, 300, "Ivy"]]]
+    ],
+    plan: [
+      ["Doors and windows", [["pdoor", "swing", 80, 80, "Narrow door"], ["pdoor", "swing", 90, 90, "Door"], ["pdoor", "pair", 160, 80, "Double door"], ["pdoor", "sliding", 180, 15, "Sliding door"], ["pwindow", null, 90, 15, "Small window"], ["pwindow", null, 120, 15, "Window"], ["pwindow", null, 180, 15, "Wide window"]]],
+      ["Kitchen and laundry", [["fixture", "fridge", 70, 70, "Fridge"], ["fixture", "stove", 60, 60, "Stove"], ["fixture", "sink", 80, 60, "Kitchen sink"], ["fixture", "dishwasher", 60, 60, "Dishwasher"], ["fixture", "counter", 240, 60, "Counter"], ["fixture", "counter", 180, 90, "Island"], ["fixture", "washer", 60, 60, "Washer"], ["fixture", "dryer", 60, 60, "Dryer"]]],
+      ["Bathroom", [["fixture", "toilet", 40, 70, "Toilet"], ["fixture", "sink", 60, 45, "Basin"], ["fixture", "bath", 170, 75, "Bathtub"], ["fixture", "shower", 90, 90, "Shower"]]],
+      ["Living and dining", [["furn", "sofa", 210, 90, "Sofa"], ["furn", "armchair", 85, 85, "Armchair"], ["furn", "table", 200, 160, "Dining table"], ["furn", "rug", 240, 170, "Rug", { color: "#b8466a" }], ["furn", "tv", 180, 45, "TV console"], ["furn", "desk", 140, 70, "Desk"]]],
+      ["Bedroom", [["furn", "bed", 160, 200, "Double bed", { color: "#d8cbb5" }], ["furn", "bed", 90, 200, "Single bed", { color: "#d8cbb5" }], ["furn", "wardrobe", 120, 60, "Wardrobe"]]],
+      ["Stairs and garden", [["stairs", "straight", 100, 300, "Stairs"], ["stairs", "spiral", 160, 160, "Spiral stairs"], ["pplant", "pot", 60, 60, "Potted plant"], ["pplant", "tree", 300, 300, "Tree"]]]
+    ]
+  };
+  const libThumbs = {};
+  function libPart(it) { const T = TYPES[it.t]; const p = { id: 1, t: it.t, layer: T.layer, color: (it.ex && it.ex.color) || T.color, x: 0, y: 0, w: it.w, h: it.h }; if (T.styles) p.style = it.s; if (T.texs) p.tex = (it.ex && it.ex.tex) || T.tex; return p; }
+  function libThumb(it, mode, key) {
+    if (libThumbs[key]) return libThumbs[key];
+    const p = libPart(it), a = artSVG([p], "day", null, mode, true), pad = Math.max(it.w, it.h) * 0.12 + 4, side = Math.max(it.w, it.h) + pad * 2;
+    const x0 = it.w / 2 - side / 2, y0 = -it.h / 2 - side / 2;
+    return (libThumbs[key] = svgURL(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(y0)} ${f(side)} ${f(side)}"><defs>${STATIC_DEFS}${a.defs}</defs>${a.body}</svg>`));
+  }
+  function libItems(mode) { return LIB[mode].map(c => [c[0], c[1].map(q => ({ t: q[0], s: q[1], w: q[2], h: q[3], n: q[4], ex: q[5] }))]); }
+  function renderLib() {
+    const m = D.mode;
+    let h = `<div class="grab"></div><h2>Library</h2><p class="lede">${m === "plan" ? "Doors, windows, appliances, fixtures and furniture for the floor plan." : "Ready-made windows, doors, roofs, trim and plants for the front."} Pick one, then tap the board to place it, or drag to size it.</p>`;
+    libItems(m).forEach((c, ci) => {
+      h += `<h3>${esc(c[0])}</h3><div class="libgrid">`;
+      c[1].forEach((it, ii) => { const on = tool === "lib" && libItem && libItem.n === it.n && libItem.t === it.t; h += `<button class="libitem" data-c="${ci}" data-i="${ii}" aria-pressed="${!!on}"><img alt="" src="${libThumb(it, m, m + ci + "_" + ii)}"><b>${esc(it.n)}</b><small>${esc(fmtLen(it.w))} × ${esc(fmtLen(it.h))}</small></button>`; });
+      h += `</div>`;
+    });
+    h += `<button class="secondary" data-close>Close</button>`;
+    $("libSheet").innerHTML = h;
+  }
+  $("libSheet").addEventListener("click", e => {
+    const b = e.target.closest(".libitem"); if (!b) return;
+    const it = libItems(D.mode)[+b.dataset.c][1][+b.dataset.i];
+    libItem = it; tool = "lib"; SFX.tap(); closeSheets(); renderDock();
+    toast("Tap the board to place the " + it.n.toLowerCase() + ". Tap Library to pick another.");
+  });
 
   /* ---------- sheets ---------- */
   function openSheet(id) { document.querySelectorAll(".sheet").forEach(s => { s.hidden = s.id !== id; }); $("scrim").hidden = false; const sh = $(id); sh.scrollTop = 0; }
@@ -1361,19 +1614,20 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   function buildProps(p) {
     const T = TYPES[p.t], k = T.kind, u = S().units === "ft" ? "ft-in, like 3' 6\"" : "metres, or add cm";
     let h = `<div class="grab"></div><h2>${esc(partName(p))}</h2><p class="lede">${esc(sizeText(p))}</p>`;
-    if (k === "label") h += `<div class="fields">${fld("Text", "text", p.text, true)}</div>`;
+    if (k === "label" || p.t === "room") h += `<div class="fields">${fld(p.t === "room" ? "Room name" : "Text", "text", p.text, true)}</div>`;
     if (T.styles) h += `<h3>Style</h3>` + chips("style", T.styles, p.style);
     if (T.texs) h += `<h3>Texture</h3>` + chips("tex", T.texs, p.tex);
     h += `<h3>Color</h3>` + swatches(p.color);
     h += `<h3>Size and position</h3><div class="fields">`;
-    if (k === "rect") h += fld("Width", "w", fmtIn(p.w)) + fld("Height", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld("Height above ground", "y", fmtIn(p.y));
-    else if (k === "label") h += fld("Letter size", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld("Height above ground", "y", fmtIn(p.y), true);
+    const plan = D.mode === "plan", yl = plan ? "Bottom edge" : "Height above ground";
+    if (k === "rect") h += fld(plan ? "Width (across)" : "Width", "w", fmtIn(p.w)) + fld(plan ? "Depth (up the page)" : "Height", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld(yl, "y", fmtIn(p.y));
+    else if (k === "label") h += fld("Letter size", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld(yl, "y", fmtIn(p.y), true);
     else if (k === "line" || k === "dim") h += fld("Start, across", "x1", fmtIn(p.x1)) + fld("Start, up", "y1", fmtIn(p.y1)) + fld("End, across", "x2", fmtIn(p.x2)) + fld("End, up", "y2", fmtIn(p.y2)) + fld("Length", "len", fmtIn(Math.hypot(p.x2 - p.x1, p.y2 - p.y1))) + (k === "dim" ? fld("Offset", "off", fmtIn(p.off)) : fld("Thickness", "lw", fmtIn(p.lw)));
     else h += fld("Thickness", "lw", fmtIn(p.lw), true);
-    h += `</div><p class="note">Type sizes in ${u}. Height is measured from the ground line.</p>`;
+    h += `</div><p class="note">Type sizes in ${u}${plan ? ". Positions are measured on the plan grid." : ". Height is measured from the ground line."}</p>`;
     if (k === "line") h += `<div class="row"><label>Dashed</label><button class="switch" data-sw="dash" role="switch" aria-checked="${!!p.dash}" aria-label="Dashed"></button></div>`;
     h += `<h3>Layer</h3><div class="seg" data-k="layer">${LAYERS.map(l => `<button data-v="${l.id}" aria-pressed="${p.layer === l.id}">${l.name}</button>`).join("")}</div>`;
-    h += `<h3>Arrange</h3><div class="acts">${k === "rect" || k === "label" ? '<button data-a="center">Center on wall</button>' : ""}<button data-a="mirror">Mirror copy</button><button data-a="dup">Duplicate</button><button data-a="front">Bring to front</button><button data-a="back">Send to back</button><button data-a="del" class="danger">Delete</button></div>`;
+    h += `<h3>Arrange</h3><div class="acts">${TYPES[p.t].rot ? '<button data-a="rot">Rotate 90°</button>' : ""}${k === "rect" || k === "label" ? `<button data-a="center">${plan ? "Center in room" : "Center on wall"}</button>` : ""}<button data-a="mirror">Mirror copy</button><button data-a="dup">Duplicate</button><button data-a="front">Bring to front</button><button data-a="back">Send to back</button><button data-a="del" class="danger">Delete</button></div>`;
     h += `<h3>Repeat</h3><div class="rep">${fld("Copies", "repN", "2").replace('data-f="repN"', 'id="repN" inputmode="numeric"')}${fld("Gap", "repG", fmtIn(gsnap(60))).replace('data-f="repG"', 'id="repG"')}</div>
       <div class="seg" id="repDir" style="margin-top:8px"><button data-v="right" aria-pressed="true">To the right</button><button data-v="up" aria-pressed="false">Upward</button></div>
       <button class="secondary" data-a="repeat">Repeat</button>`;
@@ -1392,6 +1646,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (b.dataset.sw === "dash") { withUndo(() => { if (p.dash) delete p.dash; else p.dash = true; }); buildProps(p); return; }
     const a = b.dataset.a;
     if (a === "center") { centerOnWall(); buildProps(p); }
+    else if (a === "rot") { rotate(); buildProps(p); }
     else if (a === "mirror") { mirror(); refreshProps(); }
     else if (a === "dup") { duplicate(); refreshProps(); }
     else if (a === "front") { arrange(true); }
@@ -1407,7 +1662,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const p = selPart(); if (!p) return; const t = e.target;
     if (t.type === "color") { if (hexOk(t.value)) { withUndo(() => { p.color = t.value.toLowerCase(); }); remember(p); buildProps(p); } return; }
     const key = t.dataset.f; if (!key || key === "repN" || key === "repG") return;
-    if (key === "text") { const v = cleanText(t.value, 60); if (v) withUndo(() => { p.text = v; p.w = labelW(v, p.h); }); buildProps(p); return; }
+    if (key === "text") { const v = cleanText(t.value, p.t === "room" ? 40 : 60); if (v) withUndo(() => { p.text = v; if (p.t === "label") p.w = labelW(v, p.h); }); buildProps(p); return; }
     const v = parseLen(t.value);
     if (!isFinite(v)) { toast("That size wasn't understood. Try " + (S().units === "ft" ? "3' 6\"" : "1.20") + "."); buildProps(p); return; }
     withUndo(() => {
@@ -1438,7 +1693,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const pt = store.paint;
     let h = `<div class="grab"></div><h2>Paint box</h2><p class="lede">Paint recolors any part you tap. Line and Pen draw in this color too.</p>`;
     h += `<h3>Color</h3>` + swatches(pt.color);
-    h += `<h3>Texture for walls, roofs and chimneys</h3><div class="chips" data-k="tex"><button data-v="" aria-pressed="${!pt.tex}">Keep texture</button>${ALL_TEX.map(v => `<button data-v="${v}" aria-pressed="${v === pt.tex}">${NAMES[v]}</button>`).join("")}</div>`;
+    h += `<h3>Texture for walls, roofs and floors</h3><div class="chips" data-k="tex"><button data-v="" aria-pressed="${!pt.tex}">Keep texture</button>${ALL_TEX.map(v => `<button data-v="${v}" aria-pressed="${v === pt.tex}">${NAMES[v]}</button>`).join("")}</div>`;
     h += `<h3>Pen size</h3><div class="seg" data-k="pen">${[[2, "Fine"], [4, "Medium"], [8, "Bold"], [16, "Marker"]].map(q => `<button data-v="${q[0]}" aria-pressed="${pt.pen === q[0]}">${q[1]}</button>`).join("")}</div>`;
     h += `<button class="primary" data-close>Done</button>`;
     $("paintSheet").innerHTML = h;
@@ -1517,7 +1772,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const list = store.designs.slice().sort((a, b) => b.at - a.at);
     let h = `<div class="grab"></div><h2>Your designs</h2><p class="lede">Saved on this phone as you draw.</p><button class="secondary" style="margin:0 0 12px" data-n="1">New design</button><div class="cards">`;
     list.forEach(d => {
-      h += `<div class="card${d.id === D.id ? " cur" : ""}" data-id="${esc(d.id)}"><img alt="" src="${thumbURL(d)}"><b>${esc(d.name)}</b><small>${esc(when(d.at))} · ${d.parts.length} parts</small><div class="cbtns"><button data-a="open">${d.id === D.id ? "Open" : "Open"}</button><button data-a="copy">Copy</button><button data-a="del" class="danger">Delete</button></div></div>`;
+      h += `<div class="card${d.id === D.id ? " cur" : ""}" data-id="${esc(d.id)}"><img alt="" src="${thumbURL(d)}"><b>${esc(d.name)}</b><small>${esc(when(d.at))} · ${d.front.length + d.plan.length} parts${d.plan.length ? " · has plan" : ""}</small><div class="cbtns"><button data-a="open">${d.id === D.id ? "Open" : "Open"}</button><button data-a="copy">Copy</button><button data-a="del" class="danger">Delete</button></div></div>`;
     });
     h += `</div><button class="primary" data-close>Done</button>`;
     $("designsSheet").innerHTML = h;
@@ -1537,11 +1792,11 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       save(); renderDesigns();
     }
   });
-  function switchTo(d) { D = d; store.cur = d.id; sel = null; undoStack = []; redoStack = []; save(); render(); fit(); }
+  function switchTo(d) { D = d; store.cur = d.id; sel = null; tool = "select"; libItem = null; undoStack = []; redoStack = []; buildTools(); save(); render(); fit(); }
   function renderNew() {
     let h = `<div class="grab"></div><h2>New design</h2><p class="lede">Start from an empty lot, or from a house to take apart and remix.</p><div class="cards">`;
     h += `<button class="card" data-tpl="blank"><img alt="" src="${thumbURL(newDesign("", []))}"><b>Empty lot</b><small>Start from scratch</small></button>`;
-    Object.keys(TEMPLATES).forEach(k => { const t = TEMPLATES[k], d = newDesign(t.name, t.parts); d.sky = t.sky; h += `<button class="card" data-tpl="${k}"><img alt="" src="${thumbURL(d)}"><b>${esc(t.name)}</b><small>${d.parts.length} parts</small></button>`; });
+    Object.keys(TEMPLATES).forEach(k => { const t = TEMPLATES[k], d = newDesign(t.name, t.parts, t.plan); d.sky = t.sky; h += `<button class="card" data-tpl="${k}"><img alt="" src="${thumbURL(d)}"><b>${esc(t.name)}</b><small>${t.plan ? "Front and plan" : d.front.length + " parts"}</small></button>`; });
     h += `</div><button class="secondary" data-close>Cancel</button>`;
     $("newSheet").innerHTML = h;
   }
@@ -1549,7 +1804,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const c = e.target.closest("[data-tpl]"); if (!c) return;
     const t = TEMPLATES[c.dataset.tpl];
     const n = store.designs.length + 1;
-    const d = t ? newDesign(t.name, t.parts) : newDesign("House " + n, []);
+    const d = t ? newDesign(t.name, t.parts, t.plan) : newDesign("House " + n, []);
     if (t) d.sky = t.sky;
     store.designs.push(d); switchTo(d); closeSheets(); SFX.place(); sess.games++;
     track("design_new", { template: c.dataset.tpl });
@@ -1677,6 +1932,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   $("cEdit").addEventListener("click", () => { SFX.tap(); openProps(); });
   $("cCopy").addEventListener("click", duplicate);
   $("cMirror").addEventListener("click", mirror);
+  $("cRot").addEventListener("click", rotate);
   $("cFront").addEventListener("click", () => arrange(true));
   $("cBack").addEventListener("click", () => arrange(false));
   $("cDel").addEventListener("click", del);
