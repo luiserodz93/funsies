@@ -29,6 +29,8 @@ The sides are **Limestone** (light) and **Basalt** (dark, with lantern-lit windo
 
 **Scale:** a scale bar sits at the top left of the board and in saved pictures, and a 5′ 9″ person stands next to the front door in the Front and 3D views (turn the figure off in the menu).
 
+**Lot:** Menu, then Lot (or the badge at the top left), places the house on a lot. Pick a common US size (city row 25′ × 100′, narrow 40′ × 100′, standard 50′ × 100′, suburban 60′ × 120′, quarter acre 80′ × 136′, half acre 100′ × 218′) or type a custom width and depth. Each lot has front, side and rear setbacks you can edit, and the house's front and side yards can be typed or centered. The plan draws the property lines, the setback line, the sidewalk and the street, with a warning when the house crosses a setback. The front shows the property lines and lot width, 3D shows the yard, sidewalk and street, and the badge shows how much of the lot the house covers. The starter houses come on lots.
+
 **Gravity:** in the Front view nothing floats. A wall, roof, door, step or plant placed, drawn, moved or resized in mid air falls onto whatever holds it up: the ground, a wall top, a step, a flat roof or a trim band. Turn it off with the Gravity chip under the board to hang parts freely.
 
 **Features**

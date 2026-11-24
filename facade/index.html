@@ -91,7 +91,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
 .viewseg button{border:0; background:transparent; padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
 .viewseg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
-.apill{position:absolute; left:10px; top:52px; z-index:2; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:5px 9px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
+.apill{position:absolute; left:10px; top:52px; z-index:2; cursor:pointer; text-align:left; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:5px 9px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
 .nudge{display:grid; grid-template-columns:repeat(3, 48px); grid-template-rows:repeat(2, 40px); gap:6px; justify-content:center}
 .nudge button{border:1px solid var(--panel-line); background:transparent; border-radius:8px; font-weight:500; font-size:16px; cursor:pointer}
 .nudge .up{grid-column:2} .nudge .lf{grid-column:1; grid-row:2} .nudge .dn{grid-column:2; grid-row:2} .nudge .rt{grid-column:3; grid-row:2}
@@ -183,6 +183,13 @@ body.is3d .tool{opacity:.55}
 .sw.custom{display:grid; place-items:center; background:conic-gradient(#b8705a,#c9b27a,#8a9a78,#6f8ea3,#7b7393,#a8788a,#b8705a); overflow:hidden}
 .sw.custom input{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; border:0; padding:0}
 .fields{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.fields.three{grid-template-columns:1fr 1fr 1fr}
+.lots{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.lots button{display:grid; gap:3px; text-align:left; border:1px solid var(--panel-line); background:transparent; border-radius:8px; padding:10px; cursor:pointer; color:var(--ink)}
+.lots button[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink)}
+.lots b{font-weight:600; font-size:13.5px}
+.lots small{font-family:var(--font-mono); font-size:11px; color:var(--ink2); font-variant-numeric:tabular-nums}
+.note.warn{color:var(--accent)}
 .fld{display:grid; gap:4px}
 .fld span{font-size:12px; font-weight:500; color:var(--ink2)}
 .fld input, .field input{width:100%; min-width:0; border:1px solid var(--panel-line); background:transparent; border-radius:6px; padding:9px 10px; font-family:var(--font-mono); font-weight:400; font-size:16px; font-variant-numeric:tabular-nums}
@@ -263,7 +270,7 @@ body.is3d .tool{opacity:.55}
     </svg>
         <div class="viewseg" id="viewSeg" role="group" aria-label="View"><button data-v="front" aria-pressed="true">Front</button><button data-v="plan" aria-pressed="false">Plan</button><button data-v="3d" aria-pressed="false">3D</button></div>
     <div id="v3" hidden><canvas id="c3"></canvas><div class="v3bar"><button class="chip" id="roof3" aria-pressed="true">Roof on</button><button class="chip" id="reset3">Reset view</button></div><div id="v3msg" class="v3msg" hidden></div></div>
-    <div class="apill" id="areaPill" hidden></div>
+    <button class="apill" id="areaPill" hidden aria-label="Lot size"></button>
     <div class="corner">
       <button class="mini" id="zoomIn" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <button class="mini" id="zoomOut" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
@@ -306,6 +313,7 @@ body.is3d .tool{opacity:.55}
 <section class="sheet" id="multiSheet" hidden aria-label="Arrange selection"></section>
 <section class="sheet" id="paintSheet" hidden aria-label="Paint"></section>
 <section class="sheet" id="menuSheet" hidden aria-label="Menu"></section>
+<section class="sheet" id="lotSheet" hidden aria-label="Lot size"></section>
 <section class="sheet" id="layersSheet" hidden aria-label="Layers"></section>
 <section class="sheet" id="designsSheet" hidden aria-label="Your designs"></section>
 <section class="sheet" id="newSheet" hidden aria-label="New design"></section>
@@ -321,6 +329,7 @@ body.is3d .tool{opacity:.55}
     <li><b>Snap.</b> Grid snaps to the grid size. Snap lines parts up with the edges and centers of other parts and the ground (dashed guides show it). Ortho keeps lines and dimensions straight.</li>
     <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
     <li><b>Front and Plan.</b> The switch at the top left flips between the front of the house and its floor plan. Each has its own tools, and rooms show their floor area as you size them. They are linked: a ground-floor window or door placed on the front wall also goes into the plan's front wall (the bottom edge of the rooms), and the other way round. Moving or resizing it in one view moves it in the other, and dotted lines show where the other view's walls and openings fall.</li>
+    <li><b>Lot.</b> Menu, then Lot, sets the property: a common US lot size or your own width and depth, with setbacks. The plan shows property lines, setbacks, the sidewalk and street; the front shows the property lines; 3D shows the yard. The badge at the top left shows the lot area and how much of it the house covers.</li>
     <li><b>Library.</b> Ready-made windows, doors, roofs, trim and plants for the front, and doors, windows, appliances, bathroom fixtures and furniture for the plan. Pick one, then tap the board to place it.</li>
     <li><b>Measure.</b> Measure drags a dimension between two points. Drag its middle handle to move it away from the wall.</li>
     <li><b>Move around.</b> Pinch to zoom and drag with two fingers, or use the + and − buttons. The corner button fits the drawing to the screen.</li>
@@ -487,6 +496,7 @@ body.is3d .tool{opacity:.55}
     if (typeof o.at === "number" && isFinite(o.at)) d.at = o.at;
     d.sky = ["day", "dusk", "night"].indexOf(o.sky) >= 0 ? o.sky : "day";
     if (num(o.lx) != null) d.lx = num(o.lx);
+    const lot = cleanLot(o.lot); if (lot) d.lot = lot;
     if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
     return d;
   }
@@ -860,7 +870,7 @@ body.is3d .tool{opacity:.55}
   }
   /* Floor plan symbols. Rotatable ones draw in their own frame: length L across, depth Dp down, back edge at the top. */
   const PAPER = "#f7f6f2", INK = "#2a2a28";
-  function fmtArea(cm2) { return S().units === "ft" ? Math.round(cm2 / 929.0304) + " ft²" : (cm2 / 10000).toFixed(1) + " m²"; }
+  function fmtArea(cm2) { return S().units === "ft" ? Math.round(cm2 / 929.0304).toLocaleString("en-US") + " ft²" : (cm2 / 10000).toLocaleString("en-US", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " m²"; }
   function roomSVG(p, o) {
     const { X, T, W, H } = bx(p), name = (p.text || "Room").toUpperCase(), fs = clamp(Math.min(W / (name.length * 0.78 + 2), H / 6), 9, 30), cx = X + W / 2, cy = T + H / 2, halo = `stroke="${shade(p.color, 0.55)}" stroke-width="${f(fs * 0.3)}" paint-order="stroke" stroke-linejoin="round"`;
     o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.05)}" text-anchor="middle" font-size="${f(fs)}" font-family="Inter Tight, system-ui, sans-serif" font-weight="600" letter-spacing="${f(fs * 0.12)}" fill="${INK}" ${halo}>${esc(name)}</text>` +
@@ -1227,7 +1237,7 @@ body.is3d .tool{opacity:.55}
     dusk: { rtop: "#4a5470", rbot: "#e0b796", lawn: "#626a52", top: "#5f6577", bot: "#d9c3b0", soil: "#c9bcb0", line: "#2b2a2e", hatch: "rgba(43,42,46,.3)", halo: "rgba(240,230,220,.85)", glass: "url(#gDusk)" },
     night: { rtop: "#0a0f18", rbot: "#1f2a3a", lawn: "#1c2420", top: "#14181f", bot: "#262c36", soil: "#1b1f25", line: "#9aa3ad", hatch: "rgba(154,163,173,.25)", halo: "rgba(20,24,31,.85)", glass: "url(#gNight)" }
   };
-  function artSVG(parts, sky, layers, mode, noGround, style) {
+  function artSVG(parts, sky, layers, mode, noGround, style, site) {
     const pats = new Map(), sk = SKY[sky] || SKY.day, real = mode !== "plan" && (style || S().render) === "real";
     const b = bounds(parts.filter(p => p.t !== "dim"));
     const o = {
@@ -1259,7 +1269,8 @@ body.is3d .tool{opacity:.55}
     });
     const shadows = real && o.shad && o.clip ? `<clipPath id="wallsClip">${o.clip}</clipPath><g clip-path="url(#wallsClip)">${o.shad}</g>` : "";
     const fig = mode !== "plan" && !noGround && S().figure ? figureSVG(parts.filter(p => !(layers && layers[p.layer] && layers[p.layer].hide)), o) : "";
-    return { defs: Array.from(pats.values()).join("") + Object.values(o.lf).join(""), body: ground + o.grd + body + shadows + after + fig + o.top };
+    const lotS = site && site.lot ? (mode === "plan" ? lotPlanSVG(site) : noGround ? "" : lotFrontSVG(site, b, sky, real)) : "";
+    return { defs: Array.from(pats.values()).join("") + Object.values(o.lf).join(""), body: ground + lotS + o.grd + body + shadows + after + fig + o.top };
   }
 
   /* ---------- export ---------- */
@@ -1267,11 +1278,11 @@ body.is3d .tool{opacity:.55}
   function exportSVG(d, pad, mode, titled) {
     mode = mode || d.mode;
     const plan = mode === "plan", parts = (plan ? d.plan : d.front).filter(p => !d.layers[p.layer].hide);
-    const b = bounds(parts) || { x0: 0, y0: 0, x1: 800, y1: 400 };
+    const b = lotBounds(d, mode, bounds(parts)) || { x0: 0, y0: 0, x1: 800, y1: 400 };
     pad = pad == null ? Math.max(60, (b.x1 - b.x0) * 0.06) : pad;
     const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad; let bot = plan ? b.y0 - pad : Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
     if (titled) bot -= clamp(Math.min(x1 - x0, top - bot) * 0.022, 9, 40) * 6;
-    const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null, mode);
+    const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null, mode, false, undefined, siteOf(d));
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S().render === "real" ? sk.rtop : sk.top}"/><stop offset="1" stop-color="${S().render === "real" ? sk.rbot : sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, plan ? PAPER : "url(#sky)")}${a.body}${titled ? titleBlock(d, plan, x0, -top, W, H, sk) : ""}</svg>`;
     return { svg, W, H };
   }
@@ -1319,7 +1330,7 @@ body.is3d .tool{opacity:.55}
   function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function unb64u(s) { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/")); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
   const strip = list => list.map(p => { const q = Object.assign({}, p); delete q.id; return q; });
-  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; if (typeof d.lx === "number") o.lx = d.lx; return o; }
+  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; if (typeof d.lx === "number") o.lx = d.lx; if (d.lot) o.lot = d.lot; return o; }
   async function encodeDesign(d) {
     const bytes = new TextEncoder().encode(JSON.stringify(compactDesign(d)));
     if (window.CompressionStream) {
@@ -1344,7 +1355,7 @@ body.is3d .tool{opacity:.55}
 
   /* ---------- templates ---------- */
   const TEMPLATES = {
-    cottage: { name: "Garden cottage", sky: "day", parts: [
+    cottage: { name: "Garden cottage", sky: "day", lot: "std", parts: [
       { t: "chimney", x: 560, y: 380, w: 60, h: 230, color: "#8a5444", tex: "brick" },
       { t: "wall", x: 0, y: 0, w: 800, h: 300, color: "#a0705a", tex: "brick" },
       { t: "roof", x: -50, y: 300, w: 900, h: 270, color: "#4a4b4d", tex: "shingle", style: "gable" },
@@ -1382,7 +1393,7 @@ body.is3d .tool{opacity:.55}
       { t: "pwindow", x: 150, y: 642.5, w: 120, h: 15 },
       { t: "pwindow", x: 520, y: 642.5, w: 80, h: 15 },
       { t: "pplant", x: 20, y: 20, w: 50, h: 50, style: "pot" }] },
-    townhouse: { name: "City townhouse", sky: "dusk", parts: [
+    townhouse: { name: "City townhouse", sky: "dusk", lot: "row", parts: [
       { t: "wall", x: 0, y: 0, w: 650, h: 940, color: "#d8cdbb", tex: "stucco" },
       { t: "trim", x: 0, y: 0, w: 40, h: 920, color: "#ece8df", style: "quoins" },
       { t: "trim", x: 610, y: 0, w: 40, h: 920, color: "#ece8df", style: "quoins", fx: true },
@@ -1402,7 +1413,7 @@ body.is3d .tool{opacity:.55}
       { t: "window", x: 460, y: 690, w: 110, h: 170, color: "#ece8df", style: "double" },
       { t: "plant", x: 80, y: 690, w: 110, h: 40, color: "#7d8f6e", style: "flowers" },
       { t: "plant", x: 460, y: 690, w: 110, h: 40, color: "#7d8f6e", style: "flowers" }] },
-    modern: { name: "Modern house", sky: "day", parts: [
+    modern: { name: "Modern house", sky: "day", lot: "sub", parts: [
       { t: "wall", x: 0, y: 0, w: 1000, h: 320, color: "#eceae4", tex: "board" },
       { t: "wall", x: 450, y: 320, w: 550, h: 300, color: "#3a3b3d", tex: "siding" },
       { t: "roof", x: -20, y: 320, w: 470, h: 22, color: "#3a3b3d", tex: "plain", style: "flat" },
@@ -1423,12 +1434,12 @@ body.is3d .tool{opacity:.55}
   function measure() { const r = stage.getBoundingClientRect(); stageW = r.width || 300; stageH = r.height || 300; }
   function fit() {
     measure();
-    const b = bounds(D.parts.filter(visible));
+    const b = lotBounds(D, D.mode, bounds(D.parts.filter(visible)));
     let x0, x1, y0, y1;
     const plan = D.mode === "plan";
     if (b) { x0 = b.x0; x1 = b.x1; y0 = plan ? b.y0 : Math.min(b.y0, 0); y1 = plan ? b.y1 : Math.max(b.y1, 100); }
     else { x0 = -100; x1 = 1100; y0 = plan ? -100 : 0; y1 = plan ? 800 : 600; }
-    const padT = 60, padB = 64, padL = 22, padR = 62; // the zoom buttons sit along the right edge
+    const padT = pillText() ? 124 : 60, padB = 64, padL = 22, padR = 62; // the zoom buttons sit along the right edge
     const s = clamp(Math.min((stageW - padL - padR) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6);
     view.s = s; view.tx = padL + (stageW - padL - padR - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
     renderView();
@@ -1438,7 +1449,7 @@ body.is3d .tool{opacity:.55}
   let preview = null; // a part being drawn
   function renderArt() {
     const parts = preview ? D.parts.concat([preview]) : D.parts;
-    const a = artSVG(parts, D.sky, D.layers, D.mode);
+    const a = artSVG(parts, D.sky, D.layers, D.mode, false, undefined, siteOf(D));
     $("defs").innerHTML = a.defs; $("artBody").innerHTML = a.body;
     stage.dataset.sky = D.mode === "plan" ? "plan" : D.sky + (S().render === "real" ? "-r" : "");
   }
@@ -1499,7 +1510,7 @@ body.is3d .tool{opacity:.55}
       }
       handles.forEach(h => { s += `<circle cx="${f(h[1])}" cy="${f(h[2])}" r="${h[0] === 2 && k === "dim" ? 8 : 7}" fill="var(--panel-solid)" stroke="var(--accent)" stroke-width="2.5"/>`; });
     }
-    if (!view3d) { const y = D.mode === "plan" ? 104 : 70, dark = D.mode !== "plan" && D.sky === "night", len = scaleStep(view.s, 110)[0]; s += `<g opacity=".9">${scaleBarSVG(16 + len * view.s, y, view.s, 110, dark ? "#e6e3dc" : "#2a2a28", dark ? "#14181f" : "#fbfaf7", 10)}</g>`; }
+    if (!view3d) { const y = pillText() ? 104 : 70, dark = D.mode !== "plan" && D.sky === "night", len = scaleStep(view.s, 110)[0]; s += `<g opacity=".9">${scaleBarSVG(16 + len * view.s, y, view.s, 110, dark ? "#e6e3dc" : "#2a2a28", dark ? "#14181f" : "#fbfaf7", 10)}</g>`; }
     u.innerHTML = `<style>.szt{font:500 11px "IBM Plex Mono",ui-monospace,monospace;fill:var(--ink);paint-order:stroke;stroke:var(--panel-solid);stroke-width:4px;stroke-linejoin:round}</style>` + s;
   }
   function renderView() {
@@ -1525,8 +1536,8 @@ body.is3d .tool{opacity:.55}
     $("cGroup").setAttribute("aria-label", grouped ? "Ungroup" : "Group"); $("cGroup").style.color = grouped ? "var(--accent)" : "";
     $("multiChip").setAttribute("aria-pressed", multiMode); $("gravChip").setAttribute("aria-pressed", S().gravity); $("gravChip").hidden = D.mode === "plan";
     $("pasteBtn").hidden = !clip;
-    const ap = $("areaPill"), rooms = D.mode === "plan" ? D.parts.filter(q => q.t === "room") : [];
-    ap.hidden = !rooms.length; if (rooms.length) ap.textContent = rooms.length + (rooms.length === 1 ? " room · " : " rooms · ") + fmtArea(rooms.reduce((t, q) => t + q.w * q.h, 0));
+    const ap = $("areaPill"), pt = pillText();
+    ap.hidden = !pt; ap.textContent = pt;
     document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === (view3d ? "3d" : D.mode)));
     const lb = document.querySelector('.tool[data-t="lib"] span'); if (lb) lb.textContent = tool === "lib" && libItem ? libItem.n : "Library";
     if (many) { const U = unionBox(list); $("ctxName").textContent = (grouped ? "Group of " : "") + list.length + " parts"; $("ctxSize").textContent = fmtLen(U.w) + " × " + fmtLen(U.h); }
@@ -1706,9 +1717,185 @@ body.is3d .tool{opacity:.55}
     return s;
   }
 
+  /* ---------- lot ----------
+     A design can sit on a lot: width along the street, depth back from it, and minimum yards (setbacks).
+     The lot is kept in plan coordinates (x across, y back from the street), so the front view adds the link offset. */
+  const FT = 30.48;
+  const LOTS = [
+    { k: "row", n: "City row", w: 25, h: 100, sf: 10, ss: 0, sr: 20 },
+    { k: "narrow", n: "Narrow", w: 40, h: 100, sf: 20, ss: 5, sr: 20 },
+    { k: "std", n: "Standard", w: 50, h: 100, sf: 25, ss: 5, sr: 20 },
+    { k: "sub", n: "Suburban", w: 60, h: 120, sf: 25, ss: 8, sr: 25 },
+    { k: "qtr", n: "Quarter acre", w: 80, h: 136, sf: 30, ss: 10, sr: 30 },
+    { k: "half", n: "Half acre", w: 100, h: 218, sf: 35, ss: 15, sr: 35 }
+  ];
+  const LOT_MIN = 300, LOT_MAX = 50000;
+  function cleanLot(o) {
+    if (!o || typeof o !== "object") return null;
+    const w = num(o.w), h = num(o.h), x = num(o.x), y = num(o.y);
+    if (w == null || h == null || x == null || y == null || w < LOT_MIN || h < LOT_MIN) return null;
+    const sb = (v, m) => clamp(num(v) || 0, 0, m);
+    return { k: LOTS.some(q => q.k === o.k) ? o.k : "custom", w, h, x, y, sf: sb(o.sf, h / 2), ss: sb(o.ss, w / 2), sr: sb(o.sr, h / 2) };
+  }
+  function lotName(L) {
+    const q = LOTS.find(z => z.k === L.k);
+    return (q ? q.n + " " : "Custom ") + fmtLen(L.w) + " × " + fmtLen(L.h);
+  }
+  function lotArea(L) {
+    const a = fmtArea(L.w * L.h), ac = L.w * L.h / 929.0304 / 43560;
+    return a + (S().units === "ft" && ac >= 0.2 ? " · " + ac.toFixed(2).replace(/0$/, "") + " acre" : "");
+  }
+  /* The house footprint in plan coordinates: the rooms, or without a plan the front walls given a depth (as 3D does). */
+  function houseFoot(d) {
+    const rooms = d.plan.filter(p => p.t === "room");
+    if (rooms.length) return { x0: Math.min.apply(null, rooms.map(p => p.x)), x1: Math.max.apply(null, rooms.map(p => p.x + p.w)), y0: Math.min.apply(null, rooms.map(p => p.y)), y1: Math.max.apply(null, rooms.map(p => p.y + p.h)) };
+    const ws = d.front.filter(p => p.t === "wall");
+    if (!ws.length) return null;
+    const x0 = Math.min.apply(null, ws.map(p => p.x)), x1 = Math.max.apply(null, ws.map(p => p.x + p.w));
+    return { x0, x1, y0: 0, y1: clamp((x1 - x0) * 0.75, 600, 1100) };
+  }
+  function lotOffset(d) {
+    const rooms = d.plan.filter(p => p.t === "room");
+    if (!rooms.length) return 0;
+    if (typeof d.lx === "number") return d.lx;
+    const y = Math.min.apply(null, rooms.map(p => p.y)), x0 = Math.min.apply(null, rooms.filter(p => Math.abs(p.y - y) < 8).map(p => p.x));
+    const ws = d.front.filter(p => p.t === "wall" && p.y < 5);
+    return ws.length ? r1(Math.min.apply(null, ws.map(p => p.x)) - x0) : 0;
+  }
+  const siteOf = d => d.lot ? { lot: d.lot, lx: lotOffset(d), foot: houseFoot(d) } : null;
+  /* Centers the house across the lot and sets it back a little past the front setback. */
+  function placeLot(L, d) {
+    const F = houseFoot(d);
+    if (!F) { L.x = r1(400 - L.w / 2); L.y = r1(-(L.sf + 150)); return L; }
+    const spare = L.h - L.sf - L.sr - (F.y1 - F.y0);
+    L.x = r1((F.x0 + F.x1) / 2 - L.w / 2); L.y = r1(F.y0 - (L.sf + Math.max(0, spare) * 0.25));
+    return L;
+  }
+  function presetLot(k, d) {
+    const q = LOTS.find(z => z.k === k) || LOTS[2];
+    return placeLot({ k: q.k, w: r1(q.w * FT), h: r1(q.h * FT), x: 0, y: 0, sf: r1(q.sf * FT), ss: r1(q.ss * FT), sr: r1(q.sr * FT) }, d);
+  }
+  function lotYards(L, F) { return F ? { f: F.y0 - L.y, l: F.x0 - L.x, r: L.x + L.w - F.x1, b: L.y + L.h - F.y1 } : null; }
+  function lotIssues(L, F) {
+    const Y = lotYards(L, F); if (!Y) return [];
+    if (Math.min(Y.f, Y.l, Y.r, Y.b) < -0.5) return ["The house crosses the property line."];
+    const out = [];
+    if (Y.f < L.sf - 0.5) out.push("The front yard is " + fmtLen(Y.f) + ", under the " + fmtLen(L.sf) + " front setback.");
+    if (Math.min(Y.l, Y.r) < L.ss - 0.5) out.push("A side yard is " + fmtLen(Math.min(Y.l, Y.r)) + ", under the " + fmtLen(L.ss) + " side setback.");
+    if (Y.b < L.sr - 0.5) out.push("The rear yard is " + fmtLen(Y.b) + ", under the " + fmtLen(L.sr) + " rear setback.");
+    return out;
+  }
+  /* Adds the lot to a bounding box for fitting and saving. The front only takes it in when the lot isn't much wider than the house. */
+  function lotBounds(d, mode, b) {
+    const L = d.lot; if (!L) return b;
+    let q;
+    if (mode === "plan") q = { x0: L.x, x1: L.x + L.w, y0: L.y - 420, y1: L.y + L.h };
+    else {
+      const lx = lotOffset(d), hw = b ? b.x1 - b.x0 : 0;
+      if (b && L.w > hw * 2.6) return b;
+      q = { x0: L.x + lx, x1: L.x + lx + L.w, y0: -90, y1: 0 };
+    }
+    return b ? { x0: Math.min(b.x0, q.x0), x1: Math.max(b.x1, q.x1), y0: Math.min(b.y0, q.y0), y1: Math.max(b.y1, q.y1) } : q;
+  }
+  const mono = (x, y, fs, fill, extra, t) => `<text x="${f(x)}" y="${f(y)}" font-size="${f(fs)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="500" fill="${fill}" ${extra || ""}>${esc(t)}</text>`;
+  /* Plan: street, curb and sidewalk below the front line, a lawn tint, the setback (buildable) line and the property line. */
+  function lotPlanSVG(site) {
+    const L = site.lot, X0 = L.x, X1 = L.x + L.w, Y0 = L.y, Y1 = L.y + L.h, ext = Math.max(L.w * 0.3, 600);
+    const fs = clamp(L.w / 24, 20, 100), grey = "#6f6c66", bad = lotIssues(L, site.foot).length > 0;
+    const halo = `stroke="${PAPER}" stroke-width="${f(fs * 0.3)}" paint-order="stroke" stroke-linejoin="round"`;
+    const SX0 = X0 - ext, SW = L.w + ext * 2, curb = Y0 - 300, walk0 = Y0 - 30, walk1 = Y0 - 30 - 152.4;
+    let s = R(SX0, -curb, SW, 820, "#e7e5df") + `<path d="M${f(SX0)} ${f(-curb)}H${f(SX0 + SW)}" stroke="${INK}" stroke-width="5"/>` +
+      `<path d="M${f(SX0)} ${f(-(curb - 410))}H${f(SX0 + SW)}" stroke="#bdb9b0" stroke-width="4" stroke-dasharray="90 70"/>` +
+      mono(X0 + L.w / 2, -(curb - 230), fs * 1.05, "#8b877e", `text-anchor="middle" letter-spacing="${f(fs * 0.5)}"`, "STREET");
+    s += R(SX0, -walk0, SW, 152.4, "#efeee9") + `<path d="M${f(SX0)} ${f(-walk0)}H${f(SX0 + SW)}M${f(SX0)} ${f(-walk1)}H${f(SX0 + SW)}" stroke="#a9a59c" stroke-width="2"/>`;
+    let joints = ""; for (let x = Math.ceil(SX0 / 152.4) * 152.4; x < SX0 + SW; x += 152.4) joints += `M${f(x)} ${f(-walk0)}V${f(-walk1)}`;
+    s += `<path d="${joints}" stroke="#c4c0b7" stroke-width="1.5"/>`;
+    s += R(X0, -Y1, L.w, L.h, "#edf0e6");
+    const bx0 = X0 + L.ss, bx1 = X1 - L.ss, by0 = Y0 + L.sf, by1 = Y1 - L.sr;
+    if (bx1 > bx0 && by1 > by0) {
+      s += R(bx0, -by1, bx1 - bx0, by1 - by0, "none", `stroke="${bad ? "#b8466a" : "#8d8a83"}" stroke-width="3" stroke-dasharray="22 14"`);
+      s += mono(bx0 + fs * 0.4, -(by1 - fs * 0.95), fs * 0.62, bad ? "#b8466a" : grey, `letter-spacing="${f(fs * 0.12)}" ${halo}`, "SETBACK");
+    }
+    s += R(X0, -Y1, L.w, L.h, "none", `stroke="${INK}" stroke-width="5" stroke-dasharray="80 16 14 16"`);
+    s += mono(X0 + L.w / 2, -(Y0 + fs * 1.5), fs, INK, `text-anchor="middle" ${halo}`, fmtLen(L.w));
+    s += mono(X0 + fs * 1.4, -(Y0 + L.h / 2), fs, INK, `text-anchor="middle" transform="rotate(-90 ${f(X0 + fs * 1.4)} ${f(-(Y0 + L.h / 2))})" ${halo}`, fmtLen(L.h));
+    s += mono(X0 + L.w / 2, -(Y1 - fs * 1.8), fs * 0.8, grey, `text-anchor="middle" letter-spacing="${f(fs * 0.1)}" ${halo}`, "LOT · " + lotArea(L).toUpperCase());
+    s += mono(X1 - fs * 0.4, -(Y0 - fs * 1.2), fs * 0.62, grey, `text-anchor="end" letter-spacing="${f(fs * 0.12)}"`, "PROPERTY LINE");
+    return s;
+  }
+  /* Front: the two side property lines as long-dash center lines, tagged P/L, and the lot width dimensioned below the ground. */
+  function lotFrontSVG(site, b, sky, real) {
+    const L = site.lot, xa = L.x + site.lx, xb = xa + L.w, top = Math.max(b ? b.y1 : 0, 300) + 60, night = sky === "night";
+    const ink = night ? "#d7dade" : "#2a2a28", fs = clamp(L.w / 40, 16, 40), lawn = (SKY[sky] || SKY.day)[real ? "lawn" : "soil"];
+    const halo = `stroke="${lawn}" stroke-width="${f(fs * 0.35)}" paint-order="stroke" stroke-linejoin="round"`, y = 62;
+    let s = `<g opacity="${real ? 0.75 : 0.85}"><path d="M${f(xa)} 10V${f(-top)}M${f(xb)} 10V${f(-top)}" stroke="${ink}" stroke-width="3" stroke-dasharray="60 12 10 12"/>`;
+    s += mono(xa, -(top + fs * 0.5), fs, ink, `text-anchor="middle"`, "P/L") + mono(xb, -(top + fs * 0.5), fs, ink, `text-anchor="middle"`, "P/L");
+    s += `<path d="M${f(xa)} ${f(y)}H${f(xb)}M${f(xa)} ${f(y - 14)}V${f(y + 14)}M${f(xb)} ${f(y - 14)}V${f(y + 14)}M${f(xa - 9)} ${f(y + 9)}L${f(xa + 9)} ${f(y - 9)}M${f(xb - 9)} ${f(y + 9)}L${f(xb + 9)} ${f(y - 9)}" stroke="${ink}" stroke-width="2.5"/>`;
+    s += mono((xa + xb) / 2, y + fs * 0.35, fs, ink, `text-anchor="middle" ${halo}`, "LOT " + fmtLen(L.w));
+    return s + "</g>";
+  }
+  function lotPill() { const L = D.lot; return L ? "Lot " + fmtLen(L.w) + " × " + fmtLen(L.h) + " · " + fmtArea(L.w * L.h) : ""; }
+  function pillText() {
+    if (view3d) return "";
+    const L = D.lot, rooms = D.mode === "plan" ? D.plan.filter(q => q.t === "room") : [];
+    if (!rooms.length) return lotPill();
+    const a = rooms.reduce((t, q) => t + q.w * q.h, 0);
+    return rooms.length + (rooms.length === 1 ? " room · " : " rooms · ") + fmtArea(a) + (L ? " · " + Math.round(a / (L.w * L.h) * 100) + "% of lot" : "");
+  }
+  function renderLot() {
+    const L = D.lot, F = houseFoot(D);
+    const lf = (label, key, v) => `<label class="fld"><span>${label}</span><input data-lf="${key}" value="${esc(fmtIn(v))}" inputmode="${S().units === "ft" ? "text" : "decimal"}" autocomplete="off" enterkeyhint="done"></label>`;
+    let h = `<div class="grab"></div><h2>Lot size</h2><p class="lede">Pick a common US lot or type your own. The plan shows the property lines, setbacks, sidewalk and street; the front shows the property lines; 3D shows the yard.</p><div class="lots">`;
+    h += `<button data-lot="none" aria-pressed="${!L}"><b>No lot</b><small>House only</small></button>`;
+    LOTS.forEach(q => { h += `<button data-lot="${q.k}" aria-pressed="${!!L && L.k === q.k}"><b>${q.n}</b><small>${fmtLen(q.w * FT)} × ${fmtLen(q.h * FT)}<br>${fmtArea(q.w * q.h * FT * FT)}</small></button>`; });
+    h += `<button data-lot="custom" aria-pressed="${!!L && L.k === "custom"}"><b>Custom</b><small>Type the width<br>and depth</small></button></div>`;
+    if (L) {
+      h += `<h3>Size</h3><div class="fields">${lf("Width at the street", "w", L.w)}${lf("Depth", "h", L.h)}</div><p class="note">${esc(lotArea(L))}</p>`;
+      h += `<h3>Setbacks</h3><div class="fields three">${lf("Front", "sf", L.sf)}${lf("Sides", "ss", L.ss)}${lf("Rear", "sr", L.sr)}</div><p class="note">The smallest yards allowed, drawn as the dashed line. These are typical; your town's zoning code sets the real ones.</p>`;
+      if (F) {
+        const Y = lotYards(L, F), iss = lotIssues(L, F), rooms = D.plan.filter(q => q.t === "room"), a = rooms.reduce((t, q) => t + q.w * q.h, 0) || (F.x1 - F.x0) * (F.y1 - F.y0);
+        h += `<h3>House on the lot</h3><div class="fields">${lf("Front yard", "fy", Y.f)}${lf("Left side yard", "ly", Y.l)}</div>`;
+        h += `<p class="note">Right side yard ${esc(fmtLen(Y.r))} · rear yard ${esc(fmtLen(Y.b))} · the house covers ${Math.round(a / (L.w * L.h) * 100)}% of the lot${rooms.length ? "" : " (estimated without a plan)"}.</p>`;
+        iss.forEach(t => { h += `<p class="note warn">${esc(t)}</p>`; });
+        h += `<div class="links" style="margin-top:10px;grid-template-columns:1fr"><button data-lm="center">Center the house on the lot</button></div>`;
+      }
+    }
+    h += `<button class="primary" data-close>Done</button>`;
+    const sh = $("lotSheet"), top = sh.scrollTop; sh.innerHTML = h; sh.scrollTop = top;
+  }
+  $("lotSheet").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.lot) {
+      const k = b.dataset.lot;
+      withUndo(() => {
+        if (k === "none") delete D.lot;
+        else if (k === "custom") { if (D.lot) D.lot.k = "custom"; else { D.lot = presetLot("std", D); D.lot.k = "custom"; } }
+        else D.lot = presetLot(k, D);
+      });
+      SFX.tap(); renderLot(); fit();
+      if (k === "custom") { const i = $("lotSheet").querySelector('[data-lf="w"]'); if (i) i.focus(); }
+    } else if (b.dataset.lm === "center" && D.lot) { const L = D.lot; withUndo(() => { const c = JSON.parse(JSON.stringify(L)); placeLot(c, D); L.x = c.x; L.y = c.y; }); SFX.tap(); renderLot(); }
+  });
+  $("lotSheet").addEventListener("change", e => {
+    const k = e.target.dataset.lf, L = D.lot; if (!k || !L) return;
+    const v = parseLen(e.target.value), F = houseFoot(D);
+    const bad = () => { toast(S().units === "ft" ? "Type a length like 50' or 12' 6\"." : "Type a length in metres, like 15 or 15.5."); renderLot(); };
+    if (!isFinite(v)) return bad();
+    withUndo(() => {
+      if (k === "w" || k === "h") { if (v < LOT_MIN || v > LOT_MAX) return; L[k] = r1(v); L.k = "custom"; L.ss = Math.min(L.ss, L.w / 2); L.sf = Math.min(L.sf, L.h / 2); L.sr = Math.min(L.sr, L.h / 2); }
+      else if (k === "sf" || k === "sr") L[k] = r1(clamp(v, 0, L.h / 2));
+      else if (k === "ss") L.ss = r1(clamp(v, 0, L.w / 2));
+      else if (k === "fy" && F) L.y = r1(F.y0 - clamp(v, -L.h, L.h));
+      else if (k === "ly" && F) L.x = r1(F.x0 - clamp(v, -L.w, L.w));
+    });
+    if ((k === "w" || k === "h") && (v < LOT_MIN || v > LOT_MAX)) toast("A lot can be " + fmtLen(LOT_MIN) + " to " + fmtLen(LOT_MAX) + " on a side.");
+    renderLot();
+  });
+  $("lotSheet").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.tagName === "INPUT") e.target.blur(); });
+
   /* ---------- undo ---------- */
-  const snapshot = () => JSON.stringify({ f: D.front, p: D.plan, n: D.next });
-  function restore(s) { const o = JSON.parse(s); D.front = o.f; D.plan = o.p; D.next = o.n; }
+  const snapshot = () => JSON.stringify({ f: D.front, p: D.plan, n: D.next, l: D.lot || null });
+  function restore(s) { const o = JSON.parse(s); D.front = o.f; D.plan = o.p; D.next = o.n; if (o.l) D.lot = o.l; else delete D.lot; }
   function pushUndo(before) { undoStack.push(before); if (undoStack.length > 150) undoStack.shift(); redoStack = []; }
   function changed() {
     D.at = Date.now(); syncLinks();
@@ -2486,6 +2673,16 @@ body.is3d .tool{opacity:.55}
       if (p.t === "pplant") { if (p.style === "tree") tree3(g, p.x + p.w / 2, -(p.y + p.h / 2), p.w * 0.8, 400, p.color, rnd); else shrub3(g, p.x + p.w / 2, -(p.y + p.h / 2), p.w * 0.7, 70, p.color, rnd); return; }
       boxW(g, p.x + 1, p.x + p.w - 1, 2, 2 + (H3[p.style] || 60), -(p.y + p.h) + 1, -p.y - 1, m);
     });
+    /* The lot: a greener yard inside the property lines with a low stone edging, then the sidewalk, curb and street out front. */
+    if (D.lot) {
+      const L = D.lot, X0 = L.x, X1 = L.x + L.w, Z0 = -L.y, Z1 = -(L.y + L.h), ext = Math.max(L.w, 3000), edge = solid("#cfcabf", 0.9), conc = solid("#cdcac2", 0.92);
+      boxW(g, X0, X1, -0.5, 0.4, Z1, Z0, new THREE.MeshStandardMaterial({ color: 0x7a915a, roughness: 1 }));
+      boxW(g, X0 - 5, X1 + 5, 0, 4, Z0 - 5, Z0 + 5, edge); boxW(g, X0 - 5, X1 + 5, 0, 4, Z1 - 5, Z1 + 5, edge);
+      boxW(g, X0 - 5, X0 + 5, 0, 4, Z1, Z0, edge); boxW(g, X1 - 5, X1 + 5, 0, 4, Z1, Z0, edge);
+      boxW(g, X0 - ext, X1 + ext, 0, 9, -(L.y - 30), -(L.y - 30 - 152.4), conc);
+      boxW(g, X0 - ext, X1 + ext, -8, 12, -(L.y - 300) - 15, -(L.y - 300), conc);
+      boxW(g, X0 - ext, X1 + ext, -0.6, 0.2, -(L.y - 300), -(L.y - 300 - 820), solid("#4e5054", 0.95));
+    }
     return { group: g, roofs: rg, box: { x0: PX0, x1: PX1, z0: Zb, z1: Zf, top: Math.max(wallTop, ...front.filter(q => q.t === "roof" || q.t === "wall" || q.t === "chimney").map(q => q.y + q.h)) } };
   }
   function skyTex(top, bot) {
@@ -2539,7 +2736,7 @@ body.is3d .tool{opacity:.55}
   }
   function reset3D() {
     const b = v3.box; if (!b) return; const o = v3.orb, c = v3.camera, w = Math.hypot(b.x1 - b.x0, b.z1 - b.z0) + 200, h = b.top + 100;
-    const vf = c.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * c.aspect), r = Math.max(w / 2 / Math.tan(hf), h / 2 / Math.tan(vf)) * 1.15;
+    const vf = c.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * c.aspect), R = Math.hypot(b.x1 - b.x0, b.z1 - b.z0, b.top) / 2, r = Math.max(Math.max(w / 2 / Math.tan(hf), h / 2 / Math.tan(vf)) * 1.15, R / Math.sin(Math.min(vf, hf)) * 1.08); // the sphere term keeps wide, short screens from cropping
     Object.assign(o, { th: -0.55, ph: 1.32, r: clamp(r, 300, 20000), tx: (b.x0 + b.x1) / 2, ty: b.top * 0.38, tz: (b.z0 + b.z1) / 2 });
     draw3D();
   }
@@ -2795,6 +2992,7 @@ body.is3d .tool{opacity:.55}
     let h = `<div class="grab"></div><h2>Brick <em style="color:var(--accent);font-weight:500">&amp;</em> Blueprint</h2>
       <div class="field"><label for="nameIn">Design name</label><input id="nameIn" maxlength="40" value="${esc(D.name)}" autocomplete="off" enterkeyhint="done"></div>
       <div class="links" style="margin-top:10px"><button data-m="designs">Your designs (${store.designs.length})</button><button data-m="new">New design</button></div>
+      <h3>Lot</h3><div class="links" style="grid-template-columns:1fr"><button data-m="lot">${D.lot ? esc(lotName(D.lot)) + " · change" : "Set the lot size"}</button></div>
       <h3>Share</h3><div class="links three"><button data-m="link">Share link</button><button data-m="png">Save picture</button><button data-m="svg">Save SVG</button></div>
       <h3>Front view style</h3><div class="seg" data-s="render"><button data-v="real" aria-pressed="${st.render === "real"}">Realistic</button><button data-v="draft" aria-pressed="${st.render === "draft"}">Drafting</button></div>
       <h3>Sky</h3><div class="seg" data-s="sky">${[["day", "Day"], ["dusk", "Dusk"], ["night", "Night"]].map(q => `<button data-v="${q[0]}" aria-pressed="${D.sky === q[0]}">${q[1]}</button>`).join("")}</div>
@@ -2832,6 +3030,7 @@ body.is3d .tool{opacity:.55}
     else if (m === "link") openShare();
     else if (m === "linkall") { const n = linkAll(true); closeSheets(); toast(n ? "Linked " + n + (n === 1 ? " opening" : " openings") + " between the front and the plan." : linkWhyNot()); }
     else if (m === "help") openSheet("helpSheet");
+    else if (m === "lot") { renderLot(); openSheet("lotSheet"); }
     else if (m === "clear") {
       if (!D.parts.length) { toast("The drawing is already empty."); return; }
       if (Date.now() - clearArmed > 3000) { clearArmed = Date.now(); b.textContent = "Tap again to clear"; return; }
@@ -2880,6 +3079,7 @@ body.is3d .tool{opacity:.55}
     const n = store.designs.length + 1;
     const d = t ? newDesign(t.name, t.parts, t.plan) : newDesign("House " + n, []);
     if (t) d.sky = t.sky;
+    if (t && t.lot) d.lot = presetLot(t.lot, d);
     store.designs.push(d); switchTo(d); if (t && t.plan && S().link) { linkAll(false); save(); render(); } closeSheets(); SFX.place(); sess.games++;
     track("design_new", { template: c.dataset.tpl });
   });
@@ -2998,6 +3198,7 @@ body.is3d .tool{opacity:.55}
   $("menuBtn").addEventListener("click", () => { SFX.tap(); renderMenu(); openSheet("menuSheet"); });
   $("brandBtn").addEventListener("click", () => { SFX.tap(); renderMenu(); openSheet("menuSheet"); });
   $("layersBtn").addEventListener("click", () => { SFX.tap(); renderLayers(); openSheet("layersSheet"); });
+  $("areaPill").addEventListener("click", () => { SFX.tap(); renderLot(); openSheet("lotSheet"); });
   $("fitBtn").addEventListener("click", () => { SFX.tap(); fit(); });
   $("helpBtn").addEventListener("click", () => openSheet("helpSheet"));
   $("gridChip").addEventListener("click", () => { S().snap = !S().snap; save(); renderDock(); toast(S().snap ? "Grid snap on." : "Grid snap off: parts move freely."); });
