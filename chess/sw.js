@@ -1,6 +1,6 @@
 /* Offline support: serve the game's own files (and its fonts) from cache, refresh in the background.
    Everything else, including live-play connections, goes straight to the network. */
-const CACHE = "arbor-arch-v4";
+const CACHE = "arbor-arch-v5";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
