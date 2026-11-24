@@ -57,3 +57,18 @@ Live play uses a Firebase Realtime Database through its web API, so no Firebase 
 
 The database URL is not a secret. It is meant to appear in public web pages, and the rules above are what protect the data. Each game uses well under 1 KB. Games aren't deleted automatically, so if you ever want to clear old ones, delete the `games` node in the console.
 
+
+## Security notes
+
+**What protects the game**
+- Each friend game has a random 72-bit ID from the browser's cryptographic generator. The ID is the only way to read or write that game, and the database rules block listing games.
+- Every database write is checked for format and size. A game's record can only grow by one move at a time, so nobody can lock a game by padding it, roll it back, or delete it. Moves are also replayed and checked for legality on each phone before they are shown.
+- Names and other text from links are escaped before display, and invisible or direction-changing characters are stripped.
+- A Content Security Policy limits the page to its own code, Google Fonts, Google Analytics and the game's Firebase database. Referrers are turned off.
+- Each phone uses a separate random player ID per game, so games can't be linked to the same device.
+- Analytics runs without Google signals or ad personalization. Logs are write-only and hold no names or exact locations.
+
+**Known limits (accepted for a casual game without accounts)**
+- Anyone who has a game's link can make moves in that game. Keep invite links between the people playing.
+- The database accepts new games and log entries from anyone on the internet, which someone could abuse to fill the free plan's storage. The Spark plan can't run up charges. If it becomes a problem, Firebase App Check and anonymous sign-in are the next steps.
+- GitHub Pages can't send custom HTTP headers, so `X-Content-Type-Options` and `frame-ancestors` can't be set. The CSP and referrer policy are set with `<meta>` tags instead.
