@@ -89,9 +89,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 #stage[data-sky="dusk-r"]{background:linear-gradient(180deg,#4a5470,#e0b796 75%)}
 #stage[data-sky="night-r"]{background:linear-gradient(180deg,#0a0f18,#1f2a3a)}
 .viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
-.viewseg button{border:0; background:transparent; padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
+.viewseg button{border:0; background:transparent; padding:10px 12px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
 .viewseg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
-.apill{position:absolute; left:10px; top:52px; z-index:2; cursor:pointer; text-align:left; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:5px 9px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
+.apill{position:absolute; left:10px; top:58px; z-index:2; cursor:pointer; text-align:left; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:8px 10px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
 .nudge{display:grid; grid-template-columns:repeat(3, 48px); grid-template-rows:repeat(2, 40px); gap:6px; justify-content:center}
 .nudge button{border:1px solid var(--panel-line); background:transparent; border-radius:8px; font-weight:500; font-size:16px; cursor:pointer}
 .nudge .up{grid-column:2} .nudge .lf{grid-column:1; grid-row:2} .nudge .dn{grid-column:2; grid-row:2} .nudge .rt{grid-column:3; grid-row:2}
@@ -115,7 +115,7 @@ body.is3d .tool{opacity:.55}
 .mini:active{background:var(--hover)}
 .mini svg{width:18px; height:18px; stroke-width:1.6}
 .snaps{position:absolute; left:10px; bottom:10px; z-index:2; display:flex; gap:0; flex-wrap:wrap; max-width:calc(100% - 20px); border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
-.chip{border:0; border-right:1px solid var(--panel-line); background:transparent; border-radius:0; padding:7px 10px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; color:var(--ink3); position:relative}
+.chip{border:0; border-right:1px solid var(--panel-line); background:transparent; border-radius:0; padding:11px 10px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; color:var(--ink3); position:relative}
 .chip:last-child{border-right:0}
 .chip[aria-pressed="true"]{color:var(--ink)}
 .chip[aria-pressed="true"]::before{content:""; display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-right:6px; vertical-align:1px}
@@ -1434,13 +1434,16 @@ body.is3d .tool{opacity:.55}
   function measure() { const r = stage.getBoundingClientRect(); stageW = r.width || 300; stageH = r.height || 300; }
   function fit() {
     measure();
-    const b = lotBounds(D, D.mode, bounds(D.parts.filter(visible)));
-    let x0, x1, y0, y1;
-    const plan = D.mode === "plan";
-    if (b) { x0 = b.x0; x1 = b.x1; y0 = plan ? b.y0 : Math.min(b.y0, 0); y1 = plan ? b.y1 : Math.max(b.y1, 100); }
-    else { x0 = -100; x1 = 1100; y0 = plan ? -100 : 0; y1 = plan ? 800 : 600; }
-    const padT = pillText() ? 124 : 60, padB = 64, padL = 22, padR = 62; // the zoom buttons sit along the right edge
-    const s = clamp(Math.min((stageW - padL - padR) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6);
+    const plan = D.mode === "plan", padT = pillText() ? 134 : 66, padB = 64, padL = 22, padR = 62; // the zoom buttons sit along the right edge
+    const frame = b => {
+      let x0, x1, y0, y1;
+      if (b) { x0 = b.x0; x1 = b.x1; y0 = plan ? b.y0 : Math.min(b.y0, 0); y1 = plan ? b.y1 : Math.max(b.y1, 100); }
+      else { x0 = -100; x1 = 1100; y0 = plan ? -100 : 0; y1 = plan ? 800 : 600; }
+      return { x0, x1, y0, y1, s: clamp(Math.min((stageW - padL - padR) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6) };
+    };
+    /* Fit the lot too, unless that would shrink the house to under a quarter of its own fit (a deep lot on a sideways phone). */
+    const hb = bounds(D.parts.filter(visible)), H = frame(hb), L = frame(lotBounds(D, D.mode, hb)), F = hb && L.s < H.s * 0.25 ? H : L;
+    const { x0, x1, y0, y1, s } = F;
     view.s = s; view.tx = padL + (stageW - padL - padR - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
     renderView();
   }
@@ -1508,9 +1511,10 @@ body.is3d .tool{opacity:.55}
         handles = [[0, p1.x, p1.y], [1, p2.x, p2.y]];
         if (k === "dim") { const g = dimGeom(p), m = toS((g.A.x + g.B.x) / 2, (g.A.y + g.B.y) / 2); handles.push([2, m.x, m.y]); }
       }
+      if (tool !== "select" && p.t !== curType()) handles = []; // a drawing tool draws; only Select (or the same part tool) resizes
       handles.forEach(h => { s += `<circle cx="${f(h[1])}" cy="${f(h[2])}" r="${h[0] === 2 && k === "dim" ? 8 : 7}" fill="var(--panel-solid)" stroke="var(--accent)" stroke-width="2.5"/>`; });
     }
-    if (!view3d) { const y = pillText() ? 104 : 70, dark = D.mode !== "plan" && D.sky === "night", len = scaleStep(view.s, 110)[0]; s += `<g opacity=".9">${scaleBarSVG(16 + len * view.s, y, view.s, 110, dark ? "#e6e3dc" : "#2a2a28", dark ? "#14181f" : "#fbfaf7", 10)}</g>`; }
+    if (!view3d) { const y = pillText() ? 116 : 76, dark = D.mode !== "plan" && D.sky === "night", len = scaleStep(view.s, 110)[0]; s += `<g opacity=".9">${scaleBarSVG(16 + len * view.s, y, view.s, 110, dark ? "#e6e3dc" : "#2a2a28", dark ? "#14181f" : "#fbfaf7", 10)}</g>`; }
     u.innerHTML = `<style>.szt{font:500 11px "IBM Plex Mono",ui-monospace,monospace;fill:var(--ink);paint-order:stroke;stroke:var(--panel-solid);stroke-width:4px;stroke-linejoin:round}</style>` + s;
   }
   function renderView() {
@@ -1955,7 +1959,7 @@ body.is3d .tool{opacity:.55}
   const ptrs = new Map(); let pinch = null, lastTap = { t: 0, id: null }, stageRect = null;
   function spos(e) { const r = stageRect || stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
   stage.addEventListener("pointerdown", e => {
-    if (e.target.closest && e.target.closest("button")) return;
+    if (view3d || (e.target.closest && e.target.closest("button"))) return; // the 3D canvas handles its own gestures
     if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 1) return;
     stageRect = stage.getBoundingClientRect();
     try { stage.setPointerCapture(e.pointerId); } catch (x) {}
@@ -1980,6 +1984,7 @@ body.is3d .tool{opacity:.55}
   stage.addEventListener("pointerup", e => up(e, false));
   stage.addEventListener("pointercancel", e => up(e, true));
   stage.addEventListener("wheel", e => {
+    if (view3d) return;
     e.preventDefault();
     const p = spos(e), k = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022));
     zoomAt(p, view.s * k);
@@ -2006,7 +2011,7 @@ body.is3d .tool{opacity:.55}
     act = { sp0: sp, w0: w, moved: false, before: null };
     if (pan) { act.k = "pan"; act.v0 = Object.assign({}, view); return; }
     const p = selPart();
-    const h = p && editable(p) ? hitHandle(sp) : null;
+    const h = p && editable(p) && (tool === "select" || p.t === curType()) ? hitHandle(sp) : null;
     if (h != null) { act.k = "handle"; act.h = h; act.orig = JSON.parse(JSON.stringify(p)); act.tg = snapTargets(p); return; }
     const hit = hitPart(w);
     if (tool === "select") {
@@ -2023,7 +2028,9 @@ body.is3d .tool{opacity:.55}
       return;
     }
     if (tool === "paint") { act.k = "paint"; return; }
-    if (hit && p && selList().some(q => q.id === hit.id) && tool !== "pen") { sel = hit.id; startMove(hit); return; }
+    /* With a part tool, pressing the part just placed (same type) drags it into place; anywhere else the tool draws,
+       so a wall can be drawn inside a selected room and a window tapped onto a selected wall. */
+    if (hit && p && selList().some(q => q.id === hit.id) && hit.t === curType() && ["pen", "line", "dim", "pwall"].indexOf(tool) < 0) { sel = hit.id; startMove(hit); return; }
     act.tg = snapTargets(null);
     if (tool === "pen") { act.k = "pen"; act.pts = [r1(w.x), r1(w.y)]; return; }
     if (tool === "line" || tool === "dim" || tool === "pwall") { act.k = "line"; act.a = snapPoint(w); guides = { x: [], y: [] }; return; }
