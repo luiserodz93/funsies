@@ -1399,7 +1399,7 @@ var Chess = (function () {
      Firebase Realtime Database (when FIREBASE_DB is set) or the ntfy.sh relay as a fallback.
      Firebase is used through its REST + streaming API, so no SDK is loaded.
      Firebase data: /games/<id>/state {g, by, at} and /games/<id>/presence/<clientId> {on, at}. */
-  var FIREBASE_DB = "";
+  var FIREBASE_DB = "https://arborandarchchessgame-default-rtdb.firebaseio.com";
   var FB = (window.ARBOR_FIREBASE || FIREBASE_DB || "").replace(/\/+$/, "");
   var RELAY = window.ARBOR_RELAY || "https://ntfy.sh/";
   var hasLive = canLink && typeof EventSource !== "undefined" && typeof fetch !== "undefined";
