@@ -51,35 +51,37 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-html,body{height:100%}
+/* iOS Home Screen apps can report a viewport that stops short of the bottom of the screen. screenFit() sets
+   --appH to the real screen height and --gapB to the missing strip, so the app and the bottom-anchored layers reach the edge. */
+html,body{height:var(--appH, 100%)}
 body{margin:0; overflow:hidden; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px; letter-spacing:-.005em;
   -webkit-tap-highlight-color:transparent; overscroll-behavior:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
   -webkit-font-smoothing:antialiased}
-body::before{content:""; position:fixed; inset:0; z-index:-2; background:var(--bg1)}
+body::before{content:""; position:fixed; inset:0; bottom:calc(-1 * var(--gapB, 0px)); z-index:-2; background:var(--bg1)}
 button,input{font:inherit; color:inherit}
 button{touch-action:manipulation}
 input{-webkit-user-select:text; user-select:text}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 
-.app{position:fixed; inset:0; display:flex; flex-direction:column;
+.app{position:fixed; left:0; right:0; top:0; height:var(--appH, 100%); display:flex; flex-direction:column;
   padding-top:max(6px, env(safe-area-inset-top, 0px));
   padding-left:env(safe-area-inset-left, 0px); padding-right:env(safe-area-inset-right, 0px)}
 
-header.top{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 14px 10px; flex:none}
+header.top{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:2px 10px 6px 14px; flex:none}
 .brand{display:flex; align-items:center; gap:10px; min-width:0; border:0; background:none; padding:0; cursor:pointer; text-align:left}
-.brand svg{width:30px; height:30px; flex:none}
-.brand h1{margin:0; font-family:var(--font-display); font-weight:400; font-size:23px; letter-spacing:0; line-height:1; white-space:nowrap}
-.brand h1 em{font-style:italic; color:var(--ink2)}
-.brand small{display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-top:5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:46vw}
+.brand svg{width:26px; height:26px; flex:none}
+.brand h1{margin:0; font-family:var(--font-ui); font-weight:600; font-size:16.5px; letter-spacing:-.015em; line-height:1.1; white-space:nowrap; color:var(--ink)}
+.brand h1 em{font-family:var(--font-display); font-style:italic; font-weight:400; font-size:18px; color:var(--accent); padding:0 1px}
+.brand small{display:block; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); margin-top:3px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:46vw}
 .brand > div{min-width:0}
 .hbtns{display:flex; gap:2px; flex:none}
-.iconbtn{position:relative; width:40px; height:40px; border-radius:10px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; flex:none; padding:0}
+.iconbtn{position:relative; width:38px; height:38px; border-radius:10px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; flex:none; padding:0}
 .iconbtn:active{background:var(--hover)}
-.iconbtn svg{width:20px; height:20px; stroke-width:1.6}
+.iconbtn svg{width:19px; height:19px; stroke-width:1.6}
 .iconbtn:disabled{opacity:.3; cursor:default}
 
 /* The drawing board */
-#stage{position:relative; flex:1; min-height:0; margin:0 10px; border-radius:6px; overflow:hidden; touch-action:none;
+#stage{position:relative; flex:1; min-height:0; margin:0 8px; border-radius:6px; overflow:hidden; touch-action:none;
   box-shadow:0 0 0 1px var(--panel-line), 0 18px 40px -28px var(--shadow);
   background:linear-gradient(180deg,var(--sky1),var(--sky2))}
 #stage[data-sky="dusk"]{background:linear-gradient(180deg,#5f6577,#d9c3b0)}
@@ -88,10 +90,10 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 #stage[data-sky="day-r"]{background:linear-gradient(180deg,#9fbad0,#e6ecee 70%)}
 #stage[data-sky="dusk-r"]{background:linear-gradient(180deg,#4a5470,#e0b796 75%)}
 #stage[data-sky="night-r"]{background:linear-gradient(180deg,#0a0f18,#1f2a3a)}
-.viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
-.viewseg button{border:0; background:transparent; padding:10px 12px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
+.viewseg{position:absolute; left:8px; top:8px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
+.viewseg button{border:0; background:transparent; padding:9px 11px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
 .viewseg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
-.apill{position:absolute; left:10px; top:58px; z-index:2; cursor:pointer; text-align:left; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:8px 10px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
+.apill{position:absolute; left:8px; top:52px; z-index:2; cursor:pointer; text-align:left; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:8px 10px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
 .nudge{display:grid; grid-template-columns:repeat(3, 48px); grid-template-rows:repeat(2, 40px); gap:6px; justify-content:center}
 .nudge button{border:1px solid var(--panel-line); background:transparent; border-radius:8px; font-weight:500; font-size:16px; cursor:pointer}
 .nudge .up{grid-column:2} .nudge .lf{grid-column:1; grid-row:2} .nudge .dn{grid-column:2; grid-row:2} .nudge .rt{grid-column:3; grid-row:2}
@@ -109,20 +111,20 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .v3msg{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--panel-solid); border:1px solid var(--panel-line); border-radius:10px; padding:12px 16px; font-size:14px; max-width:80%; text-align:center}
 body.is3d .corner, body.is3d .snaps, body.is3d #ctx, body.is3d #areaPill{display:none !important}
 body.is3d .tool{opacity:.55}
-.corner{position:absolute; right:10px; top:10px; z-index:2; display:grid; gap:0; border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
-.mini{width:38px; height:38px; border-radius:0; border:0; border-bottom:1px solid var(--panel-line); background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
+.corner{position:absolute; right:8px; top:8px; z-index:2; display:grid; gap:0; border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
+.mini{width:36px; height:36px; border-radius:0; border:0; border-bottom:1px solid var(--panel-line); background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
 .corner .mini:last-child, .corner .mini:nth-last-child(2):has(+ [hidden]){border-bottom:0}
 .mini:active{background:var(--hover)}
 .mini svg{width:18px; height:18px; stroke-width:1.6}
-.snaps{position:absolute; left:10px; bottom:10px; z-index:2; display:flex; gap:0; flex-wrap:wrap; max-width:calc(100% - 20px); border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
-.chip{border:0; border-right:1px solid var(--panel-line); background:transparent; border-radius:0; padding:11px 10px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; color:var(--ink3); position:relative}
+.snaps{position:absolute; left:8px; bottom:8px; z-index:2; display:flex; gap:0; flex-wrap:wrap; max-width:calc(100% - 20px); border-radius:8px; border:1px solid var(--panel-line); background:var(--panel); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); overflow:hidden}
+.chip{border:0; border-right:1px solid var(--panel-line); background:transparent; border-radius:0; padding:9px 9px; font-family:var(--font-mono); font-size:9.5px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; color:var(--ink3); position:relative}
 .chip:last-child{border-right:0}
 .chip[aria-pressed="true"]{color:var(--ink)}
 .chip[aria-pressed="true"]::before{content:""; display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-right:6px; vertical-align:1px}
 .readout{position:absolute; z-index:3; pointer-events:none; background:var(--ink); color:var(--panel-solid); border-radius:5px; padding:5px 9px; font-family:var(--font-mono); font-weight:500; font-size:12px; white-space:nowrap; font-variant-numeric:tabular-nums; box-shadow:0 8px 20px -10px var(--shadow)}
 
 /* Tool tray */
-.dock{flex:none; padding:10px 10px max(8px, env(safe-area-inset-bottom, 0px))}
+.dock{flex:none; padding:8px 8px max(6px, env(safe-area-inset-bottom, 0px))}
 .ctx{position:absolute; left:10px; right:10px; bottom:10px; z-index:3; max-width:560px; margin:0 auto; display:flex; align-items:center; gap:8px; padding:4px 4px 4px 12px; border-radius:10px; background:var(--panel-solid); border:1px solid var(--panel-line); box-shadow:0 10px 28px -16px var(--shadow)}
 #stage:has(#ctx:not([hidden])) .snaps{bottom:66px}
 .ctxinfo{flex:1; min-width:0; line-height:1.2}
@@ -134,10 +136,10 @@ body.is3d .tool{opacity:.55}
 .ctxbtns svg{width:19px; height:19px; stroke-width:1.6}
 .ctxbtns .danger{color:var(--check)}
 .tools{display:grid; grid-template-columns:repeat(7, 1fr); gap:0; border-radius:10px; border:1px solid var(--panel-line); background:var(--panel-solid); overflow:hidden}
-.tool{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; height:52px; padding:0 1px; border-radius:0; border:0; border-right:1px solid var(--panel-line); border-bottom:1px solid var(--panel-line); background:transparent; cursor:pointer; font-size:10px; font-weight:500; letter-spacing:.01em; color:var(--ink2); min-width:0}
+.tool{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:46px; padding:0 1px; border-radius:0; border:0; border-right:1px solid var(--panel-line); border-bottom:1px solid var(--panel-line); background:transparent; cursor:pointer; font-size:9.5px; font-weight:500; letter-spacing:.01em; color:var(--ink2); min-width:0}
 .tool:nth-child(7n){border-right:0}
 .tool:nth-last-child(-n+7){border-bottom:0}
-.tool svg{width:20px; height:20px; flex:none; stroke-width:1.5; color:var(--ink)}
+.tool svg{width:19px; height:19px; flex:none; stroke-width:1.5; color:var(--ink)}
 .tool span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
 .tool[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
 .tool[aria-pressed="true"] svg{color:var(--panel-solid)}
@@ -160,9 +162,9 @@ body.is3d .tool{opacity:.55}
   .sheet{width:min(100%, 560px); max-height:calc(100% - 4px)}
 }
 /* Sheets */
-.scrim{position:fixed; inset:0; background:rgba(12,12,11,.32); z-index:40; animation:fade .2s}
+.scrim{position:fixed; inset:0; bottom:calc(-1 * var(--gapB, 0px)); background:rgba(12,12,11,.32); z-index:40; animation:fade .2s}
 @keyframes fade{from{opacity:0}}
-.sheet{position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0 auto; width:min(100%, 520px); max-height:calc(100% - 8px - env(safe-area-inset-top, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+.sheet{position:fixed; left:0; right:0; bottom:calc(-1 * var(--gapB, 0px)); z-index:50; margin:0 auto; width:min(100%, 520px); max-height:calc(100% - 8px - env(safe-area-inset-top, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
   background:var(--panel-solid); color:var(--ink); border-radius:14px 14px 0 0; box-shadow:0 0 0 1px var(--panel-line), 0 -16px 40px -16px var(--shadow);
   padding:10px max(20px, env(safe-area-inset-left, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-right, 0px));
   animation:rise .28s cubic-bezier(.2,.8,.3,1); -webkit-user-select:none; user-select:none}
@@ -244,8 +246,9 @@ body.is3d .tool{opacity:.55}
 .help li::before{content:counter(h, decimal-leading-zero); position:absolute; left:0; top:3px; font-family:var(--font-mono); font-size:11px; line-height:1.5; color:var(--ink3)}
 .help b{font-weight:600; color:var(--ink)}
 .linkbox{width:100%; border:1px dashed var(--ink3); background:transparent; border-radius:8px; padding:10px; font-family:var(--font-mono); font-size:12px; word-break:break-all; max-height:90px; overflow:auto; -webkit-user-select:all; user-select:all}
-.toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--panel-solid); padding:10px 16px; border-radius:10px; font-weight:500; font-size:13.5px; line-height:1.4; box-shadow:0 12px 30px -12px var(--shadow); max-width:calc(100vw - 32px); width:max-content; text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere; pointer-events:none}
-@keyframes drop{from{transform:translate(-50%,-10px); opacity:0}}
+/* Toasts sit at the bottom of the board, above the snap chips, so they never cover the title or the view switch. */
+.toast{position:fixed; left:var(--toastX, 50%); top:var(--toastY, calc(14px + env(safe-area-inset-top, 0px))); transform:translate(-50%, var(--toastTy, 0%)); z-index:60; background:var(--ink); color:var(--panel-solid); padding:10px 16px; border-radius:10px; font-weight:500; font-size:13.5px; line-height:1.4; box-shadow:0 12px 30px -12px var(--shadow); max-width:var(--toastW, calc(100vw - 32px)); width:max-content; text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere; pointer-events:none}
+@keyframes drop{from{transform:translate(-50%, calc(var(--toastTy, 0%) - 10px)); opacity:0}}
 @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important} }
 </style>
 </head>
@@ -512,6 +515,7 @@ body.is3d .tool{opacity:.55}
     if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
     return d;
   }
+  let firstRun = false;
   function load() {
     let d = null;
     try { d = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
@@ -537,7 +541,11 @@ body.is3d .tool{opacity:.55}
       store.helped = d.helped === true;
       if (d.hinted && typeof d.hinted === "object") Object.keys(TYPES).concat(["select", "paint", "plan"]).forEach(k => { if (d.hinted[k] === true) store.hinted[k] = true; });
     }
-    if (!store.designs.length) store.designs.push(newDesign("My first house", []));
+    if (!store.designs.length) {
+      /* First launch opens on a finished house to explore, not an empty board. */
+      const t = TEMPLATES.prConcrete, d0 = newDesign(t.name, t.parts, t.plan);
+      d0.sky = t.sky; d0.style = t.style; d0.lot = presetLot(t.lot, d0); store.designs.push(d0); firstRun = true;
+    }
     D = store.designs.find(x => x.id === store.cur) || store.designs[0];
     store.cur = D.id;
   }
@@ -1829,20 +1837,50 @@ body.is3d .tool{opacity:.55}
   let stageW = 300, stageH = 300;
   const toS = (x, y) => ({ x: x * view.s + view.tx, y: -y * view.s + view.ty });
   const toW = (sx, sy) => ({ x: (sx - view.tx) / view.s, y: -(sy - view.ty) / view.s });
-  function measure() { const r = stage.getBoundingClientRect(); stageW = r.width || 300; stageH = r.height || 300; }
+  /* Real screen height. In Home Screen mode iOS can give a viewport shorter than the screen, which leaves an empty
+     band at the bottom; use the screen's own height there instead. */
+  function screenFit() {
+    const de = document.documentElement, ih = window.innerHeight;
+    let h = Math.max(ih, de.clientHeight);
+    const standalone = navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    if (standalone && window.screen) {
+      const sw = Math.min(screen.width, screen.height), sh = Math.max(screen.width, screen.height), full = window.innerWidth > ih ? sw : sh;
+      if (full > h && full - h <= 160) h = full;
+    }
+    de.style.setProperty("--appH", h + "px");
+    de.style.setProperty("--gapB", Math.max(0, h - ih) + "px");
+  }
+  screenFit();
+  function measure() {
+    const r = stage.getBoundingClientRect(); stageW = r.width || 300; stageH = r.height || 300;
+    const de = document.documentElement.style;
+    /* Tall board: toasts sit at its bottom, above the snap chips. Short (sideways) board: they drop over the header instead, off the house. */
+    if (r.height > 120) {
+      const tall = r.height > 520;
+      de.setProperty("--toastX", (r.left + r.width / 2) + "px"); de.setProperty("--toastW", Math.max(200, r.width - 24) + "px");
+      de.setProperty("--toastY", (tall ? r.bottom - 52 : Math.max(4, r.top - 46)) + "px"); de.setProperty("--toastTy", tall ? "-100%" : "0%");
+    }
+  }
   function fit() {
     measure();
-    const plan = D.mode === "plan", padT = pillText() ? 134 : 66, padB = 64, padL = 22, padR = 62; // the zoom buttons sit along the right edge
-    const frame = b => {
+    const plan = D.mode === "plan", sr = stage.getBoundingClientRect();
+    /* Two ways to keep the house clear of the board's controls: leave room above it (portrait), or beside the left-hand
+       controls (a short, wide board in landscape). Whichever lets the house draw larger wins. Zoom buttons sit on the right. */
+    let left = 0;
+    ["viewSeg", "areaPill"].forEach(id => { const e = $(id); if (e && e.offsetParent) left = Math.max(left, e.getBoundingClientRect().right - sr.left); });
+    const pads = [{ t: pillText() ? 120 : 76, b: 56, l: 18, r: 56 }, { t: 18, b: 56, l: left + 14, r: 56 }];
+    const frame = (b, P) => {
       let x0, x1, y0, y1;
       if (b) { x0 = b.x0; x1 = b.x1; y0 = plan ? b.y0 : Math.min(b.y0, 0); y1 = plan ? b.y1 : Math.max(b.y1, 100); }
       else { x0 = -100; x1 = 1100; y0 = plan ? -100 : 0; y1 = plan ? 800 : 600; }
-      return { x0, x1, y0, y1, s: clamp(Math.min((stageW - padL - padR) / (x1 - x0), (stageH - padT - padB) / (y1 - y0)), 0.02, 6) };
+      return { x0, x1, y0, y1, P, s: clamp(Math.min((stageW - P.l - P.r) / (x1 - x0), (stageH - P.t - P.b) / (y1 - y0)), 0.02, 6) };
     };
-    /* Fit the lot too, unless that would shrink the house to under a quarter of its own fit (a deep lot on a sideways phone). */
-    const hb = bounds(D.parts.filter(visible)), H = frame(hb), L = frame(lotBounds(D, D.mode, hb)), F = hb && L.s < H.s * 0.25 ? H : L;
-    const { x0, x1, y0, y1, s } = F;
-    view.s = s; view.tx = padL + (stageW - padL - padR - (x1 - x0) * s) / 2 - x0 * s; view.ty = padT + y1 * s + Math.max(0, (stageH - padT - padB) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
+    /* Fit the lot too, unless that would shrink the house to under 80% of its own fit: on a phone the house should fill the board. */
+    const hb = bounds(D.parts.filter(visible)), lb = lotBounds(D, D.mode, hb);
+    let F = null;
+    pads.forEach(P => { const H = frame(hb, P), L = frame(lb, P), G = hb && L.s < H.s * 0.8 ? H : L; if (!F || G.s > F.s * 1.05) F = G; });
+    const { x0, x1, y0, y1, s, P } = F;
+    view.s = s; view.tx = P.l + (stageW - P.l - P.r - (x1 - x0) * s) / 2 - x0 * s; view.ty = P.t + y1 * s + Math.max(0, (stageH - P.t - P.b) - (y1 - y0) * s) * (plan ? 0.5 : 0.72);
     renderView();
   }
 
@@ -1912,7 +1950,7 @@ body.is3d .tool{opacity:.55}
       if (tool !== "select" && p.t !== curType()) handles = []; // a drawing tool draws; only Select (or the same part tool) resizes
       handles.forEach(h => { s += `<circle cx="${f(h[1])}" cy="${f(h[2])}" r="${h[0] === 2 && k === "dim" ? 8 : 7}" fill="var(--panel-solid)" stroke="var(--accent)" stroke-width="2.5"/>`; });
     }
-    if (!view3d) { const y = pillText() ? 116 : 76, dark = D.mode !== "plan" && D.sky === "night", len = scaleStep(view.s, 110)[0]; s += `<g opacity=".9">${scaleBarSVG(16 + len * view.s, y, view.s, 110, dark ? "#e6e3dc" : "#2a2a28", dark ? "#14181f" : "#fbfaf7", 10)}</g>`; }
+    if (!view3d) { const y = pillText() ? 104 : 64, dark = D.mode !== "plan" && D.sky === "night", len = scaleStep(view.s, 110)[0]; const paper = dark ? "#14181f" : "#fbfaf7"; s += `<rect x="8" y="${y - 16}" width="${f(len * view.s + 18)}" height="25" rx="6" fill="${paper}" fill-opacity=".82"/><g opacity=".9">${scaleBarSVG(17 + len * view.s, y, view.s, 110, dark ? "#e6e3dc" : "#2a2a28", paper, 10)}</g>`; }
     u.innerHTML = `<style>.szt{font:500 11px "IBM Plex Mono",ui-monospace,monospace;fill:var(--ink);paint-order:stroke;stroke:var(--panel-solid);stroke-width:4px;stroke-linejoin:round}</style>` + s;
   }
   function renderView() {
@@ -3949,8 +3987,11 @@ body.is3d .tool{opacity:.55}
     else if (e.key === "Escape") { if (!$("scrim").hidden) closeSheets(); else { selectPart(null); tool = "select"; render(); } }
   });
   let rsT = 0;
-  const onResize = () => { clearTimeout(rsT); rsT = setTimeout(() => { if (view3d) size3D(); const ow = stageW, oh = stageH; measure(); if (Math.abs(stageW - ow) < 1 && Math.abs(stageH - oh) < 1) return; if ((ow > oh) !== (stageW > stageH)) { fit(); return; } view.tx += (stageW - ow) / 2; view.ty += (stageH - oh) / 2; renderView(); }, 60); };
+  const onResize = () => { screenFit(); clearTimeout(rsT); rsT = setTimeout(() => { if (view3d) size3D(); const ow = stageW, oh = stageH; measure(); if (Math.abs(stageW - ow) < 1 && Math.abs(stageH - oh) < 1) return; if ((ow > oh) !== (stageW > stageH)) { fit(); return; } view.tx += (stageW - ow) / 2; view.ty += (stageH - oh) / 2; renderView(); }, 60); };
   window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", onResize);
+  window.addEventListener("pageshow", onResize);
+  if (window.visualViewport) visualViewport.addEventListener("resize", onResize);
   if (window.ResizeObserver) new ResizeObserver(onResize).observe(stage);
 
   /* ---------- boot ---------- */
@@ -3963,7 +4004,9 @@ body.is3d .tool{opacity:.55}
   try { const c = JSON.parse(localStorage.getItem(STORE + "-clip") || "null"); if (c && Array.isArray(c.parts) && c.parts.length <= 2000) clip = { mode: c.mode === "plan" ? "plan" : "front", parts: c.parts }; } catch (e) {}
   renderDock();
   readLink();
-  if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => toast("Welcome. Pick a part below and tap the board to place it. The ? button explains everything."), 400); }
+  if (firstRun) { useStyle(D.style); if (S().link) linkAll(false); save(); render(); requestAnimationFrame(() => fit()); }
+  if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => toast("Welcome. This is a starter house to explore: drag around, try 3D, or tap a part to change it. The ? button explains everything."), 400); }
+  else if (!location.hash && !D.front.length && !D.plan.length) setTimeout(() => toast("This design is empty. Tap here to start from a Puerto Rico or US house.", () => { renderNew(); openSheet("newSheet"); $("toast").hidden = true; }), 500);
   window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG, get v3() { return v3; } };
 
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
