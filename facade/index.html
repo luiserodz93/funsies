@@ -385,7 +385,7 @@ body.is3d .tool{opacity:.55}
   const LAYER_IDS = LAYERS.map(l => l.id);
   const TYPES = {
     wall: { name: "Wall", kind: "rect", layer: "structure", w: 731.5, h: 274.3, color: "#c8b8a2", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "block", "concrete", "shingle", "plain"] },
-    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#4a4b4d", tex: "shingle", style: "gable", styles: ["gable", "side", "hip", "flat", "parapet", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "concrete", "plain"] },
+    roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#4a4b4d", tex: "shingle", style: "gable", styles: ["gable", "side", "hip", "flat", "parapet", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "zinc", "concrete", "plain"] },
     window: { name: "Window", kind: "rect", layer: "openings", w: 91.4, h: 152.4, color: "#f1efe9", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters", "jalousie", "louver"] },
     door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3e4a4f", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage", "criollo", "gate"] },
     trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#ece8df", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame", "post", "tapered", "railing", "reja"] },
@@ -430,12 +430,12 @@ body.is3d .tool{opacity:.55}
     sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console",
     toilet: "Toilet", sink: "Sink", bath: "Bathtub", shower: "Shower", stove: "Stove", fridge: "Fridge", counter: "Counter", dishwasher: "Dishwasher", washer: "Washer", dryer: "Dryer", pot: "Potted plant",
     wood: "Wood", ftile: "Tile", carpet: "Carpet", concrete: "Concrete",
-    brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", block: "Concrete block", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", plain: "Smooth"
+    brick: "Brick", stone: "Stone", siding: "Siding", board: "Board & batten", stucco: "Stucco", block: "Concrete block", shingle: "Shingle", tile: "Clay tile", slate: "Slate", metal: "Metal seam", zinc: "Corrugated zinc", plain: "Smooth"
   };
   const PALETTE = ["#f5f3ee", "#e8e2d6", "#d8cdbb", "#c8b8a2", "#b39a7c", "#a0705a", "#8a5444",
     "#6e5a4c", "#4a4b4d", "#2a2a28", "#5b6670", "#2f5f8f", "#7f97a8", "#4f6658",
     "#7d8f6e", "#a9b391", "#c9b27a", "#b98a4e", "#9c4f3f", "#8a7a92"];
-  const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "wood", "ftile", "carpet", "concrete", "plain"];
+  const ALL_TEX = ["brick", "stone", "siding", "board", "stucco", "shingle", "tile", "slate", "metal", "zinc", "wood", "ftile", "carpet", "concrete", "plain"];
   const LINKABLE = { window: 1, door: 1, pwindow: 1, pdoor: 1 };
   const modeOf = t => TYPES[t].mode || "front";
   const GRIDS = { m: [5, 10, 25, 50, 100], ft: [2.54, 7.62, 15.24, 30.48, 60.96] };
@@ -660,6 +660,7 @@ body.is3d .tool{opacity:.55}
       case "carpet": w = 12; h = 12; b = R(0, 0, 12, 12, c) + `<circle cx="3" cy="3" r=".9" fill="${d1}"/><circle cx="9" cy="8" r=".9" fill="${l1}"/>`; break;
       case "concrete": w = 100; h = 100; b = R(0, 0, 100, 100, c) + R(0, 99, 100, 1, d1) + R(99, 0, 1, 100, d1) + [[12, 20], [40, 8], [70, 33], [25, 60], [58, 74], [85, 55], [33, 88]].map(q => `<circle cx="${q[0]}" cy="${q[1]}" r=".9" fill="${d1}"/>`).join(""); break;
       case "metal": w = 40; h = 10; b = R(0, 0, 40, 10, c) + R(0, 0, 2.5, 10, l1) + R(2.5, 0, 1, 10, d2); break;
+      case "zinc": w = 7.6; h = 10; b = R(0, 0, 7.6, 10, c) + R(0, 0, 1.6, 10, l1) + R(4.6, 0, 1.6, 10, d1); break;
       default: return "";
     }
     return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${w}" height="${h}">${b}</pattern>`;
@@ -822,24 +823,41 @@ body.is3d .tool{opacity:.55}
   }
   /* A reja: the painted steel security grille over Puerto Rican windows, doors and carports. */
   function grilleSVG(X, T, W, H, c, real, door) {
-    const t = clamp(Math.min(W, H) * 0.035, 2.5, 5), bw = Math.max(1.4, t * 0.55), n = Math.max(3, Math.round(W / 11)), sp = W / n;
-    let d = "", m = "";
-    for (let i = 1; i < n; i++) d += `M${f(X + sp * i)} ${f(T)}V${f(T + H)}`;
-    (door ? [0.33, 0.66] : [0.5]).forEach(r => { d += `M${f(X)} ${f(T + H * r)}H${f(X + W)}`; });
-    const my = T + H * (door ? 0.33 : 0.5), dh = Math.min(sp * 0.9, H * 0.12);
-    for (let i = 0; i < n; i++) { const cx = X + sp * (i + 0.5); m += `M${f(cx)} ${f(my - dh)}L${f(cx + sp / 2)} ${f(my)}L${f(cx)} ${f(my + dh)}L${f(cx - sp / 2)} ${f(my)}Z`; }
-    const frame = (col, w) => R(X + t / 2, T + t / 2, W - t, H - t, "none", `stroke="${col}" stroke-width="${f(w)}"`);
-    const shadow = real ? `<g transform="translate(2.5 2.5)" opacity=".26"><path d="${d}${m}" stroke="#000" stroke-width="${f(bw)}" fill="none"/>${frame("#000", t)}</g>` : "";
-    return shadow + `<path d="${d}" stroke="${c}" stroke-width="${f(bw)}" fill="none"/><path d="${m}" stroke="${c}" stroke-width="${f(bw * 0.8)}" fill="none"/>` + frame(c, t) +
-      (real ? `<path d="${d}" stroke="#fff" stroke-opacity=".16" stroke-width="${f(bw * 0.35)}" transform="translate(-.4 -.4)"/>` : "");
+    /* A decorative reja: a light frame of square cells, each with a diamond and a ring at its center, the open lattice
+       painted over Puerto Rican windows, doors and marquesinas. A wide, low one is a marquesina gate: two leaves with
+       spear tips on top. */
+    const gate = !door && W > H * 2.2, t = clamp(Math.min(W, H) * 0.03, 2.2, 4), bw = 1.3;
+    const cols = Math.max(2, Math.round(W / (gate ? 34 : 30))), cw = W / cols, rows = Math.max(1, Math.round(H / cw)), rh = H / rows;
+    let g = "", rings = "";
+    for (let i = 1; i < cols; i++) g += `M${f(X + cw * i)} ${f(T)}V${f(T + H)}`;
+    for (let j = 1; j < rows; j++) g += `M${f(X)} ${f(T + rh * j)}H${f(X + W)}`;
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+      const cx = X + cw * (i + 0.5), cy = T + rh * (j + 0.5), ax = cw * 0.5, ay = rh * 0.5;
+      g += `M${f(cx)} ${f(cy - ay)}Q${f(cx + ax * 0.18)} ${f(cy - ay * 0.18)} ${f(cx + ax)} ${f(cy)}Q${f(cx + ax * 0.18)} ${f(cy + ay * 0.18)} ${f(cx)} ${f(cy + ay)}Q${f(cx - ax * 0.18)} ${f(cy + ay * 0.18)} ${f(cx - ax)} ${f(cy)}Q${f(cx - ax * 0.18)} ${f(cy - ay * 0.18)} ${f(cx)} ${f(cy - ay)}Z`;
+      rings += `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(Math.min(cw, rh) * 0.11)}"/>`;
+    }
+    let tips = "";
+    if (gate) { for (let i = 0; i <= cols * 2; i++) { const x = X + cw / 2 * i; tips += `M${f(x)} ${f(T)}V${f(T - 9)}M${f(x - 2.2)} ${f(T - 7)}L${f(x)} ${f(T - 12)}L${f(x + 2.2)} ${f(T - 7)}Z`; } }
+    const frame = (col, w) => R(X + t / 2, T + t / 2, W - t, H - t, "none", `stroke="${col}" stroke-width="${f(w)}"`) + (gate ? `<path d="M${f(X + W / 2 - 2)} ${f(T)}V${f(T + H)}M${f(X + W / 2 + 2)} ${f(T)}V${f(T + H)}" stroke="${col}" stroke-width="${f(w * 0.8)}"/>` : "");
+    const body = col => `<path d="${g}" stroke="${col}" stroke-width="${f(bw)}" fill="none" stroke-linejoin="round"/><g fill="none" stroke="${col}" stroke-width="${f(bw * 0.9)}">${rings}</g>` + (tips ? `<path d="${tips}" stroke="${col}" stroke-width="1.4" fill="${col}"/>` : "") + frame(col, t);
+    const shadow = real ? `<g transform="translate(2 2.5)" opacity=".2">${body("#000")}</g>` : "";
+    return shadow + body(c) + (real ? `<path d="${g}" stroke="#fff" stroke-opacity=".22" stroke-width=".5" fill="none" transform="translate(-.35 -.35)"/>` : "");
   }
+
   function railingSVG(p, real) {
-    const { X, T, W, H, B } = bx(p), c = p.color, rh = clamp(H * 0.08, 3, 8), n = Math.max(3, Math.round(W / 12)), sp = W / n, bw = clamp(sp * 0.16, 1.2, 3);
-    let d = ""; for (let i = 1; i < n; i++) d += `M${f(X + sp * i)} ${f(T + rh)}V${f(B - rh)}`;
-    const body = `<path d="${d}" stroke="${c}" stroke-width="${f(bw)}"/>` + R(X, T, W, rh, c) + R(X, B - rh, W, rh, c) + R(X, T, bw * 1.8, H, c) + R(X + W - bw * 1.8, T, bw * 1.8, H, c);
-    if (!real) return body + R(X, T, W, rh, "none", stk(shade(c, -0.4), 0.8));
-    return `<g transform="translate(2.5 3)" opacity=".24"><path d="${d}" stroke="#000" stroke-width="${f(bw)}"/>${R(X, T, W, rh, "#000")}</g>` + body + R(X, T, W, 1, "#fff", 'opacity=".35"');
+    /* Top rail, bottom rail lifted off the floor, square balusters about 4" apart and end posts with caps. */
+    const { X, T, W, H, B } = bx(p), c = p.color, rh = clamp(H * 0.08, 4.5, 9), br = clamp(H * 0.05, 3, 6), gap = clamp(H * 0.06, 3, 8), pw = clamp(H * 0.1, 6, 11);
+    const n = Math.max(3, Math.round((W - 2 * pw) / 11)), sp = (W - 2 * pw) / n, bw = clamp(sp * 0.32, 1.6, 4.2), dk = shade(c, -0.28), e = shade(c, -0.45);
+    let bal = "";
+    for (let i = 1; i < n; i++) { const x = X + pw + sp * i - bw / 2; bal += R(x, T + rh, bw, H - rh - br - gap, c) + (real ? R(x + bw * 0.62, T + rh, bw * 0.38, H - rh - br - gap, dk) : ""); }
+    const rails = R(X, T, W, rh, c) + R(X + pw, B - gap - br, W - 2 * pw, br, c);
+    const posts = R(X, T - 2, pw, H + 2, c) + R(X + W - pw, T - 2, pw, H + 2, c) + R(X - 1.5, T - 4, pw + 3, 3, c) + R(X + W - pw - 1.5, T - 4, pw + 3, 3, c);
+    if (!real) return bal.replace(/\/>/g, ` ${stk(e, 0.5)}/>`) + rails.replace(/\/>/g, ` ${stk(e, 0.8)}/>`) + posts.replace(/\/>/g, ` ${stk(e, 0.8)}/>`);
+    const sh = `<g transform="translate(4 6)" opacity=".28">${bal}${rails}${posts}</g>`.replace(/fill="[^"]*"/g, 'fill="#000"');
+    return sh + bal + rails + R(X, T, W, 1.3, "#fff", 'opacity=".55"') + R(X, T + rh - 1.4, W, 1.4, "#000", 'opacity=".22"') + R(X + pw, B - gap - br, W - 2 * pw, 1, "#fff", 'opacity=".4"') + R(X + pw, B - gap - 1, W - 2 * pw, 1, "#000", 'opacity=".2"')
+      + posts + R(X + pw * 0.62, T - 2, pw * 0.38, H + 2, dk) + R(X + W - pw * 0.38, T - 2, pw * 0.38, H + 2, dk) + R(X - 1.5, T - 4, pw + 3, 1, "#fff", 'opacity=".5"') + R(X + W - pw - 1.5, T - 4, pw + 3, 1, "#fff", 'opacity=".5"');
   }
+
   /* Criollo double doors (tall louvered leaves under a transom) and a wood door behind a reja gate. */
   function specialDoor(p, o, real) {
     const { X, T, W, H, B } = bx(p), c = p.color, fr = clamp(W * 0.05, 3, 8), cas = "#eeebe4", e = shade(c, -0.4), edge = real ? "" : stk(e, 1);
@@ -894,14 +912,28 @@ body.is3d .tool{opacity:.55}
     const { X, T, W, H, B } = bx(p), c = p.color, ink = real ? "" : stk("#2a2a28", 1);
     let s = "";
     if (p.style === "solar") {
-      const th = H * 0.28, ph = H * 0.5, legs = H - th - ph, leg = "#8d8a83";
-      s += R(X + W * 0.08, B - legs, W * 0.025, legs, leg) + R(X + W * 0.895, B - legs, W * 0.025, legs, leg);
-      s += R(X, T + th, W, ph, real ? "#1d3550" : "#9db1c0", stk("#c9c7c1", 2.5));
-      let fins = ""; for (let x = X + 10; x < X + W - 4; x += 10) fins += `M${f(x)} ${f(T + th + 2)}V${f(T + th + ph - 2)}`;
-      s += `<path d="${fins}" stroke="${real ? "#fff" : "#2a2a28"}" stroke-opacity="${real ? 0.14 : 0.35}" stroke-width=".8"/>`;
-      if (real) s += P(`M${f(X + W * 0.1)} ${f(T + th + ph)}L${f(X + W * 0.45)} ${f(T + th)}L${f(X + W * 0.6)} ${f(T + th)}L${f(X + W * 0.25)} ${f(T + th + ph)}Z`, "#fff", 'opacity=".1"');
-      s += R(X + W * 0.04, T, W * 0.92, th, "#e9e7e2", `rx="${f(th / 2)}" ${ink}`);
-      if (real) s += R(X + W * 0.04, T, W * 0.92, th * 0.35, "#fff", `rx="${f(th / 4)}" opacity=".45"`) + R(X + W * 0.04, T + th * 0.7, W * 0.92, th * 0.3, "#000", `rx="${f(th / 4)}" opacity=".14"`);
+      /* A thermosiphon solar water heater: a glazed collector tilted toward the sun on an aluminum frame, with the white
+         storage tank lying across its top. */
+      const th = H * 0.27, tk = T, py = T + th * 0.78, ph = H * 0.5, pb = py + ph, al = "#b9bcbd", ald = "#8c9091", tx0 = X + W * 0.02, tw = W * 0.96;
+      [[X + W * 0.07, pb], [X + W * 0.93 - 3, pb], [X + W * 0.2, tk + th * 0.9], [X + W * 0.8 - 3, tk + th * 0.9]].forEach(q => { s += R(q[0], q[1], 3, B - q[1], real ? ald : "#efece6", ink); });
+      s += R(X + W * 0.05, B - 3, W * 0.9, 3, real ? ald : "#efece6", ink);
+      if (real) s += `<path d="M${f(X + W * 0.07 + 1.5)} ${f(B - 3)}L${f(X + W * 0.2 + 1.5)} ${f(pb)}M${f(X + W * 0.93 - 1.5)} ${f(B - 3)}L${f(X + W * 0.8 - 1.5)} ${f(pb)}" stroke="${ald}" stroke-width="2.2"/>`;
+      const gx = X + W * 0.04, gw = W * 0.92, fr = clamp(ph * 0.07, 2.5, 4.5);
+      s += R(gx, py, gw, ph, real ? al : "#efece6", ink);
+      if (real) {
+        if (!o.lf.gSolar) o.lf.gSolar = `<linearGradient id="gSolar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f6f8c"/><stop offset=".35" stop-color="#1e3550"/><stop offset="1" stop-color="#0d1a2a"/></linearGradient>`;
+        s += R(gx + fr, py + fr, gw - 2 * fr, ph - 2 * fr, "url(#gSolar)");
+        let ris = ""; for (let x = gx + fr + 6; x < gx + gw - fr - 2; x += 8) ris += `M${f(x)} ${f(py + fr + 3)}V${f(pb - fr - 3)}`;
+        s += `<path d="${ris}" stroke="#7b5a3a" stroke-opacity=".45" stroke-width=".9"/>` + R(gx + fr, py + fr + 1.5, gw - 2 * fr, 2, "#7b5a3a", 'opacity=".5"') + R(gx + fr, pb - fr - 3.5, gw - 2 * fr, 2, "#7b5a3a", 'opacity=".5"');
+        s += P(`M${f(gx + gw * 0.18)} ${f(pb - fr)}L${f(gx + gw * 0.42)} ${f(py + fr)}L${f(gx + gw * 0.52)} ${f(py + fr)}L${f(gx + gw * 0.28)} ${f(pb - fr)}Z`, "#fff", 'opacity=".12"') + R(gx, py, gw, 1.2, "#fff", 'opacity=".6"');
+      } else { s += R(gx + fr, py + fr, gw - 2 * fr, ph - 2 * fr, "#d9e2e8", ink); let ris = ""; for (let x = gx + fr + 8; x < gx + gw - fr - 2; x += 10) ris += `M${f(x)} ${f(py + fr)}V${f(pb - fr)}`; s += `<path d="${ris}" stroke="#2a2a28" stroke-width=".5"/>`; }
+      /* the tank: a horizontal white cylinder with rounded ends and two straps */
+      const tr = th / 2, tank = `M${f(tx0 + tr * 0.5)} ${f(tk)}H${f(tx0 + tw - tr * 0.5)}Q${f(tx0 + tw)} ${f(tk)} ${f(tx0 + tw)} ${f(tk + tr)}Q${f(tx0 + tw)} ${f(tk + th)} ${f(tx0 + tw - tr * 0.5)} ${f(tk + th)}H${f(tx0 + tr * 0.5)}Q${f(tx0)} ${f(tk + th)} ${f(tx0)} ${f(tk + tr)}Q${f(tx0)} ${f(tk)} ${f(tx0 + tr * 0.5)} ${f(tk)}Z`;
+      s += P(tank, "#eeece7", ink);
+      if (real) {
+        if (!o.lf.gTank) o.lf.gTank = `<linearGradient id="gTank" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset=".75" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>`;
+        s += P(tank, "url(#gTank)") + R(tx0 + tw * 0.22, tk, 2.2, th, "#a9a9a6") + R(tx0 + tw * 0.78, tk, 2.2, th, "#a9a9a6");
+      } else s += `<path d="M${f(tx0 + tw * 0.22)} ${f(tk)}V${f(tk + th)}M${f(tx0 + tw * 0.78)} ${f(tk)}V${f(tk + th)}" stroke="#2a2a28" stroke-width=".7"/>`;
     } else if (p.style === "ac") {
       const fx = X + W * 0.36, fy = T + H * 0.5, fr = Math.min(W * 0.3, H * 0.42);
       if (real) { s += R(X + 2, T + 3, W, H, "#000", 'opacity=".2"'); o.shad += R(X, B, W, 10, "url(#gEave)"); }
@@ -912,17 +944,19 @@ body.is3d .tool{opacity:.55}
       s += g + `<path d="${v}" stroke="${shade(c, -0.3)}" stroke-width=".9"/>`;
       if (real) s += R(X, T, W, H, "url(#gLight)") + R(X, T, W, 1.2, "#fff", 'opacity=".5"');
     } else {
-      const sh = H * 0.16, top = T, bot = B - sh, r = W * 0.12, leg = "#77736c";
-      s += R(X + W * 0.1, bot, W * 0.06, sh, leg) + R(X + W * 0.84, bot, W * 0.06, sh, leg) + R(X + W * 0.06, bot, W * 0.88, sh * 0.18, leg);
-      const body = `M${f(X)} ${f(bot)}V${f(top + r)}Q${f(X)} ${f(top)} ${f(X + r)} ${f(top)}H${f(X + W - r)}Q${f(X + W)} ${f(top)} ${f(X + W)} ${f(top + r)}V${f(bot)}Z`;
+      /* A polyethylene water tank (cisterna): a ribbed drum with a domed top and a screw lid, standing on the roof. */
+      const dome = H * 0.14, top = T + dome;
+      const body = `M${f(X)} ${f(B)}V${f(top)}Q${f(X + W * 0.02)} ${f(T + dome * 0.15)} ${f(X + W * 0.3)} ${f(T + dome * 0.02)}H${f(X + W * 0.7)}Q${f(X + W * 0.98)} ${f(T + dome * 0.15)} ${f(X + W)} ${f(top)}V${f(B)}Z`;
       s += P(body, c, ink);
-      let ribs = ""; for (let k = 1; k < 6; k++) ribs += `M${f(X)} ${f(top + r + (bot - top - r) * k / 6)}H${f(X + W)}`;
-      s += `<path d="${ribs}" stroke="${shade(c, real ? 0.18 : -0.3)}" stroke-width="1.2"/>` + R(X + W * 0.38, top - H * 0.04, W * 0.24, H * 0.04, shade(c, 0.12), ink);
-      if (real) s += P(body, "url(#gCyl)", 'opacity=".8"');
+      let ribs = ""; for (let k = 1; k < 6; k++) ribs += `M${f(X)} ${f(top + (B - top) * k / 6)}H${f(X + W)}`;
+      s += `<path d="${ribs}" stroke="${shade(c, real ? 0.22 : -0.3)}" stroke-width="2"/>` + (real ? `<path d="${ribs}" stroke="#000" stroke-opacity=".25" stroke-width="1" transform="translate(0 1.6)"/>` : "");
+      s += R(X + W * 0.36, T - H * 0.03, W * 0.28, H * 0.04, shade(c, 0.15), ink + ` rx="${f(H * 0.01)}"`);
+      if (real) s += P(body, "url(#gCyl)", 'opacity=".85"') + R(X, B - 3, W, 3, "#000", 'opacity=".25"');
     }
     if (real && p.y < 5) groundShadow(o, X, W, 10);
     return s;
   }
+
   function stepsSVG(p) {
     const { X, T, W, H, B } = bx(p), c = p.color, e = shade(c, -0.35), st = stk(e, 1);
     const n = Math.max(1, Math.round(H / 17)), sh = H / n; let out = "";
@@ -1206,6 +1240,14 @@ body.is3d .tool{opacity:.55}
         for (let y = 0; y < 4; y++) for (let k = -1; k <= 4; k++) { const x = k * sw + (y % 2 ? sw / 2 : 0), t = vary(c, r, 0.1); b += R(x + 0.5, y * sh, sw - 1, sh - 0.6, t) + R(x + 0.5, y * sh + sh - 1.8, sw - 1, 1.2, shade(t, -0.3)); }
         break;
       }
+      case "zinc": {
+        /* corrugated sheets: a rib every 3", lit on one side, with a lap joint every few feet */
+        w = 7.6 * 8; h = 180; pre = grad(id + "z", 1, 0, [[0, "#000", 0.28], [0.3, "#fff", 0.22], [0.55, "#fff", 0.05], [1, "#000", 0.3]]);
+        b = R(0, 0, w, h, c);
+        for (let k = 0; k < 8; k++) b += R(k * 7.6, 0, 7.6, h, `url(#${id}z)`);
+        b += R(0, h - 3, w, 1.4, shade(c, -0.4)) + R(0, h - 1.6, w, 1, shade(c, 0.25)) + R(0, 0, w, h, vary(c, r, 0.08), 'opacity=".25"');
+        break;
+      }
       case "metal": {
         w = 45; h = 60; pre = grad(id + "g", 1, 0, [[0, "#fff", 0.1], [0.5, "#fff", 0.02], [1, "#000", 0.12]]);
         b = R(0, 0, w, h, c) + R(0, 0, w, h, `url(#${id}g)`) + R(0, 0, 1.4, h, shade(c, 0.28)) + R(1.4, 0, 1.2, h, shade(c, -0.35));
@@ -1217,11 +1259,23 @@ body.is3d .tool{opacity:.55}
   }
   const grain = (x, y, w, h, op) => NOISE ? R(x, y, w, h, "url(#noise)", `opacity="${op == null ? 1 : op}"`) : "";
   const groundShadow = (o, x, w, d) => { o.grd += `<ellipse cx="${f(x + w / 2)}" cy="${f(Math.min(12, d) / 3)}" rx="${f(w * 0.6)}" ry="${f(Math.max(4, Math.min(14, d)))}" fill="url(#gShadowEl)"/>`; };
+  const wallBelowAt = (p, all) => (all || []).some(q => q !== p && q.t === "wall" && Math.abs(q.y + q.h - p.y) < 3 && q.x < p.x + p.w - 5 && q.x + q.w > p.x + 5);
   function realWall(p, o) {
     const { X, T, W, H, B } = bx(p), c = p.color;
     let s = R(X, T, W, H, o.pat(p.tex, c)) + grain(X, T, W, H, 0.9) + R(X, T, W, H, "url(#gLight)");
     if (p.y < 5) { const fh = Math.min(22, H * 0.1); s += R(X, B - 45, W, 45, "url(#gAO)") + R(X - 2, B - fh, W + 4, fh, "#9d988f") + grain(X - 2, B - fh, W + 4, fh) + R(X - 2, B - fh, W + 4, 1.5, "#c9c4ba"); o.grd += R(X - 30, 0, W + 60, 22, "url(#gGround)"); }
     s += R(X, T, 3, H, "#fff", 'opacity=".1"') + R(X + W - 4, T, 4, H, "#000", 'opacity=".14"');
+    if (p.tex === "siding" || p.tex === "board") {
+      /* wood houses have corner boards and a frieze board under the eave, so the ends of the house read clearly */
+      const tc = mix(c, "#f4f1ea", 0.85), cb = clamp(W * 0.014, 9, 14);
+      s += R(X, T, cb, H, tc) + R(X + W - cb, T, cb, H, tc) + R(X, T, W, Math.min(14, H * 0.05), tc) + R(X + cb, T, 1.2, H, "#000", 'opacity=".25"') + R(X + W - cb - 1.2, T, 1.2, H, "#000", 'opacity=".25"') + R(X + W - cb * 0.4, T, cb * 0.4, H, "#000", 'opacity=".12"');
+    }
+    if (p.y > 30 && !wallBelowAt(p, o.all)) {
+      /* a raised house (on posts) sits on a floor beam that the posts hold up */
+      const bh = clamp(H * 0.07, 14, 22), bc = mix(c, "#e9e4da", 0.8);
+      s += R(X - 6, B, W + 12, bh, bc) + R(X - 6, B, W + 12, 1.4, "#fff", 'opacity=".45"') + R(X - 6, B + bh - 2, W + 12, 2, "#000", 'opacity=".3"') + grain(X - 6, B, W + 12, bh, 0.6);
+      o.grd += R(X - 20, 0, W + 40, 26, "url(#gGround)");
+    }
     o.clip += `<rect x="${f(X)}" y="${f(T)}" width="${f(W)}" height="${f(H)}"/>`;
     return s;
   }
@@ -1253,9 +1307,21 @@ body.is3d .tool{opacity:.55}
     o.shad += R(X, B, W, Math.min(90, Math.max(30, H * 0.25)), "url(#gEave)");
     let s = `<clipPath id="${id}"><path d="${d}"/></clipPath><g clip-path="url(#${id})">${R(X, T, W, H, fill)}${grain(X, T, W, H)}${R(X, T, W, H, "url(#gRoofSh)")}`;
     if (p.style === "gable" || !p.style) s += P(`M${f(X + W / 2)} ${f(T)}L${f(X + W)} ${f(B)}L${f(X + W / 2)} ${f(B)}Z`, "#000", 'opacity=".08"');
-    if (p.style === "hip") s += P(`M${f(X + W * 0.72)} ${f(T)}L${f(X + W)} ${f(B)}L${f(X + W * 0.72)} ${f(B)}Z`, "#000", 'opacity=".1"') + P(`M${f(X)} ${f(B)}L${f(X + W * 0.28)} ${f(T)}L${f(X + W * 0.28)} ${f(B)}Z`, "#fff", 'opacity=".05"');
+    const sheet = p.tex === "metal" || p.tex === "zinc";
+    if (p.style === "hip") {
+      /* The hip ends slope away to the sides: they catch less light, and their ribs and seams run out of sight. */
+      const L = `M${f(X)} ${f(B)}L${f(X + W * 0.28)} ${f(T)}L${f(X + W * 0.28)} ${f(B)}Z`, Rt = `M${f(X + W * 0.72)} ${f(T)}L${f(X + W)} ${f(B)}L${f(X + W * 0.72)} ${f(B)}Z`;
+      s += sheet ? P(L, shade(c, -0.08)) + P(Rt, shade(c, -0.24)) + P(L, "url(#gRoofSh)") + P(Rt, "url(#gRoofSh)") : P(Rt, "#000", 'opacity=".14"') + P(L, "#fff", 'opacity=".05"');
+    }
     s += `</g>` + P(d, "none", `stroke="${edge}" stroke-width="1.2" stroke-linejoin="round"`) + extra;
-    s += R(X - 2, B - fh, W + 4, fh, fas) + R(X - 2, B - fh, W + 4, 1.2, shade(fas, 0.35)) + R(X - 2, B - 1.5, W + 4, 1.5, "#000", 'opacity=".3"');
+    if (sheet || p.style === "hip") {
+      /* hip and ridge caps */
+      const caps = p.style === "hip" ? `M${f(X + 3)} ${f(B - 2)}L${f(X + W * 0.28)} ${f(T)}H${f(X + W * 0.72)}L${f(X + W - 3)} ${f(B - 2)}` : (p.style === "gable" || !p.style) ? `M${f(X + 3)} ${f(B - 2)}L${f(X + W / 2)} ${f(T)}L${f(X + W - 3)} ${f(B - 2)}` : "";
+      if (caps) s += `<path d="${caps}" fill="none" stroke="${shade(c, sheet ? 0.12 : 0.06)}" stroke-width="${sheet ? 5 : 4}" stroke-linejoin="round"/><path d="${caps}" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1" transform="translate(0 2.6)"/>`;
+    }
+    const eh = sheet ? Math.min(H * 0.045, 8) : fh, ec = sheet ? shade(c, -0.3) : fas;
+    s += R(X - 2, B - eh, W + 4, eh, ec) + R(X - 2, B - eh, W + 4, 1.2, shade(ec, 0.35)) + R(X - 2, B - 1.5, W + 4, 1.5, "#000", 'opacity=".3"');
+    if (sheet) o.shad += R(X, B, W, 16, "#000", 'opacity=".12"');
     return s;
   }
   function realWindow(p, o) {
@@ -1439,6 +1505,10 @@ body.is3d .tool{opacity:.55}
       ground = R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 45, "url(#earth)") + `<path d="M-100000 0H100000" stroke="${sk.line}" stroke-width="3"/>`;
     }
     let body = "", after = "";
+    /* Equipment standing on a parapet roof's slab is drawn behind the parapet. */
+    const deckOf = p => p.t === "equip" && parts.find(q => q.t === "roof" && q.style === "parapet" && p.y >= q.y - 1 && p.y < q.y + q.h - 2 && p.x < q.x + q.w && p.x + p.w > q.x);
+    if (parts.some(deckOf)) { parts = parts.slice(); parts.filter(deckOf).forEach(p => { const q = deckOf(p); parts.splice(parts.indexOf(p), 1); parts.splice(parts.indexOf(q), 0, p); }); }
+    o.all = parts;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
       const T = TYPES[p.t], draw = real && REAL[p.t] ? REAL[p.t] : DRAW[p.t]; let s;
@@ -1539,10 +1609,13 @@ body.is3d .tool{opacity:.55}
   /* ---------- templates ---------- */
   const TEMPLATES = {
     prConcrete: { name: "Casa de concreto", r: "pr", style: "pr-concrete", sky: "day", lot: "pr", parts: [
-      { t: "wall", x: -450, y: 0, w: 450, h: 290, color: "#e2d5b8", tex: "stucco" },
+      { t: "wall", x: -450, y: 0, w: 450, h: 290, color: "#d4c6a6", tex: "stucco" },
       { t: "wall", x: 0, y: 0, w: 900, h: 290, color: "#f0e2b6", tex: "stucco" },
+      { t: "equip", x: 640, y: 310, w: 110, h: 140, color: "#2f3133", style: "tank" },
+      { t: "equip", x: 150, y: 310, w: 210, h: 150, color: "#2f3133", style: "solar" },
       { t: "roof", x: -460, y: 290, w: 1370, h: 60, color: "#ece7dc", tex: "concrete", style: "parapet" },
       { t: "trim", x: -450, y: 0, w: 30, h: 290, color: "#ece7dc", style: "post" },
+      { t: "equip", x: -250, y: 170, w: 85, h: 60, color: "#eeeeec", style: "ac" },
       { t: "trim", x: -420, y: 0, w: 420, h: 150, color: "#f5f3ee", style: "reja" },
       { t: "steps", x: 290, y: 0, w: 150, h: 30, color: "#bdb7ad", style: "steps" },
       { t: "door", x: 319, y: 30, w: 91.4, h: 213, color: "#f5f3ee", style: "gate" },
@@ -1550,9 +1623,6 @@ body.is3d .tool{opacity:.55}
       { t: "window", x: 520, y: 100, w: 150, h: 120, color: "#c9ccce", style: "jalousie" },
       { t: "trim", x: 72, y: 92, w: 166, h: 136, color: "#f5f3ee", style: "reja" },
       { t: "trim", x: 512, y: 92, w: 166, h: 136, color: "#f5f3ee", style: "reja" },
-      { t: "equip", x: 710, y: 205, w: 85, h: 60, color: "#eeeeec", style: "ac" },
-      { t: "equip", x: 640, y: 350, w: 110, h: 140, color: "#2f3133", style: "tank" },
-      { t: "equip", x: 120, y: 350, w: 210, h: 110, color: "#2f3133", style: "solar" },
       { t: "plant", x: 90, y: 0, w: 130, h: 70, color: "#5e7f4a", style: "shrub" },
       { t: "plant", x: 530, y: 0, w: 130, h: 70, color: "#5e7f4a", style: "shrub" },
       { t: "plant", x: 760, y: 0, w: 300, h: 640, color: "#6f8f4e", style: "palm" }],
@@ -1608,17 +1678,17 @@ body.is3d .tool{opacity:.55}
       { t: "trim", x: 55, y: 360, w: 590, h: 100, color: "#2a2a28", style: "railing" },
       { t: "plant", x: 620, y: 0, w: 90, h: 330, color: "#b8466a", style: "ivy" }] },
     prCampo: { name: "Casa de campo", r: "pr", style: "pr-campo", sky: "day", lot: "qtr", parts: [
-      { t: "trim", x: 0, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
-      { t: "trim", x: 290, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
-      { t: "trim", x: 600, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
-      { t: "trim", x: 858, y: 0, w: 22, h: 120, color: "#f5f3ee", style: "post" },
+      { t: "trim", x: -4, y: 0, w: 28, h: 102, color: "#efebe3", style: "post" },
+      { t: "trim", x: 290, y: 0, w: 28, h: 102, color: "#efebe3", style: "post" },
+      { t: "trim", x: 590, y: 0, w: 28, h: 102, color: "#efebe3", style: "post" },
+      { t: "trim", x: 856, y: 0, w: 28, h: 102, color: "#efebe3", style: "post" },
       { t: "wall", x: 0, y: 120, w: 880, h: 270, color: "#7fb3a8", tex: "siding" },
-      { t: "roof", x: -60, y: 390, w: 1000, h: 210, color: "#9c4f3f", tex: "metal", style: "hip" },
+      { t: "roof", x: -60, y: 390, w: 1000, h: 230, color: "#a2513f", tex: "zinc", style: "hip" },
       { t: "door", x: 380, y: 120, w: 91.4, h: 210, color: "#f5f3ee", style: "panel" },
       { t: "window", x: 110, y: 180, w: 110, h: 150, color: "#f5f3ee", style: "louver" },
       { t: "window", x: 650, y: 180, w: 110, h: 150, color: "#f5f3ee", style: "louver" },
-      { t: "trim", x: 0, y: 120, w: 340, h: 95, color: "#f5f3ee", style: "railing" },
-      { t: "trim", x: 510, y: 120, w: 370, h: 95, color: "#f5f3ee", style: "railing" },
+      { t: "trim", x: -6, y: 120, w: 346, h: 95, color: "#f5f3ee", style: "railing" },
+      { t: "trim", x: 510, y: 120, w: 376, h: 95, color: "#f5f3ee", style: "railing" },
       { t: "steps", x: 360, y: 0, w: 130, h: 120, color: "#bdb7ad", style: "steps" },
       { t: "plant", x: -380, y: 0, w: 300, h: 640, color: "#6f8f4e", style: "palm" },
       { t: "plant", x: 980, y: 0, w: 280, h: 500, color: "#5f7a4e", style: "tree" }] },
@@ -2003,7 +2073,8 @@ body.is3d .tool{opacity:.55}
     D.parts.forEach(q => {
       if (q === p || !visible(q) || kindOf(q) !== "rect" || q.x >= x1 || q.x + q.w <= x0) return;
       const tops = [];
-      if (q.t === "wall" || (q.t === "steps" && p.t !== "roof") || (q.t === "roof" && (q.style === "flat" || q.style === "parapet")) || (q.t === "trim" && (q.style === "band" || q.style === "cornice")) || ((p.t === "wall" || p.t === "roof") && q.t === "trim" && (q.style === "post" || q.style === "column" || q.style === "tapered"))) tops.push(q.y + q.h);
+      if (p.t === "equip" && q.t === "roof" && q.style === "parapet") tops.push(q.y + Math.min(20, q.h * 0.4)); // on the slab, behind the parapet
+      else if (q.t === "wall" || (q.t === "steps" && p.t !== "roof") || (q.t === "roof" && (q.style === "flat" || q.style === "parapet")) || (q.t === "trim" && (q.style === "band" || q.style === "cornice")) || ((p.t === "wall" || p.t === "roof") && q.t === "trim" && (q.style === "post" || q.style === "column" || q.style === "tapered"))) tops.push(q.y + q.h);
       if (p.t === "door" && q.t === "wall") tops.push(q.y);
       if (p.t === "roof" && q.t === "wall" && p.y >= q.y + 100 && p.y <= q.y + q.h - 20) tops.push(p.y); // a porch roof hangs on the wall
       tops.forEach(t => { if (t <= p.y + 2 && t > best) best = t; });
@@ -2064,7 +2135,7 @@ body.is3d .tool{opacity:.55}
       wall: { tex: "stucco", color: "#e9b44c" }, roof: { style: "parapet", tex: "concrete", color: "#f5f0e4" }, window: { style: "louver", color: "#2f6b5a" }, door: { style: "criollo", color: "#2f6b5a" }, trim: { style: "railing", color: "#2a2a28" } },
     "pr-campo": { r: "pr", n: "Wood country house", tpl: "prCampo",
       d: "The traditional casa de campo: a wood frame raised on posts for air and floods, a zinc (metal) roof, louvered windows and a front balcony to catch the breeze.",
-      wall: { tex: "siding", color: "#7fb3a8" }, roof: { style: "hip", tex: "metal", color: "#9c4f3f" }, window: { style: "louver", color: "#f5f3ee" }, door: { style: "panel", color: "#f5f3ee" }, trim: { style: "post", color: "#f5f3ee" } },
+      wall: { tex: "siding", color: "#7fb3a8" }, roof: { style: "hip", tex: "zinc", color: "#a2513f" }, window: { style: "louver", color: "#f5f3ee" }, door: { style: "panel", color: "#f5f3ee" }, trim: { style: "post", color: "#f5f3ee" } },
     "us-craftsman": { r: "us", n: "Craftsman bungalow", tpl: "craftsman",
       d: "Wood frame with lap siding, a low gable roof with deep eaves, and a front porch on tapered columns over stone piers.",
       wall: { tex: "siding", color: "#7f8c6a" }, roof: { style: "gable", tex: "shingle", color: "#4a4b4d" }, window: { style: "double", color: "#efe9dd" }, door: { style: "glass", color: "#8a5a3a" }, trim: { style: "tapered", color: "#efe9dd" } },
@@ -2953,6 +3024,26 @@ body.is3d .tool{opacity:.55}
     if (tile) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / tile[0], uv.getY(i) / tile[1]); }
     const m = new THREE.Mesh(g, mats); m.position.z = z0; m.castShadow = true; m.receiveShadow = true; group.add(m); return m;
   }
+  /* A reja in 3D: the same decorative pattern as the front view, cut out of a flat panel. */
+  const grilleCache = new Map();
+  function grilleTex(W, H, color, door) {
+    const key = [r1(W), r1(H), color, door].join();
+    if (grilleCache.has(key)) return grilleCache.get(key);
+    const pr = new Promise(res => {
+      const top = 14, k = Math.min(4, 2048 / Math.max(W, H + top)), cw = Math.round(W * k), ch = Math.round((H + top) * k);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cw}" height="${ch}" viewBox="0 ${-top} ${f(W)} ${f(H + top)}">${grilleSVG(0, 0, W, H, color, false, door)}</svg>`;
+      const img = new Image();
+      img.onload = () => { const c = document.createElement("canvas"); c.width = cw; c.height = ch; c.getContext("2d").drawImage(img, 0, 0, cw, ch); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; res(t); };
+      img.onerror = () => res(null);
+      img.src = svgURL(svg);
+    });
+    grilleCache.set(key, pr); return pr;
+  }
+  async function grille3(group, x0, y0, W, H, color, door, z) {
+    const t = await grilleTex(W, H, color, door); if (!t) return;
+    const top = 14, m = new THREE.Mesh(new THREE.PlaneGeometry(W, H + top), new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.5, metalness: 0.3 }));
+    m.position.set(x0 + W / 2, y0 + (H + top) / 2, z); m.castShadow = true; group.add(m);
+  }
   /* Extrudes a profile drawn in (z, y) across x, for side gables and porch roofs. */
   function extrudeX(group, pts, x0, x1, mats, tile) {
     const m = extrudeW(group, pts.map(q => [-q[0], q[1]]), 0, x1 - x0, mats, tile); m.rotation.y = Math.PI / 2; m.position.set(x0, 0, 0); return m;
@@ -3041,6 +3132,7 @@ body.is3d .tool{opacity:.55}
       return { vert, line, u0: vert ? p.y : p.x, u1: vert ? p.y + p.h : p.x + p.w, y0, y1, src: tw || p, plan: p };
     });
     const doorMat = {}, frameMat = solid("#f1efe9", 0.6), glassMat = new THREE.MeshStandardMaterial({ color: D.sky === "night" ? 0xf0c27a : 0xb4c6d2, roughness: 0.08, metalness: 0.35, emissive: D.sky === "night" ? 0x6b4a1c : 0x000000 });
+    const grilleQ = [];
     for (const s of segs) {
       const mid = o => (o.u0 + o.u1) / 2, inSeg = o => mid(o) > s.a && mid(o) < s.b;
       let ops = [];
@@ -3079,9 +3171,8 @@ body.is3d .tool{opacity:.55}
               put(px, px + pw, y0, y1, 8.7, 9, lm); for (let k = 0; k < n; k++) put(px, px + pw, y0 + (y1 - y0) * k / n + 1, y0 + (y1 - y0) * (k + 0.6) / n, 8.2, 9, dm); });
           } else put(u0, u1, o.y0, o.y1, 9, 13, dm);
           if (st === "gate") {
-            const gm = doorMat["g" + p.color] || (doorMat["g" + p.color] = solid(p.color, 0.45, 0.3)), n = Math.max(3, Math.round(W / 11));
-            for (let k = 1; k < n; k++) put(u0 + W * k / n - 0.8, u0 + W * k / n + 0.8, o.y0, o.y1, -4, -2.4, gm);
-            [0.33, 0.66].forEach(r => put(u0, u1, o.y0 + Hd * r - 0.8, o.y0 + Hd * r + 0.8, -4.4, -2, gm));
+            const gm = doorMat["g" + p.color] || (doorMat["g" + p.color] = solid(p.color, 0.45, 0.3));
+            if (s.h && s.front) grilleQ.push([u0, o.y0, W, Hd, p.color, Zo + 3.2]);
             put(u0, u0 + 3, o.y0, o.y1, -4.6, -2, gm); put(u1 - 3, u1, o.y0, o.y1, -4.6, -2, gm); put(u0, u1, o.y1 - 3, o.y1, -4.6, -2, gm);
           }
           put(u0 - 8, u0, o.y0, o.y1 + 8, -2, 1, frameMat); put(u1, u1 + 8, o.y0, o.y1 + 8, -2, 1, frameMat); put(u0, u1, o.y1, o.y1 + 8, -2, 1, frameMat);
@@ -3109,6 +3200,7 @@ body.is3d .tool{opacity:.55}
         if (s.ext) put(u0 - 5, u1 + 5, o.y0 - 5, o.y0, -5, 10, frameMat);
       });
     }
+    for (const q of grilleQ) await grille3(g, q[0], q[1], q[2], q[3], q[4], true, q[5]);
     /* Roofs, from the front view's roofs, over the footprint. */
     const Zf = -PY0, Zb = -PY1, ov = 40, rg = new THREE.Group(), PD = 230; g.add(rg);
     /* A roof that starts partway up the ground floor's walls is a porch roof: it reaches out over a porch PD deep. */
@@ -3205,8 +3297,7 @@ body.is3d .tool{opacity:.55}
         } else rail(X0, X1, z == null ? Zw + 60 : z - 4, z == null ? Zw + 60 : z - 4, y0, p.h, m);
       } else if (st === "reja") {
         const z = overOpening(p) ? null : zOut(p, cx), zz = z == null ? Zw + 3 : z - 3, gm = mat3(p.color, 0.45, 0.3), t = 3, n = Math.max(3, Math.round(p.w / 11));
-        bars(X0, X1, zz - 0.8, zz + 0.8, y0, y1, gm, "x", n, 1.6);
-        (overOpening(p) && p.h > 180 ? [0.33, 0.66] : [0.5]).forEach(rr => boxW(g, X0, X1, y0 + p.h * rr - 0.8, y0 + p.h * rr + 0.8, zz - 1, zz + 1, gm));
+        await grille3(g, X0, y0, p.w, p.h, p.color, false, zz);
         boxW(g, X0, X0 + t, y0, y1, zz - 1.2, zz + 1.2, gm); boxW(g, X1 - t, X1, y0, y1, zz - 1.2, zz + 1.2, gm); boxW(g, X0, X1, y1 - t, y1, zz - 1.2, zz + 1.2, gm); boxW(g, X0, X1, y0, y0 + t, zz - 1.2, zz + 1.2, gm);
       } else if (st === "band" || st === "cornice") boxW(g, X0, X1, y0, y1, Zw - 1, Zw + (st === "cornice" ? 16 : 5), m);
       else if (st === "pilaster" || st === "quoins") boxW(g, X0, X1, y0, y1, Zw - 1, Zw + (st === "quoins" ? 3 : 6), m);
@@ -3214,23 +3305,38 @@ body.is3d .tool{opacity:.55}
     }
     for (const p of front.filter(q => q.t === "equip")) {
       const X0 = p.x - lx, X1 = X0 + p.w, cx = (X0 + X1) / 2, m = mat3(p.color, 0.6, 0.1), st = p.style || "tank";
-      const onRoof = p.y >= wallTop - 5, deck = front.find(q => q.t === "roof" && q.style === "parapet" && Math.abs(q.y + q.h - p.y) < 4 && q.x < X1 + lx && q.x + q.w > X0 + lx);
+      const onRoof = p.y >= wallTop - 5, deck = front.find(q => q.t === "roof" && q.style === "parapet" && p.y >= q.y - 1 && p.y <= q.y + q.h + 4 && q.x < X1 + lx && q.x + q.w > X0 + lx);
       const yb = deck ? deck.y + Math.min(20, deck.h * 0.4) : p.y, zc = onRoof ? Zb + (Zf - Zb) * 0.4 : st === "ac" ? Zw + 20 : Zw + 70;
       if (st === "tank") {
-        const r = p.w / 2, lh = p.h * 0.16, leg = mat3("#77736c", 0.6, 0.4);
-        boxW(g, X0 + p.w * 0.06, X1 - p.w * 0.06, yb, yb + lh, zc - r * 0.8, zc + r * 0.8, leg);
-        const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, p.h - lh, 28), m); c.position.set(cx, yb + lh + (p.h - lh) / 2, zc); c.castShadow = c.receiveShadow = true; g.add(c);
-        const lid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.24, r * 0.24, 6, 16), mat3(shade(p.color, 0.12), 0.6, 0.1)); lid.position.set(cx, yb + p.h + 3, zc); g.add(lid);
+        /* a ribbed drum with a domed top, standing straight on the roof */
+        const r = p.w / 2, dome = p.h * 0.14, bh = p.h - dome;
+        const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, bh, 32), m); c.position.set(cx, yb + bh / 2, zc); c.castShadow = c.receiveShadow = true; g.add(c);
+        for (let k = 1; k < 6; k++) { const rib = new THREE.Mesh(new THREE.TorusGeometry(r, 1.6, 6, 32), m); rib.rotation.x = Math.PI / 2; rib.position.set(cx, yb + bh * k / 6, zc); g.add(rib); }
+        const dm = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 10, 0, Math.PI * 2, 0, Math.PI / 2), m); dm.scale.y = dome / r; dm.position.set(cx, yb + bh, zc); dm.castShadow = true; g.add(dm);
+        const lid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.28, r * 0.28, 6, 20), mat3(shade(p.color, 0.12), 0.6, 0.1)); lid.position.set(cx, yb + p.h + 2, zc); g.add(lid);
       } else if (st === "solar") {
-        const L = p.h * 1.5, tilt = 0.5, pg = new THREE.Group(), panel = new THREE.Mesh(new THREE.BoxGeometry(p.w, 5, L), mat3("#1d3550", 0.25, 0.4));
-        panel.castShadow = true; pg.add(panel); pg.position.set(cx, yb + Math.sin(tilt) * L / 2 + 12, zc); pg.rotation.x = -tilt; g.add(pg);
-        const zt = zc - Math.cos(tilt) * L / 2, tank = new THREE.Mesh(new THREE.CylinderGeometry(p.h * 0.14, p.h * 0.14, p.w * 0.92, 20), mat3("#e9e7e2", 0.5, 0.2));
-        tank.rotation.z = Math.PI / 2; tank.position.set(cx, yb + Math.sin(tilt) * L + 12 + p.h * 0.1, zt - 4); tank.castShadow = true; g.add(tank);
-        [X0 + p.w * 0.1, X1 - p.w * 0.1].forEach(lxp => boxW(g, lxp - 2, lxp + 2, yb, yb + Math.sin(tilt) * L + 12, zt - 6, zt - 2, mat3("#8d8a83", 0.6, 0.4)));
+        /* the collector tilts up away from the street on an aluminum frame, with the storage tank across its high end */
+        const tilt = 0.44, L = 200, y0 = yb + 22, y1 = y0 + Math.sin(tilt) * L, zf = zc + Math.cos(tilt) * L / 2, zb = zc - Math.cos(tilt) * L / 2, al = mat3("#b9bcbd", 0.4, 0.6);
+        const pg = new THREE.Group(), frame = new THREE.Mesh(new THREE.BoxGeometry(p.w * 0.92, 7, L), al), glass = new THREE.Mesh(new THREE.BoxGeometry(p.w * 0.92 - 8, 1, L - 8), new THREE.MeshStandardMaterial({ color: 0x14283d, roughness: 0.12, metalness: 0.5 }));
+        glass.position.y = 3.6; frame.castShadow = true; pg.add(frame); pg.add(glass); pg.position.set(cx, (y0 + y1) / 2, (zf + zb) / 2); pg.rotation.x = tilt; g.add(pg);
+        const tr = 24, tank = new THREE.Mesh(new THREE.CylinderGeometry(tr, tr, p.w * 0.96, 24), mat3("#eeece7", 0.45, 0.15));
+        tank.rotation.z = Math.PI / 2; tank.position.set(cx, y1 + tr - 2, zb - tr * 0.6); tank.castShadow = true; g.add(tank);
+        [X0 + p.w * 0.08, X1 - p.w * 0.08 - 4].forEach(x => {
+          boxW(g, x, x + 4, yb, y0, zf - 4, zf, al); boxW(g, x, x + 4, yb, y1 + tr, zb - tr * 0.6 - 2, zb - tr * 0.6 + 2, al); boxW(g, x, x + 4, yb, yb + 4, zb - tr * 0.6, zf, al);
+        });
       } else {
-        const d = 34, z0 = onRoof ? zc - d / 2 : Zw, z1 = z0 + d;
+        const d = 34, fanR = Math.min(p.w * 0.3, p.h * 0.42), fanM = mat3(shade(p.color, -0.55), 0.9, 0);
+        /* Under a marquesina the condenser hangs on the house's side wall, facing the car. */
+        const r = !onRoof && openAt(cx), side = r && encl.filter(q => q.y < r.y + r.h && q.y + q.h > r.y && (Math.abs(q.x - (r.x + r.w)) < 2 || Math.abs(q.x + q.w - r.x) < 2)).map(q => Math.abs(q.x - (r.x + r.w)) < 2 ? r.x + r.w - 7.6 : r.x + 7.6).sort((a, b) => Math.abs(a - cx) - Math.abs(b - cx))[0];
+        if (side != null) {
+          const dir = side > cx ? -1 : 1, x0 = dir < 0 ? side - d : side, zm = -(r.y + Math.min(r.h, 600) * 0.45);
+          boxW(g, x0, x0 + d, yb, yb + p.h, zm - p.w / 2, zm + p.w / 2, m);
+          const fan = new THREE.Mesh(new THREE.CylinderGeometry(fanR, fanR, 1, 24), fanM); fan.rotation.z = Math.PI / 2; fan.position.set(dir < 0 ? x0 - 0.4 : x0 + d + 0.4, yb + p.h / 2, zm + p.w * 0.14); g.add(fan);
+          continue;
+        }
+        const z0 = onRoof ? zc - d / 2 : Zw, z1 = z0 + d;
         boxW(g, X0, X1, yb, yb + p.h, z0, z1, m);
-        const fan = new THREE.Mesh(new THREE.CylinderGeometry(Math.min(p.w * 0.3, p.h * 0.42), Math.min(p.w * 0.3, p.h * 0.42), 1, 24), mat3(shade(p.color, -0.55), 0.9, 0));
+        const fan = new THREE.Mesh(new THREE.CylinderGeometry(fanR, fanR, 1, 24), fanM);
         fan.rotation.x = Math.PI / 2; fan.position.set(X0 + p.w * 0.36, yb + p.h / 2, z1 + 0.4); g.add(fan);
       }
     }
