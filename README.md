@@ -62,10 +62,15 @@ A drafting board in the garden for designing a house two ways: the **Front** (th
 
 - Tap to drop a part or drag to draw it at any size. Smart placing on the front: a roof tapped above a wall fits that wall, a door stands on the wall's base, a trim band spans the wall
 - Select, move and resize with handles, with a live size readout. Snap chips toggle grid snap, snap to other parts and the ground (with guide lines), and ortho for straight lines
-- Part settings: style, texture, color (palette or any color), exact sizes and positions typed in metres or feet and inches, room names, layer, center on wall or in room, mirror, rotate, duplicate, repeat in a row or column, front and back
+- Select several parts by dragging a box across empty board, or turn on Multi and tap them. Move them together, group and ungroup, align edges, centers, tops and bottoms, space them evenly, match sizes, mirror, duplicate, or delete them at once
+- Copy and paste between the front and plan views and between designs (the clipboard survives a reload)
+- Nudge buttons (and arrow keys) move the selection one grid step at a time; Add dimensions puts width and height dimensions on any part
+- In the plan, doors and windows tapped near a room edge or straight wall sit in that wall, and doors swing into the side you tapped. A badge shows the room count and total floor area
+- Paint box can pick up a color and texture from any part
+- Part settings: style, texture, color (palette or any color), exact sizes and positions typed in feet and inches (the default, with metres in the menu), room names, layer, center on wall or in room, mirror, rotate, duplicate, repeat in a row or column, front and back
 - Labels, lines, pen strokes and dimension lines in both views
 - Five layers (Structure, Openings, Details, Sketch, Dimensions) that can be hidden or locked
-- Undo and redo, pinch to zoom, two-finger pan, and fit to screen
+- Undo and redo, pinch to zoom, two-finger pan, zoom buttons and fit to screen
 - Day, dusk and night skies for the front (windows light up at night)
 - Designs auto-save on the phone, with a gallery, copies and three starter houses (the Garden cottage comes with a matching floor plan)
 - Save a picture (PNG) or an SVG of either view, or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
