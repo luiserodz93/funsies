@@ -22,6 +22,7 @@ The sides are **Limestone** (light) and **Basalt** (dark, with lantern-lit windo
 - Full chess rules: castling, en passant, promotion, check, checkmate, stalemate, threefold repetition, the 50-move rule and insufficient material
 - Play against the computer at three levels: Seedling, Willow, Ancient Oak
 - Play a friend live on their own phone: send one invite link, and while you both have the game open, moves appear on each other's screen instantly, with an online indicator. If someone steps away, the game catches up when they return. Moves sync through your own Firebase Realtime Database once it's set up (see below), or the free [ntfy.sh](https://ntfy.sh) relay until then. If neither is reachable, each move can still be sent as a link
+- Play several friends at once: the **Your games** list (grid icon, top right) shows every friend game with whose turn it is, and a badge counts games waiting on you. Games you're not looking at keep syncing, and a tap on the "played" note jumps to that game. Your game on this phone (computer or same phone) is kept separately
 - Same phone pass & play, with three board views: Same side, Face to face (phone flat on a table) and Turn board
 - Tap or drag to move, legal-move markers, hints, undo, and a move list
 - Four seasons (Spring, Autumn, Winter, Night) with drifting petals, leaves, snow or fireflies
@@ -43,7 +44,7 @@ GitHub Pages on a free account requires the repository to be public.
 2. Tap **Share**, then **Add to Home Screen**.
 3. It now opens full screen like an app and keeps working without internet.
 
-To play a friend on their own phone, choose **New → Play a friend**, make your move (or pick Basalt to let them start), and tap **Send** to text them the invite. Game links open in Safari, even if you've added the game to your home screen. Sending the `index.html` file itself does not work well on an iPhone, because the Files app previews HTML without running the game.
+To play a friend on their own phone, open **Your games → Invite a new friend** (or **New → Play a friend**), optionally add their name and yours, and tap **Start** to text them the invite. Repeat for each friend you want to play. Game links open in Safari, even if you've added the game to your home screen. Sending the `index.html` file itself does not work well on an iPhone, because the Files app previews HTML without running the game.
 
 ## Live play with Firebase
 
