@@ -1930,7 +1930,7 @@ var Chess = (function () {
      1. Google Analytics (when GA_ID is set): city-level location, devices, sessions, plus game events.
      2. The game's Firebase database: /logs/sessions/<id> (one per visit) and /logs/games/<push id>
         (one per finished or abandoned game). The database rules make /logs write-only. */
-  var GA_ID = "";
+  var GA_ID = "G-K2XD82086T";
   var STATS_VER = "2026.11";
   var statsOn = function () { return settings.stats && canLink; };
   var sess = { id: newId() + newId(), start: Date.now(), active: 0, visibleSince: document.hidden ? 0 : Date.now(), games: 0, moves: 0, beat: 0 };
