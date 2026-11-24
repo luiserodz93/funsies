@@ -1,0 +1,15 @@
+{
+  "name": "Arbor & Arch",
+  "short_name": "Arbor & Arch",
+  "description": "Chess in a stone garden. Pass and play or challenge the computer.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#c9d9bd",
+  "theme_color": "#c9d9bd",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
