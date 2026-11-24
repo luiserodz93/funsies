@@ -85,6 +85,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 #stage[data-sky="dusk"]{background:linear-gradient(180deg,#5f6577,#d9c3b0)}
 #stage[data-sky="night"]{background:linear-gradient(180deg,#14181f,#262c36)}
 #stage[data-sky="plan"]{background:var(--paper)}
+#stage[data-sky="day-r"]{background:linear-gradient(180deg,#9fbad0,#e6ecee 70%)}
+#stage[data-sky="dusk-r"]{background:linear-gradient(180deg,#4a5470,#e0b796 75%)}
+#stage[data-sky="night-r"]{background:linear-gradient(180deg,#0a0f18,#1f2a3a)}
 .viewseg{position:absolute; left:10px; top:10px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
 .viewseg button{border:0; background:transparent; padding:6px 12px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
 .viewseg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
@@ -412,7 +415,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 
   /* ---------- state ---------- */
   const STORE = "brick-blueprint-v1";
-  const DEF_SETTINGS = { units: "ft", grid: 15.24, snap: true, osnap: true, ortho: true, sizes: true, sound: true, stats: true, link: true };
+  const DEF_SETTINGS = { units: "ft", grid: 15.24, snap: true, osnap: true, ortho: true, sizes: true, sound: true, stats: true, link: true, render: "real" };
   let store = null, D = null, sel = null, tool = "select", multi = [], clip = null, pickColor = false, multiMode = false;
   let undoStack = [], redoStack = [];
   const view = { s: 0.4, tx: 0, ty: 0 };
@@ -486,6 +489,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (d && typeof d === "object") {
       const s = d.settings || {}, st = store.settings;
       st.units = s.units === "m" ? "m" : "ft";
+      st.render = s.render === "draft" ? "draft" : "real";
       st.grid = GRIDS[st.units].find(g => Math.abs(g - s.grid) < 0.01) || GRIDS[st.units][st.units === "ft" ? 2 : 1];
       ["snap", "osnap", "ortho", "sizes", "sound", "stats", "link"].forEach(k => { if (typeof s[k] === "boolean") st[k] = s[k]; });
       if (Array.isArray(d.designs)) d.designs.slice(0, 100).forEach(x => { const c = cleanDesign(x); if (c && !store.designs.some(y => y.id === c.id)) store.designs.push(c); });
@@ -927,34 +931,326 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     for (let i = 0; i < 7; i++) { const a = i * Math.PI * 2 / 7, x = cx + Math.cos(a) * W * 0.24, y = cy + Math.sin(a) * H * 0.24; s += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(W * 0.2)}" ry="${f(H * 0.08)}" transform="rotate(${f(a * 180 / Math.PI)} ${f(x)} ${f(y)})" ${wash}/>`; }
     return s;
   }
+  /* ---------- realistic rendering (front view) ----------
+     Material textures with per-unit color variation and grain, light from the upper left, soft shadows under eaves,
+     in window and door reveals and on the ground, and foliage built from lit leaf clusters. The plan stays in drafting style. */
+  let NOISE = "";
+  (function makeNoise() {
+    try {
+      const c = document.createElement("canvas"); c.width = c.height = 128;
+      const x = c.getContext("2d"), d = x.createImageData(128, 128), r = mulberry(7);
+      for (let i = 0; i < d.data.length; i += 4) { const v = r() < 0.5 ? 0 : 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = (r() * 46) | 0; }
+      x.putImageData(d, 0, 0); NOISE = c.toDataURL("image/png");
+    } catch (e) { NOISE = ""; }
+  })();
+  function mix(a, b, t) {
+    const A = parseInt(a.slice(1), 16), B = parseInt(b.slice(1), 16), ch = s => Math.round(((A >> s) & 255) * (1 - t) + ((B >> s) & 255) * t);
+    return "#" + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1);
+  }
+  const vary = (c, r, a) => shade(c, (r() - 0.5) * 2 * a);
+  const grad = (id, x2, y2, stops) => `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(s => `<stop offset="${s[0]}" stop-color="${s[1]}" stop-opacity="${s[2] == null ? 1 : s[2]}"/>`).join("")}</linearGradient>`;
+  function realDefs(sky) {
+    const glass = { day: [["0", "#e3ebef"], [".45", "#9fb3bf"], ["1", "#56697a"]], dusk: [["0", "#f0d3b8"], [".5", "#8c7f93"], ["1", "#3f3d52"]], night: [["0", "#f6e2ae"], [".6", "#d8a45d"], ["1", "#8a5a2c"]] }[sky] || [];
+    return (NOISE ? `<pattern id="noise" patternUnits="userSpaceOnUse" width="64" height="64"><image href="${NOISE}" width="64" height="64"/></pattern>` : "") +
+      grad("gGlassR", 0.35, 1, glass) +
+      grad("gLight", 1, 1, [[0, "#fff", 0.08], [0.5, "#fff", 0], [1, "#000", 0.12]]) +
+      grad("gAO", 0, 1, [[0, "#000", 0], [1, "#000", 0.26]]) +
+      grad("gEave", 0, 1, [[0, "#000", 0.55], [0.25, "#000", 0.3], [1, "#000", 0]]) +
+      grad("gRevT", 0, 1, [[0, "#000", 0.5], [1, "#000", 0]]) +
+      grad("gRevL", 1, 0, [[0, "#000", 0.32], [1, "#000", 0]]) +
+      grad("gGround", 0, 1, [[0, "#000", 0.3], [1, "#000", 0]]) +
+      grad("gCyl", 1, 0, [[0, "#000", 0.2], [0.3, "#fff", 0.14], [0.55, "#fff", 0.04], [1, "#000", 0.28]]) +
+      grad("gRoofSh", 0, 1, [[0, "#fff", 0.06], [1, "#000", 0.22]]) +
+      grad("gSheen", 1, 1, [[0, "#fff", 0.16], [0.45, "#fff", 0.04], [1, "#fff", 0]]) +
+      `<radialGradient id="gKnob" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#f4e4b0"/><stop offset=".5" stop-color="#b8954f"/><stop offset="1" stop-color="#5e4720"/></radialGradient>` +
+      `<radialGradient id="gShadowEl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".32"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>`;
+  }
+  function realPat(tex, c, id) {
+    const r = mulberry(parseInt(c.slice(1), 16) ^ (tex.length * 7919)), mort = mix(c, "#d6d0c4", 0.72);
+    let w, h, b = "", pre = "";
+    switch (tex) {
+      case "brick": {
+        const bw = 21.3, bh = 6.8, cols = 6, rows = 8; w = bw * cols; h = bh * rows; b = R(0, 0, w, h, mort);
+        for (let y = 0; y < rows; y++) for (let k = -1; k <= cols; k++) {
+          const x = k * bw + (y % 2 ? bw / 2 : 0), t = vary(c, r, 0.16);
+          b += R(x + 0.5, y * bh + 0.5, bw - 1, bh - 1, t) + R(x + 0.5, y * bh + bh - 1.4, bw - 1, 0.9, shade(t, -0.3)) + R(x + 0.5, y * bh + 0.5, bw - 1, 0.6, shade(t, 0.16));
+          if (r() < 0.25) b += R(x + 2 + r() * 12, y * bh + 1.5 + r() * 3, 2 + r() * 4, 1, shade(t, -0.12), 'opacity=".6"');
+        }
+        break;
+      }
+      case "stone": {
+        w = 150; h = 72; b = R(0, 0, w, h, shade(c, -0.45));
+        let y = 0; [22, 26, 24].forEach(rh => {
+          let x = -r() * 20;
+          while (x < w) { const sw = 24 + r() * 34, t = vary(c, r, 0.2), j = 1.2; b += R(x + j, y + j, Math.min(sw, w - x + 30) - 2 * j, rh - 2 * j, t, 'rx="2.5"') + R(x + j, y + j, sw - 2 * j, 1.4, shade(t, 0.18), 'rx="1"') + R(x + j, y + rh - j - 1.8, sw - 2 * j, 1.8, shade(t, -0.25), 'rx="1"'); x += sw; }
+          y += rh;
+        });
+        break;
+      }
+      case "siding": {
+        w = 120; h = 15.2; pre = grad(id + "g", 0, 1, [[0, "#fff", 0.14], [0.7, "#000", 0.02], [0.9, "#000", 0.1], [1, "#000", 0.42]]);
+        b = R(0, 0, w, h, c) + R(0, 0, w, h, `url(#${id}g)`) + `<path d="M8 5h40M62 9h44" stroke="${shade(c, -0.08)}" stroke-width=".4"/>`;
+        break;
+      }
+      case "board": {
+        w = 30.5; h = 120; pre = grad(id + "g", 1, 0, [[0, "#000", 0.32], [1, "#000", 0]]);
+        b = R(0, 0, w, h, c) + R(6, 0, 4, h, `url(#${id}g)`) + R(0, 0, 6, h, shade(c, 0.05)) + R(0, 0, 1.2, h, shade(c, 0.2)) + R(5.4, 0, 0.6, h, shade(c, -0.3)) + `<path d="M14 0v120M22 10v100" stroke="${shade(c, -0.06)}" stroke-width=".35"/>`;
+        break;
+      }
+      case "stucco": {
+        w = 120; h = 120; b = R(0, 0, w, h, c);
+        for (let i = 0; i < 22; i++) b += `<circle cx="${f(r() * w)}" cy="${f(r() * h)}" r="${f(10 + r() * 26)}" fill="${vary(c, r, 0.03)}" opacity=".35"/>`;
+        break;
+      }
+      case "shingle": {
+        const tw = 33, ex = 14; w = tw * 4; h = ex * 4; b = R(0, 0, w, h, shade(c, -0.5));
+        for (let y = 0; y < 4; y++) for (let k = -1; k <= 4; k++) {
+          const x = k * tw + (y % 2 ? tw / 2 : 0), t = vary(c, r, 0.14);
+          b += R(x + 0.4, y * ex, tw - 0.8, ex - 0.4, t) + R(x + 0.4, y * ex + ex - 2.2, tw - 0.8, 1.8, shade(t, -0.28)) + R(x + 0.4, y * ex, tw - 0.8, 0.8, shade(t, 0.12));
+        }
+        break;
+      }
+      case "tile": {
+        w = 24; h = 20; pre = grad(id + "g", 1, 0, [[0, "#000", 0.35], [0.35, "#fff", 0.18], [0.6, "#fff", 0.04], [1, "#000", 0.4]]);
+        b = R(0, 0, w, h, c) + R(0, 0, w, h, `url(#${id}g)`) + R(0, h - 3, w, 3, "#000", 'opacity=".28"');
+        break;
+      }
+      case "slate": {
+        const sw = 30, sh = 12; w = sw * 4; h = sh * 4; b = R(0, 0, w, h, shade(c, -0.5));
+        for (let y = 0; y < 4; y++) for (let k = -1; k <= 4; k++) { const x = k * sw + (y % 2 ? sw / 2 : 0), t = vary(c, r, 0.1); b += R(x + 0.5, y * sh, sw - 1, sh - 0.6, t) + R(x + 0.5, y * sh + sh - 1.8, sw - 1, 1.2, shade(t, -0.3)); }
+        break;
+      }
+      case "metal": {
+        w = 45; h = 60; pre = grad(id + "g", 1, 0, [[0, "#fff", 0.1], [0.5, "#fff", 0.02], [1, "#000", 0.12]]);
+        b = R(0, 0, w, h, c) + R(0, 0, w, h, `url(#${id}g)`) + R(0, 0, 1.4, h, shade(c, 0.28)) + R(1.4, 0, 1.2, h, shade(c, -0.35));
+        break;
+      }
+      default: return "";
+    }
+    return pre + `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${f(w)}" height="${f(h)}">${b}</pattern>`;
+  }
+  const grain = (x, y, w, h, op) => NOISE ? R(x, y, w, h, "url(#noise)", `opacity="${op == null ? 1 : op}"`) : "";
+  const groundShadow = (o, x, w, d) => { o.grd += `<ellipse cx="${f(x + w / 2)}" cy="${f(Math.min(12, d) / 3)}" rx="${f(w * 0.6)}" ry="${f(Math.max(4, Math.min(14, d)))}" fill="url(#gShadowEl)"/>`; };
+  function realWall(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color;
+    let s = R(X, T, W, H, o.pat(p.tex, c)) + grain(X, T, W, H, 0.9) + R(X, T, W, H, "url(#gLight)");
+    if (p.y < 5) { const fh = Math.min(22, H * 0.1); s += R(X, B - 45, W, 45, "url(#gAO)") + R(X - 2, B - fh, W + 4, fh, "#9d988f") + grain(X - 2, B - fh, W + 4, fh) + R(X - 2, B - fh, W + 4, 1.5, "#c9c4ba"); o.grd += R(X - 30, 0, W + 60, 22, "url(#gGround)"); }
+    s += R(X, T, 3, H, "#fff", 'opacity=".1"') + R(X + W - 4, T, 4, H, "#000", 'opacity=".14"');
+    o.clip += `<rect x="${f(X)}" y="${f(T)}" width="${f(W)}" height="${f(H)}"/>`;
+    return s;
+  }
+  function realRoof(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color, fill = o.pat(p.tex, c), edge = shade(c, -0.55), fas = mix(c, "#2a2a28", 0.35);
+    let pts, extra = "";
+    switch (p.style) {
+      case "flat": {
+        const ph = Math.min(H * 0.6, 18);
+        o.shad += R(X, B, W, Math.min(60, Math.max(18, W * 0.05)), "url(#gEave)");
+        return R(X, T, W, H, shade(c, 0.04)) + grain(X, T, W, H) + R(X, T, W, H, "url(#gRoofSh)") + R(X - 4, T, W + 8, ph, fas) + R(X - 4, T, W + 8, 1.2, shade(fas, 0.3)) + R(X - 4, T + ph - 1.5, W + 8, 1.5, "#000", 'opacity=".25"');
+      }
+      case "hip": pts = [[X, B], [X + W * 0.28, T], [X + W * 0.72, T], [X + W, B]]; break;
+      case "shed": pts = [[X, B], [X, B - H * 0.35], [X + W, T], [X + W, B]]; break;
+      case "mansard": pts = [[X, B], [X + W * 0.07, T + H * 0.3], [X + W * 0.18, T], [X + W * 0.82, T], [X + W * 0.93, T + H * 0.3], [X + W, B]]; extra = `<path d="M${f(X + W * 0.07)} ${f(T + H * 0.3)}H${f(X + W * 0.93)}" stroke="${shade(c, 0.25)}" stroke-width="2.5" fill="none"/><path d="M${f(X + W * 0.07)} ${f(T + H * 0.3 + 2.5)}H${f(X + W * 0.93)}" stroke="#000" stroke-opacity=".25" stroke-width="3" fill="none"/>`; break;
+      case "gambrel": pts = [[X, B], [X + W * 0.13, T + H * 0.45], [X + W * 0.5, T], [X + W * 0.87, T + H * 0.45], [X + W, B]]; break;
+      default: pts = [[X, B], [X + W / 2, T], [X + W, B]];
+    }
+    const d = poly(pts), fh = Math.min(H * 0.09, 16), id = "rc" + p.id;
+    o.shad += R(X, B, W, Math.min(90, Math.max(30, H * 0.25)), "url(#gEave)");
+    let s = `<clipPath id="${id}"><path d="${d}"/></clipPath><g clip-path="url(#${id})">${R(X, T, W, H, fill)}${grain(X, T, W, H)}${R(X, T, W, H, "url(#gRoofSh)")}`;
+    if (p.style === "gable" || !p.style) s += P(`M${f(X + W / 2)} ${f(T)}L${f(X + W)} ${f(B)}L${f(X + W / 2)} ${f(B)}Z`, "#000", 'opacity=".08"');
+    if (p.style === "hip") s += P(`M${f(X + W * 0.72)} ${f(T)}L${f(X + W)} ${f(B)}L${f(X + W * 0.72)} ${f(B)}Z`, "#000", 'opacity=".1"') + P(`M${f(X)} ${f(B)}L${f(X + W * 0.28)} ${f(T)}L${f(X + W * 0.28)} ${f(B)}Z`, "#fff", 'opacity=".05"');
+    s += `</g>` + P(d, "none", `stroke="${edge}" stroke-width="1.2" stroke-linejoin="round"`) + extra;
+    s += R(X - 2, B - fh, W + 4, fh, fas) + R(X - 2, B - fh, W + 4, 1.2, shade(fas, 0.35)) + R(X - 2, B - 1.5, W + 4, 1.5, "#000", 'opacity=".3"');
+    return s;
+  }
+  function realWindow(p, o) {
+    let { X, T, W, H, B } = bx(p), st = p.style, out = "", fc = p.color;
+    if (st === "shutters") {
+      const sw = W * 0.22, sc = mix(fc === "#f1efe9" ? "#3e4a4f" : fc, "#3e4a4f", 0.15);
+      [X, X + W - sw].forEach(sx => {
+        out += R(sx + 1.5, T + 1.5, sw, H, "#000", 'opacity=".18"') + R(sx, T, sw, H, sc) + grain(sx, T, sw, H, 0.6);
+        const n = Math.max(3, Math.floor(H / 7)); let ls = "", hs = "";
+        for (let i = 1; i < n; i++) { const y = T + H * i / n; ls += `M${f(sx + sw * 0.12)} ${f(y)}h${f(sw * 0.76)}`; hs += `M${f(sx + sw * 0.12)} ${f(y + 1)}h${f(sw * 0.76)}`; }
+        out += `<path d="${ls}" stroke="#000" stroke-opacity=".35" stroke-width="1"/><path d="${hs}" stroke="#fff" stroke-opacity=".12" stroke-width=".8"/>` + R(sx, T, sw, H, "none", `stroke="${shade(sc, -0.35)}" stroke-width=".8"`);
+      });
+      X += sw + 2; W -= 2 * sw + 4; st = "double"; fc = "#f1efe9";
+    }
+    const fr = clamp(Math.min(W, H) * 0.06, 3, 8), shape = st === "round" ? "round" : st === "arched" ? "arched" : "rect";
+    const iX = X + fr, iT = T + fr, iW = W - 2 * fr, iH = H - 2 * fr, inner = winPath(shape, iX, iT, iW, iH), outer = winPath(shape, X, T, W, H), id = "wc" + p.id;
+    out += P(winPath(shape, X - 2, T - 2, W + 4, H + 4), "#000", 'opacity=".22"');
+    out += P(outer, fc) + P(outer, "url(#gLight)") + P(outer, "none", `stroke="${shade(fc, -0.45)}" stroke-width=".8"`);
+    let g = R(iX, iT, iW, iH, "url(#gGlassR)");
+    if (o.sky !== "night") g += P(`M${f(iX + iW * 0.15)} ${f(iT + iH)}L${f(iX + iW * 0.55)} ${f(iT)}L${f(iX + iW * 0.78)} ${f(iT)}L${f(iX + iW * 0.38)} ${f(iT + iH)}Z`, "#fff", 'opacity=".13"') + P(`M${f(iX + iW * 0.5)} ${f(iT + iH)}L${f(iX + iW * 0.9)} ${f(iT)}L${f(iX + iW)} ${f(iT)}L${f(iX + iW)} ${f(iT + iH * 0.1)}L${f(iX + iW * 0.6)} ${f(iT + iH)}Z`, "#fff", 'opacity=".07"');
+    else g += R(iX, iT + iH * 0.55, iW, iH * 0.45, "#5a3a1c", 'opacity=".25"');
+    const mw = Math.max(1.6, fr * 0.45), bar = (x, y, w, h) => R(x + 0.8, y + 0.8, w, h, "#000", 'opacity=".25"') + R(x, y, w, h, fc);
+    if (st === "double") g += bar(iX, iT + iH / 2 - fr * 0.6, iW, fr * 1.2) + bar(iX + iW / 2 - mw / 2, iT, mw, iH / 2 - fr * 0.6) + bar(iX + iW / 2 - mw / 2, iT + iH / 2 + fr * 0.6, mw, iH / 2 - fr * 0.6);
+    else if (st === "casement") g += bar(iX + iW / 2 - fr / 2, iT, fr, iH);
+    else if (st === "arched") { const rr = Math.min(iW / 2, iH); g += bar(iX + iW / 2 - mw / 2, iT, mw, iH) + bar(iX, iT + rr - mw / 2, iW, mw); }
+    else if (st === "round") g += bar(iX + iW / 2 - mw / 2, iT, mw, iH) + bar(iX, iT + iH / 2 - mw / 2, iW, mw);
+    g += R(iX, iT, iW, Math.min(14, iH * 0.14), "url(#gRevT)") + R(iX, iT, Math.min(9, iW * 0.08), iH, "url(#gRevL)");
+    out += `<clipPath id="${id}"><path d="${inner}"/></clipPath><g clip-path="url(#${id})">${g}</g>` + P(inner, "none", `stroke="#000" stroke-opacity=".35" stroke-width=".8"`);
+    if (shape !== "round") { const sh = Math.max(3.5, fr * 0.9); out += R(X - fr, B, W + 2 * fr, 7, "url(#gEave)") + R(X - fr, B, W + 2 * fr, sh, shade(fc, -0.06)) + R(X - fr, B, W + 2 * fr, 1, "#fff", 'opacity=".5"') + R(X - fr, B + sh - 0.8, W + 2 * fr, 0.8, "#000", 'opacity=".3"'); }
+    return out;
+  }
+  function realDoor(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color, fr = clamp(W * 0.05, 3, 8), cas = "#eeebe4", id = "dc" + p.id;
+    const knob = (x, y) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(clamp(W * 0.035, 2.5, 5))}" fill="url(#gKnob)"/>`;
+    const panel = (x, y, w, h) => R(x, y, w, h, shade(c, 0.04)) + `<path d="M${f(x)} ${f(y + h)}V${f(y)}H${f(x + w)}" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.1"/><path d="M${f(x + w)} ${f(y)}V${f(y + h)}H${f(x)}" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1.1"/>` + R(x + 3, y + 3, w - 6, h - 6, "none", `stroke="#000" stroke-opacity=".12" stroke-width=".8"`);
+    const glass = (x, y, w, h) => R(x, y, w, h, "url(#gGlassR)") + P(`M${f(x + w * 0.2)} ${f(y + h)}L${f(x + w * 0.6)} ${f(y)}L${f(x + w * 0.8)} ${f(y)}L${f(x + w * 0.4)} ${f(y + h)}Z`, "#fff", 'opacity=".12"') + R(x, y, w, Math.min(8, h * 0.12), "url(#gRevT)") + R(x, y, w, h, "none", `stroke="#000" stroke-opacity=".4" stroke-width=".8"`);
+    const shape = p.style === "arched" ? winPath("arched", X, T, W, H) : `M${f(X)} ${f(T)}h${f(W)}v${f(H)}h${f(-W)}z`;
+    let out = R(X - fr - 1.5, T - fr - 1.5, W + 2 * fr + 3, H + fr + 1.5, "#000", 'opacity=".18"');
+    out += p.style === "arched" ? P(winPath("arched", X - fr, T - fr, W + 2 * fr, H + fr), cas) : R(X - fr, T - fr, W + 2 * fr, H + fr, cas);
+    out += R(X - fr, T - fr, W + 2 * fr, H + fr, "url(#gLight)") + P(shape, "#1c1c1b");
+    let leaf = R(X, T, W, H, c) + grain(X, T, W, H, 0.5);
+    if (p.style === "garage") {
+      const n = 4;
+      for (let i = 0; i < n; i++) { const y = T + H * i / n; leaf += R(X, y + H / n - 2.5, W, 2.5, "#000", 'opacity=".3"') + R(X, y, W, 1.2, "#fff", 'opacity=".18"'); }
+      const k = Math.max(2, Math.round(W / 70)), gw = W / k;
+      for (let i = 0; i < k; i++) leaf += glass(X + i * gw + gw * 0.12, T + H * 0.05, gw * 0.76, H * 0.14);
+    } else if (p.style === "double" || p.style === "french") {
+      const lw = W / 2;
+      [0, 1].forEach(i => {
+        const lx = X + i * lw;
+        if (p.style === "french") { const ix = lx + lw * 0.13, iy = T + H * 0.06, iw = lw * 0.74, ih = H * 0.86; leaf += glass(ix, iy, iw, ih); for (let k = 1; k < 4; k++) leaf += R(ix, iy + ih * k / 4 - 1, iw, 2, c); leaf += R(ix + iw / 2 - 1, iy, 2, ih, c); }
+        else leaf += panel(lx + lw * 0.16, T + H * 0.07, lw * 0.68, H * 0.4) + panel(lx + lw * 0.16, T + H * 0.53, lw * 0.68, H * 0.4);
+        leaf += knob(i ? lx + lw * 0.14 : lx + lw * 0.86, T + H * 0.52);
+      });
+      leaf += R(X + lw - 0.6, T, 1.2, H, "#000", 'opacity=".4"');
+    } else if (p.style === "arched") {
+      let ls = ""; for (let i = 1; i < 5; i++) ls += `M${f(X + W * i / 5)} ${f(T)}V${f(B)}`;
+      leaf += `<path d="${ls}" stroke="#000" stroke-opacity=".3" stroke-width="1.2"/>` + R(X, T + H * 0.6, W * 0.75, H * 0.03, "#2a2622") + R(X, T + H * 0.86, W * 0.75, H * 0.03, "#2a2622") + knob(X + W * 0.82, T + H * 0.68);
+    } else if (p.style === "glass") {
+      const gx = X + W * 0.16, gy = T + H * 0.07, gw = W * 0.68, gh = H * 0.4;
+      leaf += glass(gx, gy, gw, gh) + R(gx + gw / 2 - 1, gy, 2, gh, c) + R(gx, gy + gh / 2 - 1, gw, 2, c) + panel(X + W * 0.16, T + H * 0.55, W * 0.3, H * 0.38) + panel(X + W * 0.54, T + H * 0.55, W * 0.3, H * 0.38) + knob(X + W * 0.84, T + H * 0.5);
+    } else leaf += panel(X + W * 0.13, T + H * 0.07, W * 0.32, H * 0.38) + panel(X + W * 0.55, T + H * 0.07, W * 0.32, H * 0.38) + panel(X + W * 0.13, T + H * 0.52, W * 0.32, H * 0.4) + panel(X + W * 0.55, T + H * 0.52, W * 0.32, H * 0.4) + knob(X + W * 0.84, T + H * 0.5);
+    leaf += R(X, T, W, H, "url(#gLight)") + R(X, T, W, Math.min(16, H * 0.07), "url(#gRevT)") + R(X, T, Math.min(8, W * 0.07), H, "url(#gRevL)");
+    out += `<clipPath id="${id}"><path d="${shape}"/></clipPath><g clip-path="url(#${id})">${leaf}</g>`;
+    if (p.y < 5) groundShadow(o, X, W, 8);
+    return out;
+  }
+  function realSteps(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color, n = Math.max(1, Math.round(H / 17)), sh = H / n;
+    let out = "", sx = X, sw = W;
+    if (p.style === "stoop") { const cw = Math.max(8, W * 0.12); out += R(X, T, cw, H, shade(c, -0.08)) + R(X + W - cw, T, cw, H, shade(c, -0.08)) + grain(X, T, W, H) + R(X + cw - 2, T, 2, H, "#000", 'opacity=".2"'); sx = X + cw; sw = W - 2 * cw; }
+    for (let i = 0; i < n; i++) { const y = B - (i + 1) * sh; out += R(sx, y, sw, sh, shade(c, -0.04 * i)) + R(sx, y, sw, Math.min(3, sh * 0.2), shade(c, 0.22)) + R(sx, y + Math.min(3, sh * 0.2), sw, Math.min(6, sh * 0.35), "#000", 'opacity=".14"'); }
+    groundShadow(o, X, W, 14);
+    return out + grain(sx, T, sw, H, 0.7);
+  }
+  function realChimney(p, o) {
+    const { X, T, W, H } = bx(p), c = p.color, ch = Math.max(8, H * 0.06);
+    o.clip += `<rect x="${f(X)}" y="${f(T)}" width="${f(W)}" height="${f(H)}"/>`;
+    return R(X, T, W, H, o.pat(p.tex, c)) + grain(X, T, W, H) + R(X, T, W, H, "url(#gCyl)", 'opacity=".7"') + R(X, T + ch, W, 14, "url(#gEave)") +
+      R(X - W * 0.12, T, W * 1.24, ch, "#8e8a82") + grain(X - W * 0.12, T, W * 1.24, ch) + R(X - W * 0.12, T, W * 1.24, 1.2, "#fff", 'opacity=".3"') + R(X + W * 0.3, T - ch * 1.2, W * 0.4, ch * 1.2, "#5d554e") + R(X + W * 0.3, T - ch * 1.2, W * 0.4, ch * 1.2, "url(#gCyl)");
+  }
+  function realTrim(p, o) {
+    const { X, T, W, H, B } = bx(p);
+    let s = trimSVG(p);
+    if (p.style === "column" || p.style === "pilaster" || p.style === "quoins") s += R(X, T, W, H, "url(#gCyl)", 'opacity=".8"');
+    if (p.style === "band" || p.style === "cornice") o.shad += R(X, B, W, Math.max(8, H * 0.5), "url(#gEave)");
+    return s + grain(X, T, W, H, 0.6);
+  }
+  function leafGrad(o, c) {
+    const id = "lf" + c.slice(1);
+    if (!o.lf[id]) o.lf[id] = `<radialGradient id="${id}" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="${shade(c, 0.2)}"/><stop offset=".6" stop-color="${c}"/><stop offset="1" stop-color="${shade(c, -0.3)}"/></radialGradient>`;
+    return `url(#${id})`;
+  }
+  /* Foliage: a dark core, then many small lit leaf clusters, lighter toward the top left where the light comes from. */
+  function foliage(o, c, cx, cy, rx, ry, n, rnd, minR) {
+    const g = leafGrad(o, c), blobs = [], m = Math.min(rx, ry), N = n * 3;
+    for (let i = 0; i < N; i++) {
+      const a = rnd() * Math.PI * 2, d = Math.pow(rnd(), 0.6), r = Math.max(minR || 1.5, m * (0.09 + rnd() * 0.1));
+      const x = cx + Math.cos(a) * (rx - r) * d, y = cy + Math.sin(a) * (ry - r) * d, lit = ((cx - x) / rx + (cy - y) / ry) * 0.5;
+      blobs.push([x, y, r, shade(c, clamp(lit * 0.22 + (rnd() - 0.5) * 0.1, -0.3, 0.25))]);
+    }
+    blobs.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]));
+    let s = P(cloud(cx, cy + ry * 0.03, rx * 0.97, ry * 0.97, 16, rnd), shade(c, -0.4));
+    blobs.forEach((b, i) => { s += `<circle cx="${f(b[0])}" cy="${f(b[1])}" r="${f(b[2])}" fill="${i % 3 ? b[3] : g}"/>`; });
+    for (let i = 0; i < n; i++) { const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * 0.8; s += `<circle cx="${f(cx + Math.cos(a) * rx * d)}" cy="${f(cy + Math.sin(a) * ry * d)}" r="${f(Math.max(0.6, m * 0.05))}" fill="${shade(c, -0.45)}" opacity=".5"/>`; }
+    return s;
+  }
+  function realPlant(p, o) {
+    const { X, T, W, H, B } = bx(p), c = p.color, rnd = mulberry(p.id * 977 + 13), base = p.y < 5;
+    switch (p.style) {
+      case "tree": {
+        const cx = X + W / 2, cy = T + H * 0.36, rx = W * 0.48, ry = H * 0.36, tw = Math.max(4, W * 0.045);
+        if (base) groundShadow(o, X + W * 0.1, W * 0.8, 16);
+        let s = `<path d="M${f(cx - tw)} ${f(B)}C${f(cx - tw * 0.6)} ${f(B - H * 0.2)} ${f(cx - tw * 0.5)} ${f(cy + ry * 0.3)} ${f(cx - tw * 0.2)} ${f(cy)}L${f(cx + tw * 0.2)} ${f(cy)}C${f(cx + tw * 0.5)} ${f(cy + ry * 0.3)} ${f(cx + tw * 0.6)} ${f(B - H * 0.2)} ${f(cx + tw)} ${f(B)}Z" fill="${o.trunk}"/>`;
+        s += `<path d="M${f(cx)} ${f(cy + ry * 0.5)}L${f(cx - rx * 0.45)} ${f(cy)}M${f(cx)} ${f(cy + ry * 0.7)}L${f(cx + rx * 0.5)} ${f(cy + ry * 0.1)}" stroke="#4a3a2c" stroke-width="${f(tw * 0.5)}" stroke-linecap="round"/>`;
+        return s + foliage(o, c, cx, cy, rx, ry, Math.round(26 + W / 20), rnd);
+      }
+      case "hedge": {
+        if (base) groundShadow(o, X, W, 12);
+        let s = R(X, T + H * 0.25, W, H * 0.75, shade(c, -0.35), 'rx="6"');
+        const n = Math.max(3, Math.round(W / 40));
+        for (let i = 0; i < n; i++) s += foliage(o, c, X + W * (i + 0.5) / n, T + H * 0.45, W / n * 0.7, H * 0.48, 10, rnd);
+        return s;
+      }
+      case "flowers": {
+        const bxH = H * 0.42, my = B - bxH, cols = ["#c4767a", "#e2c56f", "#f3efe6", "#9d7bb0", "#d98a5f"];
+        let s = foliage(o, c, X + W / 2, my - H * 0.1, W * 0.5, H * 0.26, Math.round(W / 8), rnd);
+        const n = Math.max(4, Math.round(W / 10));
+        for (let i = 0; i < n; i++) { const col = cols[(rnd() * cols.length) | 0], x = X + W * (i + 0.5) / n + (rnd() - 0.5) * 6, y = T + H * 0.1 + rnd() * H * 0.3, r = clamp(W / n * 0.25, 1.4, 4.5); s += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${col}"/><circle cx="${f(x - r * 0.3)}" cy="${f(y - r * 0.3)}" r="${f(r * 0.35)}" fill="#fff" opacity=".45"/>`; }
+        return s + R(X, my, W, bxH, "#6e6a63") + grain(X, my, W, bxH) + R(X, my, W, 1.5, "#fff", 'opacity=".25"') + R(X, my + bxH - 3, W, 3, "#000", 'opacity=".3"');
+      }
+      case "ivy": {
+        const n = Math.max(2, Math.round(W / 40)), g = leafGrad(o, c); let s = "";
+        for (let k = 0; k < n; k++) {
+          const x0 = X + W * (k + 0.5) / n, amp = Math.min(W / n * 0.35, 18), top = T + H * (0.05 + rnd() * 0.3), steps = Math.max(4, Math.round((B - top) / 14));
+          let d = `M${f(x0)} ${f(B)}`, leaves = "";
+          for (let i = 1; i <= steps; i++) {
+            const y = B - (B - top) * i / steps, x = x0 + Math.sin(i * 1.1 + k) * amp, ls = clamp(W / n * 0.14, 2.5, 7);
+            d += `L${f(x)} ${f(y)}`;
+            for (let j = 0; j < 3; j++) { const lx = x + (rnd() - 0.5) * ls * 3, ly = y + (rnd() - 0.5) * ls * 2; leaves += `<circle cx="${f(lx)}" cy="${f(ly)}" r="${f(ls * (0.6 + rnd() * 0.5))}" fill="${g}"/>`; }
+          }
+          s += `<path d="${d}" fill="none" stroke="#4a3a2c" stroke-width="1" stroke-linejoin="round"/>` + leaves;
+        }
+        return s;
+      }
+      default: {
+        if (base) groundShadow(o, X, W, 10);
+        return foliage(o, c, X + W / 2, T + H * 0.56, W * 0.5, H * 0.46, Math.round(12 + W / 10), rnd);
+      }
+    }
+  }
+  const REAL = { wall: realWall, roof: realRoof, window: realWindow, door: realDoor, steps: realSteps, chimney: realChimney, trim: realTrim, plant: realPlant };
   const DRAW = { room: roomSVG, pdoor: pdoorSVG, pwindow: pwindowSVG, stairs: stairsSVG, furn: furnSVG, fixture: fixtureSVG, pplant: pplantSVG, pwall: lineSVG, wall: wallSVG, roof: roofSVG, window: windowSVG, door: doorSVG, trim: trimSVG, steps: stepsSVG, chimney: chimneySVG, plant: plantSVG, label: labelSVG, line: lineSVG, pen: penSVG, dim: dimSVG };
   const SKY = {
-    day: { top: "#e9edef", bot: "#f6f5f1", soil: "#efece6", line: "#2a2a28", hatch: "rgba(42,42,40,.28)", halo: "rgba(246,245,241,.9)", glass: "url(#gDay)" },
-    dusk: { top: "#5f6577", bot: "#d9c3b0", soil: "#c9bcb0", line: "#2b2a2e", hatch: "rgba(43,42,46,.3)", halo: "rgba(240,230,220,.85)", glass: "url(#gDusk)" },
-    night: { top: "#14181f", bot: "#262c36", soil: "#1b1f25", line: "#9aa3ad", hatch: "rgba(154,163,173,.25)", halo: "rgba(20,24,31,.85)", glass: "url(#gNight)" }
+    day: { rtop: "#9fbad0", rbot: "#e6ecee", lawn: "#87956f", top: "#e9edef", bot: "#f6f5f1", soil: "#efece6", line: "#2a2a28", hatch: "rgba(42,42,40,.28)", halo: "rgba(246,245,241,.9)", glass: "url(#gDay)" },
+    dusk: { rtop: "#4a5470", rbot: "#e0b796", lawn: "#626a52", top: "#5f6577", bot: "#d9c3b0", soil: "#c9bcb0", line: "#2b2a2e", hatch: "rgba(43,42,46,.3)", halo: "rgba(240,230,220,.85)", glass: "url(#gDusk)" },
+    night: { rtop: "#0a0f18", rbot: "#1f2a3a", lawn: "#1c2420", top: "#14181f", bot: "#262c36", soil: "#1b1f25", line: "#9aa3ad", hatch: "rgba(154,163,173,.25)", halo: "rgba(20,24,31,.85)", glass: "url(#gNight)" }
   };
-  function artSVG(parts, sky, layers, mode, noGround) {
-    const pats = new Map(), sk = SKY[sky] || SKY.day;
+  function artSVG(parts, sky, layers, mode, noGround, style) {
+    const pats = new Map(), sk = SKY[sky] || SKY.day, real = mode !== "plan" && (style || S().render) === "real";
     const b = bounds(parts.filter(p => p.t !== "dim"));
     const o = {
       top: "", sky: mode === "plan" ? "plan" : sky, halo: mode === "plan" ? "rgba(247,244,234,.9)" : sk.halo, glass: sk.glass,
+      real, shad: "", grd: "", clip: "", lf: {}, trunk: "#5b4636",
       ts: b ? clamp(Math.max(b.x1 - b.x0, b.y1 - Math.min(b.y0, 0)) / 42, 10, 60) : 20,
-      pat(tex, c) { if (!tex || tex === "plain") return c; const id = "p_" + tex + "_" + c.slice(1); if (!pats.has(id)) pats.set(id, patDef(tex, c, id)); return `url(#${id})`; }
+      pat(tex, c) { if (!tex || tex === "plain") return c; const id = (real ? "r_" : "p_") + tex + "_" + c.slice(1); if (!pats.has(id)) pats.set(id, real ? realPat(tex, c, id) : patDef(tex, c, id)); return `url(#${id})`; }
     };
-    /* Ground in section: a band of earth hatching under a heavy ground line. */
-    if (mode !== "plan" && !noGround) pats.set("earth", `<pattern id="earth" patternUnits="userSpaceOnUse" width="14" height="14"><path d="M-2 2L2 -2M0 14L14 0M12 16L16 12" stroke="${sk.hatch}" stroke-width="1"/></pattern>`);
-    let body = mode === "plan" || noGround ? "" : R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 45, "url(#earth)") + `<path d="M-100000 0H100000" stroke="${sk.line}" stroke-width="3"/>`;
+    let ground = "";
+    if (real) {
+      pats.set("realdefs", realDefs(sky));
+      if (mode !== "plan" && !noGround) ground = R(-100000, 0, 200000, 100000, sk.lawn) + grain(-100000, 0, 200000, 100000) + R(-100000, 0, 200000, 3, shade(sk.lawn, 0.18)) + `<path d="M-100000 0H100000" stroke="${shade(sk.lawn, -0.4)}" stroke-width="1.2"/>`;
+    } else if (mode !== "plan" && !noGround) {
+      /* Ground in section: a band of earth hatching under a heavy ground line. */
+      pats.set("earth", `<pattern id="earth" patternUnits="userSpaceOnUse" width="14" height="14"><path d="M-2 2L2 -2M0 14L14 0M12 16L16 12" stroke="${sk.hatch}" stroke-width="1"/></pattern>`);
+      ground = R(-100000, 0, 200000, 100000, sk.soil) + R(-100000, 0, 200000, 45, "url(#earth)") + `<path d="M-100000 0H100000" stroke="${sk.line}" stroke-width="3"/>`;
+    }
+    let body = "", after = "";
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
-      const T = TYPES[p.t]; let s;
+      const T = TYPES[p.t], draw = real && REAL[p.t] ? REAL[p.t] : DRAW[p.t]; let s;
       if (T.rot) {
         const r = p.rot || 0, L = r % 2 ? p.h : p.w, Dp = r % 2 ? p.w : p.h;
-        s = `<g transform="translate(${f(p.x + p.w / 2)} ${f(-(p.y + p.h / 2))}) rotate(${r * 90})${p.fx ? " scale(-1 1)" : ""} translate(${f(-L / 2)} ${f(-Dp / 2)})">${DRAW[p.t](p, o, L, Dp)}</g>`;
-      } else s = DRAW[p.t](p, o);
+        s = `<g transform="translate(${f(p.x + p.w / 2)} ${f(-(p.y + p.h / 2))}) rotate(${r * 90})${p.fx ? " scale(-1 1)" : ""} translate(${f(-L / 2)} ${f(-Dp / 2)})">${draw(p, o, L, Dp)}</g>`;
+      } else s = draw(p, o);
       if (p.fx && !T.rot && kindOf(p) === "rect") s = `<g transform="translate(${f(2 * p.x + p.w)} 0) scale(-1 1)">${s}</g>`;
-      body += s;
+      /* In the realistic view plants stand in front of the eave shadows. */
+      if (real && p.t === "plant") after += s; else body += s;
     });
-    return { defs: Array.from(pats.values()).join(""), body: body + o.top };
+    const shadows = real && o.shad && o.clip ? `<clipPath id="wallsClip">${o.clip}</clipPath><g clip-path="url(#wallsClip)">${o.shad}</g>` : "";
+    return { defs: Array.from(pats.values()).join("") + Object.values(o.lf).join(""), body: ground + o.grd + body + shadows + after + o.top };
   }
 
   /* ---------- export ---------- */
@@ -967,7 +1263,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad; let bot = plan ? b.y0 - pad : Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
     if (titled) bot -= clamp(Math.min(x1 - x0, top - bot) * 0.022, 9, 40) * 6;
     const W = x1 - x0, H = top - bot, sk = SKY[d.sky] || SKY.day, a = artSVG(parts, d.sky, null, mode);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk.top}"/><stop offset="1" stop-color="${sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, plan ? PAPER : "url(#sky)")}${a.body}${titled ? titleBlock(d, plan, x0, -top, W, H, sk) : ""}</svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(-top)} ${f(W)} ${f(H)}" width="${f(W)}" height="${f(H)}"><defs>${STATIC_DEFS}<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S().render === "real" ? sk.rtop : sk.top}"/><stop offset="1" stop-color="${S().render === "real" ? sk.rbot : sk.bot}"/></linearGradient>${a.defs}</defs>${R(x0, -top, W, H, plan ? PAPER : "url(#sky)")}${a.body}${titled ? titleBlock(d, plan, x0, -top, W, H, sk) : ""}</svg>`;
     return { svg, W, H };
   }
   /* A small drafting title block in the lower right of saved pictures: design name, view and date. */
@@ -1134,7 +1430,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     const parts = preview ? D.parts.concat([preview]) : D.parts;
     const a = artSVG(parts, D.sky, D.layers, D.mode);
     $("defs").innerHTML = a.defs; $("artBody").innerHTML = a.body;
-    stage.dataset.sky = D.mode === "plan" ? "plan" : D.sky;
+    stage.dataset.sky = D.mode === "plan" ? "plan" : D.sky + (S().render === "real" ? "-r" : "");
   }
   function renderGrid() {
     const g = $("grid"), sky = D.sky === "night";
@@ -1147,8 +1443,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (yMax <= 0) { g.innerHTML = ""; return; }
     for (let x = Math.ceil(tl.x / step) * step; x <= br.x; x += step) { const sx = f(toS(x, 0).x); const isM = Math.abs(x / major - Math.round(x / major)) < 1e-6; (isM ? (s => { maj += s; }) : (s => { minor += s; }))(`M${sx} 0V${f(yMax)}`); }
     for (let y = plan ? Math.floor(br.y / step) * step : Math.max(0, Math.floor(br.y / step) * step); y <= tl.y; y += step) { const sy = toS(0, y).y; if (sy > yMax) continue; const isM = Math.abs(y / major - Math.round(y / major)) < 1e-6; const s = `M0 ${f(sy)}H${f(stageW)}`; if (isM) maj += s; else minor += s; }
-    const c = plan ? "47,93,124" : sky ? "255,255,255" : "40,60,80";
-    g.innerHTML = `<path d="${minor}" stroke="rgba(${c},${sky ? 0.06 : 0.08})" stroke-width="1"/><path d="${maj}" stroke="rgba(${c},${sky ? 0.13 : 0.16})" stroke-width="1"/>`;
+    const real = !plan && S().render === "real", c = plan ? "47,93,124" : sky || real ? "255,255,255" : "40,60,80", a1 = real ? 0.1 : sky ? 0.06 : 0.08, a2 = real ? 0.2 : sky ? 0.13 : 0.16;
+    g.innerHTML = `<path d="${minor}" stroke="rgba(${c},${a1})" stroke-width="1"/><path d="${maj}" stroke="rgba(${c},${a2})" stroke-width="1"/>`;
   }
   let handles = [];
   function renderUI() {
@@ -1914,7 +2210,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       ["Stairs and garden", [["stairs", "straight", 36, 120, "Stairs"], ["stairs", "spiral", 60, 60, "Spiral stairs"], ["pplant", "pot", 24, 24, "Potted plant"], ["pplant", "tree", 120, 120, "Tree"]]]
     ]
   };
-  const libThumbs = {};
+  let libThumbs = {};
   function libPart(it) { const T = TYPES[it.t]; const p = { id: 1, t: it.t, layer: T.layer, color: (it.ex && it.ex.color) || T.color, x: 0, y: 0, w: it.w, h: it.h }; if (T.styles) p.style = it.s; if (T.texs) p.tex = (it.ex && it.ex.tex) || T.tex; return p; }
   function libThumb(it, mode, key) {
     if (libThumbs[key]) return libThumbs[key];
@@ -2107,6 +2403,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <div class="field"><label for="nameIn">Design name</label><input id="nameIn" maxlength="40" value="${esc(D.name)}" autocomplete="off" enterkeyhint="done"></div>
       <div class="links" style="margin-top:10px"><button data-m="designs">Your designs (${store.designs.length})</button><button data-m="new">New design</button></div>
       <h3>Share</h3><div class="links three"><button data-m="link">Share link</button><button data-m="png">Save picture</button><button data-m="svg">Save SVG</button></div>
+      <h3>Front view style</h3><div class="seg" data-s="render"><button data-v="real" aria-pressed="${st.render === "real"}">Realistic</button><button data-v="draft" aria-pressed="${st.render === "draft"}">Drafting</button></div>
       <h3>Sky</h3><div class="seg" data-s="sky">${[["day", "Day"], ["dusk", "Dusk"], ["night", "Night"]].map(q => `<button data-v="${q[0]}" aria-pressed="${D.sky === q[0]}">${q[1]}</button>`).join("")}</div>
       <h3>Units</h3><div class="seg" data-s="units"><button data-v="ft" aria-pressed="${st.units === "ft"}">Feet &amp; inches</button><button data-v="m" aria-pressed="${st.units === "m"}">Metres</button></div>
       <h3>Grid</h3><div class="seg" data-s="grid">${GRIDS[st.units].map((g, i) => `<button data-v="${g}" aria-pressed="${Math.abs(st.grid - g) < 0.01}">${GRID_NAMES[st.units][i]}</button>`).join("")}</div>
@@ -2129,6 +2426,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       if (grp === "sky") { D.sky = b.dataset.v; changed(); }
       else if (grp === "units") { const old = S().units, i = GRIDS[old].indexOf(S().grid); S().units = b.dataset.v; S().grid = GRIDS[S().units][Math.max(0, i)]; save(); render(); }
       else if (grp === "grid") { S().grid = +b.dataset.v; save(); render(); }
+      else if (grp === "render") { S().render = b.dataset.v === "draft" ? "draft" : "real"; libThumbs = {}; save(); render(); }
       SFX.tap(); renderMenu(); return;
     }
     if (b.dataset.t) { S()[b.dataset.t] = !S()[b.dataset.t]; save(); if (b.dataset.t === "stats") statsToggled(); SFX.tap(); renderMenu(); render(); return; }
