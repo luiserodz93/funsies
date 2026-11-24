@@ -1,15 +1,20 @@
-/* Offline support: serve the cached game, refresh the cache in the background. */
-const CACHE = "arbor-arch-v2";
+/* Offline support: serve the game's own files (and its fonts) from cache, refresh in the background.
+   Everything else, including live-play connections, goes straight to the network. */
+const CACHE = "arbor-arch-v4";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
+const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
+  const req = e.request, url = new URL(req.url);
+  if (req.method !== "GET") return;
+  if (url.origin !== self.location.origin && !FONT_HOSTS.includes(url.hostname)) return;
+  if ((req.headers.get("accept") || "").includes("text/event-stream")) return;
   e.respondWith(caches.open(CACHE).then(async c => {
-    const hit = await c.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then(r => { if (r && (r.ok || r.type === "opaque")) c.put(e.request, r.clone()); return r; }).catch(() => hit);
+    const hit = await c.match(req, { ignoreSearch: true });
+    const net = fetch(req).then(r => { if (r && (r.ok || r.type === "opaque")) c.put(req, r.clone()); return r; }).catch(() => hit);
     return hit || net;
   }));
 });
