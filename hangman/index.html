@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <title>Leaf &amp; Letter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://ntfy.sh https://fonts.googleapis.com https://fonts.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#cfdcc4">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-180.png">
-<link rel="manifest" href="manifest.webmanifest">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Hangman in a stone garden: guess the word before the ivy loses its leaves.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Leaf &amp; Letter">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap">
@@ -29,6 +29,7 @@
   --check:rgba(214,60,40,.85); --shadow:rgba(40,52,28,.28); --sky:#f6f1e2; --tile-ink:#3a2f22;
   --font-display:"Fraunces", "Iowan Old Style", Georgia, serif;
   --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -83,7 +84,6 @@
 }
 
 *{box-sizing:border-box}
-:root{padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light}
 [hidden]{display:none !important}
 html{min-height:100%}
 body{
@@ -110,14 +110,17 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .brand svg{width:34px; height:34px; flex:none}
 .brand h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:24px; letter-spacing:-.01em; line-height:1; white-space:nowrap}
 .brand h1 em{font-style:italic; font-weight:500; color:var(--accent)}
-.brand small{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-top:4px; font-weight:700}
-.iconbtn{width:42px; height:42px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.brand small{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-top:4px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.brand > div{min-width:0}
+.hbtns{display:flex; gap:8px; flex:none}
+.iconbtn{position:relative; width:42px; height:42px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; cursor:pointer; flex:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .iconbtn svg{width:22px; height:22px}
+.badge{position:absolute; top:-3px; right:-3px; min-width:19px; height:19px; padding:0 5px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-size:11px; font-weight:800; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel-solid)}
 
 /* Info slab */
 .slab{display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line); min-height:54px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .slab .clue{flex:1; min-width:0}
-.lbl{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); font-weight:800}
+.lbl{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .clue b{display:block; font-family:var(--font-display); font-weight:700; font-size:19px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .leaves{display:flex; align-items:center; gap:8px; flex:none}
 .leaves svg{width:26px; height:26px}
@@ -192,7 +195,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   transition:transform .1s, background .25s, color .25s, opacity .25s;
 }
 .kb button:active:not(:disabled){transform:translateY(2px)}
-.kb button.hit{background:var(--dark); color:var(--accent-ink); color:#fff}
+.kb button.hit{background:var(--dark); color:#fff}
 .kb button.miss{background:transparent; color:var(--check); box-shadow:inset 0 0 0 1.5px var(--check); opacity:.55; text-decoration:line-through; text-decoration-thickness:2px}
 .kb button:disabled{cursor:default}
 .kb.over button:not(.hit):not(.miss){opacity:.4}
@@ -259,11 +262,28 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .links{display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px}
 .links button{border:1.5px solid var(--panel-line); background:transparent; border-radius:12px; padding:12px 8px; font-weight:700; cursor:pointer}
 .links .danger{color:var(--check)}
+
+/* Your words */
+.glist{display:grid; gap:8px}
+.gi{display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:14px; border:1.5px solid var(--panel-line); background:var(--panel)}
+.gi.new{border-color:var(--accent)}
+.gi .av{width:42px; height:42px; border-radius:10px; background:var(--light); display:grid; place-items:center; box-shadow:inset 0 0 0 1px var(--grout)}
+.gi .av svg{width:30px; height:30px}
+.gi b{display:block; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.gi .sub{display:block; font-size:12.5px; color:var(--ink2); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.06em}
+.gi .end{display:grid; justify-items:end; gap:4px}
+.gi .st{font-size:12px; font-weight:800; padding:4px 8px; border-radius:8px; background:var(--panel-line); white-space:nowrap}
+.gi .st.go{background:var(--accent); color:var(--accent-ink)}
+.gi .rm{border:0; background:transparent; color:var(--ink2); font-size:12px; font-weight:700; padding:2px 0; cursor:pointer}
+.gi .rm[data-armed]{color:var(--check)}
+.gempty{font-size:13.5px; color:var(--ink2); font-weight:600; padding:6px 2px}
+
 .over{text-align:center}
 .over .crest{width:84px; height:84px; margin:4px auto 6px; display:block}
 .over h2{font-size:32px}
-.over .reveal{font-family:var(--font-display); font-size:28px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin:2px 0 10px; color:var(--accent)}
-.toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--bg1); padding:10px 16px; border-radius:12px; font-weight:700; font-size:14px; box-shadow:0 8px 24px -8px var(--shadow); max-width:calc(100vw - 32px); text-align:center; animation:drop .25s ease-out}
+.over .reveal{font-family:var(--font-display); font-size:28px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin:2px 0 10px; color:var(--accent); overflow-wrap:anywhere}
+.toast{position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top, 0px)); transform:translateX(-50%); z-index:60; background:var(--ink); color:var(--bg1); padding:10px 16px; border-radius:12px; font-weight:700; font-size:14px; box-shadow:0 8px 24px -8px var(--shadow); max-width:calc(100vw - 32px); text-align:center; animation:drop .25s ease-out; overflow-wrap:anywhere}
+.toast.tap{cursor:pointer; text-decoration:underline; text-underline-offset:3px}
 @keyframes drop{from{transform:translate(-50%,-10px); opacity:0}}
 #fx{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:30}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
@@ -275,6 +295,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 </style>
 </head>
 <body>
+
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <linearGradient id="gl" x1="0" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#fffcf3"/><stop offset=".55" stop-color="#f1e7d0"/><stop offset="1" stop-color="#d8c8a6"/></linearGradient>
@@ -298,9 +319,15 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
           <small id="modeLabel">vs Computer · Willow</small>
         </div>
       </div>
-      <button class="iconbtn" id="menuBtn" aria-label="Menu and settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
-      </button>
+      <div class="hbtns">
+        <button type="button" class="iconbtn" id="wordsBtn" aria-label="Words you sent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+          <span class="badge" id="wordsBadge" hidden></span>
+        </button>
+        <button type="button" class="iconbtn" id="menuBtn" aria-label="Menu and settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        </button>
+      </div>
     </header>
 
     <section class="slab">
@@ -316,7 +343,6 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       <svg class="sprig br" viewBox="0 0 100 60" aria-hidden="true"><path d="M4 50C20 30 44 18 92 14" fill="none" stroke="var(--vine)" stroke-width="3" stroke-linecap="round"/><g fill="var(--vine2)" stroke="var(--vine)" stroke-width="1.4"><path d="M24 36c-2-9 3-16 11-18-1 9-5 15-11 18Z"/><path d="M40 27c0-9 6-14 14-14-2 8-7 13-14 14Z"/><path d="M30 34c9-3 17 0 21 7-9 2-16 0-21-7Z"/><path d="M56 21c8-4 16-2 21 4-8 3-15 2-21-4Z"/></g><circle cx="80" cy="15" r="3" fill="var(--accent)"/></svg>
       <div class="scene" id="scene">
         <svg class="art" viewBox="0 0 260 180" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Carved pillar with ivy and a stone figure">
-          <!-- paving and moss -->
           <g>
             <path d="M0 160C40 154 90 158 130 156S220 152 260 158V180H0Z" fill="var(--dark)" opacity=".55"/>
             <g fill="var(--light)" stroke="var(--grout)" stroke-width="1">
@@ -324,7 +350,6 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
               <rect x="110" y="163" width="40" height="12" rx="2"/><rect x="154" y="164" width="50" height="12" rx="2"/><rect x="208" y="163" width="46" height="12" rx="2"/>
             </g>
           </g>
-          <!-- carved gallows: pillar + lintel -->
           <g stroke="#4a3b2a" stroke-width="2" stroke-linejoin="round">
             <rect x="52" y="150" width="40" height="12" rx="2" fill="url(#gl)"/>
             <rect x="57" y="144" width="30" height="7" rx="1.5" fill="url(#gl)"/>
@@ -336,13 +361,10 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
             <path d="M88 32C98 33 104 38 106 46 98 44 92 40 88 32Z" fill="url(#gl)"/>
             <circle cx="186" cy="34.5" r="3" fill="url(#gl)"/>
           </g>
-          <!-- twine -->
           <path d="M186 37V50" stroke="var(--frame2)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="2.5 1.6"/>
-          <!-- ivy -->
           <path d="M66 160C80 146 60 132 76 118S62 92 74 78 64 52 72 38C80 28 96 22 120 24S150 28 158 22" fill="none" stroke="var(--vine)" stroke-width="2.2" stroke-linecap="round"/>
           <g id="ivy"></g>
           <g class="bud" id="bud"><path d="M158 22c2-6 7-8 10-6-1 4-5 7-10 6Z" fill="var(--vine2)" stroke="var(--vine)" stroke-width="1.2"/><circle cx="168" cy="15" r="4.2" fill="var(--accent)" stroke="var(--vine)" stroke-width="1"/></g>
-          <!-- stone figure -->
           <g id="figure" stroke-linecap="round" stroke-linejoin="round" fill="none">
             <g class="part" data-k="1"><path pathLength="1" d="M186 73V112" stroke="#4a3b2a" stroke-width="8"/><path pathLength="1" d="M186 73V112" stroke="#efe5cc" stroke-width="4.6"/></g>
             <g class="part" data-k="2"><path pathLength="1" d="M186 81 168 100" stroke="#4a3b2a" stroke-width="7"/><path pathLength="1" d="M186 81 168 100" stroke="#efe5cc" stroke-width="3.8"/></g>
@@ -365,9 +387,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     <div class="kb" id="kb" aria-label="Letters"></div>
 
     <nav class="tools" aria-label="Game tools">
-      <button class="tool" id="hintBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 17c2 2.5 5 4 8 4s6-1.5 8-4"/></svg><span>Dig up a letter</span></button>
-      <button class="tool" id="giveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg><span id="giveLbl">Give up</span></button>
-      <button class="tool" id="newBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5Z"/><path d="M12 11c0-3.2 2.3-5.5 6.5-5.5 0 3.3-2.3 5.5-6.5 5.5Z"/></svg><span>New game</span></button>
+      <button type="button" class="tool" id="hintBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 17c2 2.5 5 4 8 4s6-1.5 8-4"/></svg><span>Dig up a letter</span></button>
+      <button type="button" class="tool" id="giveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg><span id="giveLbl">Give up</span></button>
+      <button type="button" class="tool" id="newBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5Z"/><path d="M12 11c0-3.2 2.3-5.5 6.5-5.5 0 3.3-2.3 5.5-6.5 5.5Z"/></svg><span>New game</span></button>
     </nav>
   </div>
 </div>
@@ -379,7 +401,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 <section class="sheet" id="newSheet" hidden role="dialog" aria-labelledby="newTitle">
   <div class="grab"></div>
   <h2 id="newTitle">New game</h2>
-  <p class="lede">Let the garden choose a word, trade a secret code with a friend, or take turns on one phone.</p>
+  <p class="lede">Let the garden choose a word, hide a word for a friend on their own phone, or take turns on one phone.</p>
   <div class="seg" id="modeSeg">
     <button type="button" data-v="ai">vs Computer</button>
     <button type="button" data-v="friend">Play a friend</button>
@@ -400,11 +422,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     <div id="sendBox">
       <div class="field"><label for="fWord">Secret word or short phrase</label><input id="fWord" type="text" maxlength="24" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="wisteria"></div>
       <div class="field"><label for="fClue">Clue (optional)</label><input id="fClue" type="text" maxlength="22" autocomplete="off" placeholder="Climbs the pergola"></div>
+      <div id="nameBox">
+        <div class="field"><label for="friendName">Friend's name, for your words list</label><input id="friendName" maxlength="24" autocomplete="off" autocapitalize="words" placeholder="e.g. Sam"></div>
+        <div class="field"><label for="myName">Your name, shown to them</label><input id="myName" maxlength="24" autocomplete="nickname" autocapitalize="words" placeholder="e.g. Alex"></div>
+      </div>
       <div class="codebox" id="codeBox" hidden><input id="codeOut" readonly aria-label="Your code"><button type="button" id="copyCode">Copy</button></div>
-      <p class="note">Text the code to your friend. They open Leaf &amp; Letter, tap New game, then Play a friend, I have a code.</p>
+      <p class="note" id="sendNote"></p>
     </div>
     <div id="getBox">
       <div class="field"><label for="codeIn">Code from your friend</label><input id="codeIn" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XX"></div>
+      <p class="note">Got a link instead? Just open it. The game starts by itself.</p>
     </div>
   </div>
 
@@ -422,6 +449,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   <button type="button" class="secondary" data-close>Not now</button>
 </section>
 
+<!-- Your words -->
+<section class="sheet" id="wordsSheet" hidden role="dialog" aria-labelledby="wordsTitle">
+  <div class="grab"></div>
+  <h2 id="wordsTitle">Your words</h2>
+  <p class="lede">Words you've hidden for friends. Each one updates live while they guess, as long as the game is open.</p>
+  <div class="glist" id="wordsList"></div>
+  <button type="button" class="primary" id="inviteNewBtn">Hide a word for a friend</button>
+  <button type="button" class="secondary" data-close>Back to the garden</button>
+</section>
+
 <!-- Menu -->
 <section class="sheet" id="menuSheet" hidden role="dialog" aria-labelledby="menuTitle">
   <div class="grab"></div>
@@ -431,6 +468,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   <h3>Comforts</h3>
   <div class="row"><div><label for="swSound">Sound</label><small>Stone taps, rustling leaves, chimes</small></div><button type="button" class="switch" role="switch" id="swSound" data-k="sound"></button></div>
   <div class="row"><div><label for="swAmb">Drifting nature</label><small>Petals, leaves, snow or fireflies</small></div><button type="button" class="switch" role="switch" id="swAmb" data-k="ambience"></button></div>
+  <div class="row" id="statsRow"><div><label for="swStats">Share anonymous play stats</label><small>Device type, play time and game results, to help improve the game. No names or exact location.</small></div><button type="button" class="switch" role="switch" id="swStats" data-k="stats"></button></div>
   <h3>Your record</h3>
   <div class="record">
     <div><b id="rPlayed">0</b><span>Played</span></div>
@@ -439,7 +477,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     <div><b id="rBest">0</b><span>Best</span></div>
   </div>
   <div class="links"><button type="button" id="resetBtn" class="danger">Clear record</button></div>
-  <p class="note">To keep it on your iPhone: open the link in Safari, tap Share, then Add to Home Screen.</p>
+  <p class="note">To keep it on your iPhone: open the link in Safari, tap Share, then Add to Home Screen. It then opens full screen and plays offline.</p>
   <button type="button" class="secondary" data-close>Done</button>
 </section>
 
@@ -462,6 +500,9 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   var $ = function (id) { return document.getElementById(id); };
   var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var STORE = "leaf-letter";
+  /* Links, live play and stats need a real web address; the Claude artifact preview has none. */
+  var canLink = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname);
+  function noop() {}
 
   /* ---------- words ---------- */
   var WORDS = {
@@ -495,24 +536,83 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   var SPOTS = [[66,152,-160],[76,138,-20],[64,124,-170],[78,110,-15],[64,96,-165],[76,82,-25],[64,66,-165],[76,52,-30],[96,22,-70],[128,28,30]];
 
   /* ---------- state ---------- */
-  var settings = { season: "auto", sound: true, ambience: !reduceMotion };
+  var settings = { season: "auto", sound: true, ambience: !reduceMotion, stats: true, myName: "" };
   var record = { played: 0, won: 0, streak: 0, best: 0 };
   var prefs = { level: 1, bed: "Garden" };
-  var game = null; // { mode, word, clue, bed, level, lives, max, guessed, misses, over, won, dug }
+  /* game: { mode, word, clue, bed, level, lives, max, guessed, misses, seq, over, won, dug, gaveUp, t0, logged, id?, pid?, pub?, from? }
+     seq is the ordered record of actions: a lowercase letter per guess, an uppercase letter per dug-up letter, "!" for giving up. */
+  var game = null;
+  /* sent: words this phone hid for friends, by game ID: { word, clue, level, name, at, seq, opened, done, seen, here, hereAt, updated } */
+  var sent = {};
   var draft = { mode: "ai", friend: "send" };
   var prevLives = null;
 
+  var ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  /* Random IDs from the browser's cryptographic generator; a game's ID is what keeps it private. */
+  function randId(n, alnum) {
+    var lim = alnum ? 62 : 64, a = new Uint8Array(n * 3), s = "", k;
+    try { crypto.getRandomValues(a); } catch (e) { for (k = 0; k < a.length; k++) a[k] = (Math.random() * 256) | 0; }
+    for (k = 0; k < a.length && s.length < n; k++) { var v = a[k] & 63; if (v < lim) s += ABC[v]; }
+    while (s.length < n) s += ABC[(Math.random() * lim) | 0];
+    return s;
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function encName(s) { try { return btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); } catch (e) { return ""; } }
+  function decName(s) { try { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return cleanName(decodeURIComponent(escape(atob(s)))); } catch (e) { return ""; } }
+  function cleanName(s) {
+    return String(s || "").replace(/[\u0000-\u001f\u007f-\u009f­؜ᅟᅠ឴឵᠎​-‏‪-‮⁠-⁯ㅤ︀-️﻿ﾠ￰-￿]/g, "")
+      .replace(/\s+/g, " ").trim().slice(0, 24);
+  }
+  var ID_RE = /^[A-Za-z0-9_-]{8,16}$/, SEQ_RE = /^[A-Za-z]{0,26}!?$/;
+
+  /* Saved data is checked field by field, so a damaged or edited store can't break the page. */
+  function cleanGame(g) {
+    if (!g || typeof g !== "object" || typeof g.word !== "string" || !validWord(g.word)) return null;
+    var lv = Math.min(2, Math.max(0, g.level | 0)), max = LEVELS[lv].lives;
+    var lettersOnly = function (a) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === "string" && /^[a-z]$/.test(x); }).slice(0, 26) : []; };
+    var out = {
+      mode: g.mode === "friend" || g.mode === "pvp" ? g.mode : "ai", word: g.word, clue: cleanClue(g.clue || ""),
+      bed: BEDS.indexOf(g.bed) > 0 ? g.bed : null, level: lv, max: max, lives: Math.min(max, Math.max(0, g.lives | 0)),
+      guessed: lettersOnly(g.guessed), misses: lettersOnly(g.misses), seq: typeof g.seq === "string" && SEQ_RE.test(g.seq) ? g.seq : "",
+      over: !!g.over, won: !!g.won, dug: Math.max(0, g.dug | 0), gaveUp: !!g.gaveUp, t0: +g.t0 || Date.now(), logged: !!g.logged
+    };
+    if (out.mode === "ai" && !out.bed) out.bed = "Garden";
+    if (out.mode === "friend" && typeof g.id === "string" && ID_RE.test(g.id)) {
+      out.id = g.id; out.pid = typeof g.pid === "string" && /^[A-Za-z0-9]{16}$/.test(g.pid) ? g.pid : randId(16, true);
+      out.pub = typeof g.pub === "number" ? g.pub : -1; out.from = cleanName(g.from);
+    }
+    return out;
+  }
+  function cleanSent(o) {
+    var out = {};
+    if (!o || typeof o !== "object") return out;
+    Object.keys(o).slice(0, 60).forEach(function (id) {
+      var s = o[id];
+      if (!ID_RE.test(id) || !s || typeof s.word !== "string" || !validWord(s.word)) return;
+      out[id] = {
+        word: s.word, clue: cleanClue(s.clue || ""), level: Math.min(2, Math.max(0, s.level | 0)), name: cleanName(s.name),
+        at: +s.at || Date.now(), seq: typeof s.seq === "string" && SEQ_RE.test(s.seq) ? s.seq : "",
+        opened: !!s.opened, done: !!s.done, seen: s.seen !== false, here: false, hereAt: 0, updated: +s.updated || +s.at || Date.now()
+      };
+    });
+    return out;
+  }
   function save() {
-    try { localStorage.setItem(STORE, JSON.stringify({ settings: settings, record: record, prefs: prefs, game: game })); } catch (e) {}
+    try { localStorage.setItem(STORE, JSON.stringify({ settings: settings, record: record, prefs: prefs, game: game, sent: sent })); } catch (e) {}
   }
   function load() {
     var d = null;
     try { d = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
-    if (!d) return;
-    if (d.settings) for (var k in settings) if (k in d.settings) settings[k] = d.settings[k];
-    if (d.record) for (k in record) if (typeof d.record[k] === "number") record[k] = d.record[k];
+    if (!d || typeof d !== "object") return;
+    if (d.settings) {
+      ["sound", "ambience", "stats"].forEach(function (k) { if (typeof d.settings[k] === "boolean") settings[k] = d.settings[k]; });
+      if (SEASONS.some(function (s) { return s.id === d.settings.season; })) settings.season = d.settings.season;
+      settings.myName = cleanName(d.settings.myName);
+    }
+    if (d.record) for (var k in record) if (typeof d.record[k] === "number" && d.record[k] >= 0) record[k] = Math.floor(d.record[k]);
     if (d.prefs) { prefs.level = Math.min(2, Math.max(0, d.prefs.level | 0)); if (BEDS.indexOf(d.prefs.bed) >= 0) prefs.bed = d.prefs.bed; }
-    if (d.game && typeof d.game.word === "string" && Array.isArray(d.game.guessed)) game = d.game;
+    game = cleanGame(d.game);
+    sent = cleanSent(d.sent);
   }
 
   /* ---------- sound ---------- */
@@ -565,6 +665,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     dig: function () { tock(0.9, 0.9); setTimeout(function () { tock(0.7, 1.05); }, 110); },
     win: function () { bell([523, 659, 784, 1047], 0.13, 0.17, 1.4); },
     lose: function () { bell([440, 349, 294], 0.22, 0.12, 1.3); },
+    news: function () { bell([880, 1320], 0.09, 0.12, 0.9); },
     tap: function () { tock(0.25, 1.6); }
   };
 
@@ -682,12 +783,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     burstAt(r.left + r.width / 2, r.top + r.height / 2, n, big);
   }
 
-  /* ---------- friend codes ---------- */
+  /* ---------- word codes ----------
+     A code carries the ivy level, the word and the clue, shifted by position and closed with a checksum.
+     It hides the word from a glance at the message; it is not encryption. */
   var IN = "abcdefghijklmnopqrstuvwxyz '-|.?";
   var OUT = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-  function cleanClue(s) { return s.toLowerCase().replace(/[^a-z '\-.?]/g, "").replace(/\s+/g, " ").trim(); }
-  function makeCode(word, clue) {
-    var s = word + "|" + clue, out = "", sum = 0;
+  function cleanClue(s) { return String(s || "").toLowerCase().replace(/[^a-z '\-.?]/g, "").replace(/\s+/g, " ").trim().slice(0, 22); }
+  function normWord(w) { return String(w || "").toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, " ").trim(); }
+  function validWord(w) { return typeof w === "string" && w.length <= 24 && /^[a-z]+([ '\-][a-z]+)*$/.test(w) && w.replace(/[^a-z]/g, "").length >= 2; }
+  function makeCode(word, clue, level) {
+    var s = "." + "abc"[level] + word + "|" + clue, out = "", sum = 0;
     for (var i = 0; i < s.length; i++) {
       var v = IN.indexOf(s[i]);
       sum += v * (i + 1);
@@ -697,22 +802,223 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     return out.match(/.{1,4}/g).join("-");
   }
   function readCode(code) {
-    var c = code.toUpperCase().replace(/O/g, "0").replace(/[^23456789A-HJ-NP-Z]/g, "");
-    if (c.length < 4) return null;
+    var c = String(code || "").toUpperCase().replace(/[^23456789A-HJ-NP-Z]/g, "");
+    if (c.length < 4 || c.length > 80) return null;
     var body = c.slice(0, -1), s = "", sum = 0;
     for (var i = 0; i < body.length; i++) {
       var v = ((OUT.indexOf(body[i]) - 11 * i - 5) % 32 + 32 * 64) % 32;
       s += IN[v]; sum += v * (i + 1);
     }
     if (OUT[sum % 32] !== c.slice(-1)) return null;
+    var level = null;
+    if (s[0] === ".") { level = "abc".indexOf(s[1]); if (level < 0) return null; s = s.slice(2); }
     var bar = s.indexOf("|");
     if (bar < 0) return null;
-    var word = s.slice(0, bar), clue = s.slice(bar + 1);
+    var word = s.slice(0, bar), clue = cleanClue(s.slice(bar + 1));
     if (!validWord(word)) return null;
-    return { word: word, clue: clue };
+    return { word: word, clue: clue, level: level };
   }
-  function normWord(w) { return w.toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, " ").trim(); }
-  function validWord(w) { return /^[a-z]+([ '\-][a-z]+)*$/.test(w) && w.replace(/[^a-z]/g, "").length >= 2 && w.length <= 24; }
+
+  /* ---------- friend links: #h=<game id>.<code>[.n<sender name>] ---------- */
+  function inviteURL(id, code) {
+    var n = settings.myName ? encName(settings.myName) : "";
+    return location.href.split("#")[0] + "#h=" + id + "." + code.replace(/-/g, "") + (n ? ".n" + n : "");
+  }
+  function readLink() {
+    if (!/^#h=/.test(location.hash)) return null;
+    var h = location.hash;
+    try { history.replaceState(null, "", location.href.split("#")[0]); } catch (e) {}
+    var m = /^#h=([A-Za-z0-9_-]{8,16})\.([2-9A-HJ-NP-Z]{4,80})(?:\.n([A-Za-z0-9_-]{1,128}))?$/.exec(h);
+    var got = m && readCode(m[2]);
+    if (!got) { toast("That word link is damaged. Ask your friend to send it again."); return null; }
+    return { id: m[1], word: got.word, clue: got.clue, level: got.level, name: m[3] ? decName(m[3]) : "" };
+  }
+
+  /* ---------- live play ----------
+     Firebase Realtime Database (when FIREBASE_DB is set) or the ntfy.sh relay as a fallback,
+     through their REST + streaming APIs, so no SDK is loaded.
+     Firebase data: /hangman/<id>/state {g, by, at} and /hangman/<id>/presence/<player id> {on, at}.
+     g is "h=<id>.<seq>": only the guesses travel, never the word. */
+  var FIREBASE_DB = "https://arborandarchchessgame-default-rtdb.firebaseio.com";
+  var FB = (window.ARBOR_FIREBASE || FIREBASE_DB || "").replace(/\/+$/, "");
+  var RELAY = window.ARBOR_RELAY || "https://ntfy.sh/";
+  var hasLive = canLink && typeof EventSource !== "undefined" && typeof fetch !== "undefined";
+  var BAD_KEY = /^(__proto__|constructor|prototype)$/;
+  function topic(id) { return "leafletter_" + id; }
+  function stateStr() { return "h=" + game.id + "." + (game.seq || ""); }
+
+  function publish(t) {
+    if (!hasLive || !game || game.mode !== "friend" || !game.id) return Promise.reject(new Error("offline"));
+    var g = stateStr();
+    if (FB) {
+      var stamp = { ".sv": "timestamp" };
+      var req = t === "s"
+        ? { url: FB + "/hangman/" + game.id + "/state.json", body: { g: g, by: game.pid, at: stamp } }
+        : { url: FB + "/hangman/" + game.id + "/presence/" + game.pid + ".json", body: { on: t !== "bye", at: stamp } };
+      return fetch(req.url, { method: "PUT", body: JSON.stringify(req.body), keepalive: t === "bye" })
+        .then(function (r) { if (!r.ok) throw new Error("firebase " + r.status); });
+    }
+    var body = JSON.stringify({ v: 1, t: t, from: game.pid, g: g });
+    return fetch(RELAY + topic(game.id), { method: "POST", body: body, keepalive: t === "bye" }).then(function (r) { if (!r.ok) throw new Error("relay " + r.status); });
+  }
+  function pushGuesses() {
+    if (!game || !game.id) return;
+    var n = (game.seq || "").length, id = game.id;
+    publish("s").then(function () { if (game && game.id === id) { game.pub = Math.max(game.pub, n); save(); } }, noop);
+  }
+  var beat = 0;
+  function goOnline() {
+    clearInterval(beat); beat = 0;
+    if (!hasLive || !game || game.mode !== "friend" || !game.id) return;
+    if (game.pub < (game.seq || "").length || game.pub < 0) pushGuesses();
+    if (!game.over) {
+      publish("hi").catch(noop);
+      beat = setInterval(function () { if (!document.hidden && game && game.id && !game.over) publish("hi").catch(noop); }, 240000);
+    }
+  }
+  function goOffline() {
+    clearInterval(beat); beat = 0;
+    if (hasLive && game && game.mode === "friend" && game.id) publish("bye").catch(noop);
+  }
+
+  /* Apply a Firebase streaming event (put replaces, patch merges children) to a local mirror. */
+  function fbApply(root, path, data, patch) {
+    var parts = path.split("/").filter(Boolean), node, i, k;
+    for (i = 0; i < parts.length; i++) if (BAD_KEY.test(parts[i])) return;
+    if (!parts.length) {
+      if (!patch) { root.v = data; return; }
+      if (!root.v || typeof root.v !== "object") root.v = {};
+      node = root.v;
+    } else {
+      if (!root.v || typeof root.v !== "object") root.v = {};
+      var o = root.v;
+      for (i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== "object") o[parts[i]] = {}; o = o[parts[i]]; }
+      var last = parts[parts.length - 1];
+      if (!patch) { if (data === null) delete o[last]; else o[last] = data; return; }
+      if (!o[last] || typeof o[last] !== "object") o[last] = {};
+      node = o[last];
+    }
+    if (data && typeof data === "object") for (k in data) { if (BAD_KEY.test(k) || !Object.prototype.hasOwnProperty.call(data, k)) continue; if (data[k] === null) delete node[k]; else node[k] = data[k]; }
+  }
+
+  /* Watchers: every word this phone sent that isn't finished keeps listening for the friend's guesses. */
+  var watchers = {};
+  function syncWatchers() {
+    if (!hasLive) return;
+    var want = {};
+    Object.keys(sent).forEach(function (id) {
+      if (sent[id].done) return;
+      want[id] = 1;
+      if (!watchers[id]) watchers[id] = watchWord(id);
+    });
+    Object.keys(watchers).forEach(function (id) { if (!want[id]) { watchers[id].close(); delete watchers[id]; } });
+  }
+  function closeWatchers() { Object.keys(watchers).forEach(function (id) { watchers[id].close(); }); watchers = {}; }
+  function watchWord(id) {
+    var mirror = {}, es;
+    try { es = new EventSource(FB ? FB + "/hangman/" + id + ".json" : RELAY + topic(id) + "/sse?since=all"); } catch (e) { return { close: noop }; }
+    if (FB) {
+      var on = function (e) {
+        var d; try { d = JSON.parse(e.data); } catch (x) { return; }
+        if (!d || typeof d.path !== "string") return;
+        fbApply(mirror, d.path, d.data, e.type === "patch");
+        var v = mirror.v || {};
+        if (v.state && typeof v.state.g === "string") gotState(id, v.state.g);
+        var pres = v.presence && typeof v.presence === "object" ? v.presence : {}, best = null;
+        Object.keys(pres).forEach(function (cid) { var p = pres[cid]; if (p && typeof p.at === "number" && (!best || p.at > best.at)) best = p; });
+        if (best) gotPresence(id, !!best.on, best.at);
+      };
+      es.addEventListener("put", on);
+      es.addEventListener("patch", on);
+      es.addEventListener("cancel", function () { es.close(); });
+    } else {
+      es.onmessage = function (e) {
+        var d; try { d = JSON.parse(e.data); } catch (x) { return; }
+        if (!d || (d.event && d.event !== "message") || typeof d.message !== "string") return;
+        var p; try { p = JSON.parse(d.message); } catch (x) { return; }
+        if (!p || p.v !== 1 || typeof p.g !== "string") return;
+        gotState(id, p.g);
+        if (p.t === "hi" || p.t === "bye") gotPresence(id, p.t === "hi", (d.time || 0) * 1000);
+      };
+    }
+    return { close: function () { es.close(); } };
+  }
+  function gotPresence(id, on, at) {
+    var s = sent[id]; if (!s || s.done) return;
+    var here = on && Date.now() - at < 900000;
+    if (here === s.here && at === s.hereAt) return;
+    s.here = here; s.hereAt = at;
+    if (!$("wordsSheet").hidden) paintWords();
+  }
+  function gotState(id, g) {
+    var m = /^h=([A-Za-z0-9_-]{8,16})\.([A-Za-z]{0,26}!?)$/.exec(g), s = sent[id];
+    if (!m || m[1] !== id || !s) return;
+    var seq = m[2];
+    if (seq.length < s.seq.length || seq.slice(0, s.seq.length) !== s.seq) return;
+    if (seq === s.seq && s.opened) return;
+    var first = !s.opened;
+    s.opened = true; s.seq = seq; s.updated = Date.now();
+    var st = wordStatus(s), who = s.name || "Your friend", W = s.word.toUpperCase();
+    if (st.over && !s.done) {
+      s.done = true; s.seen = !$("wordsSheet").hidden; s.here = false;
+      SFX.news();
+      toast(st.result === "won" ? who + " found " + W + " with " + st.lives + (st.lives === 1 ? " leaf" : " leaves") + " left." :
+        st.result === "gave_up" ? who + " gave up on " + W + "." : who + " ran out of leaves on " + W + ".", openWords);
+    } else if (first) toast(who + " opened your word " + W + ".", openWords);
+    save(); renderBadge();
+    if (!$("wordsSheet").hidden) paintWords();
+    if (s.done) syncWatchers();
+  }
+  /* Replays a friend's guesses against the word this phone hid. */
+  function wordStatus(s) {
+    var max = LEVELS[s.level].lives, guessed = [], misses = 0, dug = 0, gave = false, i, ch;
+    for (i = 0; i < s.seq.length; i++) {
+      ch = s.seq[i];
+      if (ch === "!") { gave = true; break; }
+      var low = ch.toLowerCase();
+      if (guessed.indexOf(low) >= 0) continue;
+      if (ch !== low) { dug++; guessed.push(low); }
+      else if (s.word.indexOf(ch) >= 0) guessed.push(ch);
+      else misses++;
+    }
+    var lives = Math.max(0, max - misses - dug), solved = letters(s.word).every(function (l) { return guessed.indexOf(l) >= 0; });
+    var over = solved || gave || lives <= 0;
+    var pattern = s.word.split("").map(function (c) { return /[a-z]/.test(c) ? (over || guessed.indexOf(c) >= 0 ? c.toUpperCase() : "_") : c; }).join("");
+    return { lives: lives, misses: misses, dug: dug, over: over, result: solved ? "won" : gave ? "gave_up" : over ? "lost" : null, pattern: pattern,
+      found: letters(s.word).filter(function (l) { return guessed.indexOf(l) >= 0; }).length, total: letters(s.word).length };
+  }
+
+  /* ---------- your words list ---------- */
+  var LEAF_AV = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16Z" fill="var(--vine2)" stroke="var(--vine)" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 19 15 9" stroke="var(--vine)" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  function wordRow(id) {
+    var s = sent[id], st = wordStatus(s), label, go = false, sub;
+    if (st.over) label = st.result === "won" ? "Found it" : st.result === "gave_up" ? "Gave up" : "Ivy bare";
+    else if (!s.opened) label = "Not opened";
+    else if (s.here) { label = "Guessing now"; go = true; }
+    else label = "In progress";
+    sub = st.pattern + (s.opened ? " · " + st.lives + (st.lives === 1 ? " leaf" : " leaves") + " left" : " · " + LEVELS[s.level].name);
+    return '<div class="gi' + (!s.seen ? " new" : "") + '">' +
+      '<div class="av">' + LEAF_AV + "</div>" +
+      "<div><b>" + esc(s.name || "Friend") + '</b><span class="sub">' + esc(sub) + "</span></div>" +
+      '<div class="end"><span class="st' + (go ? " go" : "") + '">' + esc(label) + "</span>" +
+      '<button type="button" class="rm" data-rm="' + esc(id) + '">Remove</button></div></div>';
+  }
+  function paintWords() {
+    var ids = Object.keys(sent).sort(function (a, b) { return (sent[b].updated || 0) - (sent[a].updated || 0); });
+    $("wordsList").innerHTML = ids.length ? ids.map(wordRow).join("") :
+      '<div class="gempty">' + (canLink ? "No words yet. Hide one for a friend below. You can have several out at once." : "Live word links work on the published game. Here you can still trade codes under New game, Play a friend.") + "</div>";
+  }
+  function renderBadge() {
+    var n = 0;
+    Object.keys(sent).forEach(function (id) { if (!sent[id].seen) n++; });
+    var b = $("wordsBadge"); b.hidden = !n; b.textContent = n;
+  }
+  function openWords() {
+    paintWords(); openSheet("wordsSheet");
+    var changed = false;
+    Object.keys(sent).forEach(function (id) { if (!sent[id].seen) { sent[id].seen = true; changed = true; } });
+    if (changed) { save(); renderBadge(); }
+  }
 
   /* ---------- game ---------- */
   function letters(w) { var o = []; for (var i = 0; i < w.length; i++) if (/[a-z]/.test(w[i]) && o.indexOf(w[i]) < 0) o.push(w[i]); return o; }
@@ -727,36 +1033,44 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   }
 
   function startGame(opts) {
-    var level = prefs.level, word, clue, bed = null;
+    logAbandoned();
+    goOffline();
+    var level = typeof opts.level === "number" && opts.level >= 0 && opts.level <= 2 ? opts.level : prefs.level, word, clue, bed = null;
     if (opts.mode === "ai") { var pk = pickWord(prefs.bed, level); word = pk[0]; bed = pk[1]; clue = ""; }
     else { word = opts.word; clue = opts.clue || ""; }
-    game = { mode: opts.mode, word: word, clue: clue, bed: bed, level: level, lives: LEVELS[level].lives, max: LEVELS[level].lives, guessed: [], misses: [], over: false, won: false, dug: 0 };
+    game = { mode: opts.mode, word: word, clue: clue, bed: bed, level: level, lives: LEVELS[level].lives, max: LEVELS[level].lives,
+      guessed: [], misses: [], seq: "", over: false, won: false, dug: 0, gaveUp: false, t0: Date.now(), logged: false };
+    if (opts.id) { game.id = opts.id; game.pid = randId(16, true); game.pub = -1; game.from = opts.from || ""; }
     prevLives = null;
     $("giveLbl").textContent = "Give up"; $("giveBtn").classList.remove("arm");
     render(true);
     save();
+    track("game_start", { mode: modeName(), level: LEVELS[level].name, joined_by_link: !!opts.id });
+    goOnline();
   }
 
   function guess(ch) {
     if (!game || game.over || anySheetOpen()) return;
     if (!/^[a-z]$/.test(ch) || game.guessed.indexOf(ch) >= 0 || game.misses.indexOf(ch) >= 0) return;
     var key = $("key-" + ch);
+    game.seq += ch;
     if (game.word.indexOf(ch) >= 0) {
       game.guessed.push(ch); SFX.hit();
       if (key) burstFrom(key, 6, false);
     } else {
       game.misses.push(ch); game.lives--; SFX.miss();
     }
-    settle(); render(); save();
+    acted();
   }
 
   function dig() {
     if (!game || game.over || game.lives <= 1) return;
     var left = letters(game.word).filter(function (l) { return game.guessed.indexOf(l) < 0; });
     if (!left.length) return;
-    game.guessed.push(left[(Math.random() * left.length) | 0]);
+    var l = left[(Math.random() * left.length) | 0];
+    game.guessed.push(l); game.seq += l.toUpperCase();
     game.lives--; game.dug++; SFX.dig();
-    settle(); render(); save();
+    acted();
   }
 
   var giveTimer = 0;
@@ -770,10 +1084,14 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       return;
     }
     clearTimeout(giveTimer); b.classList.remove("arm"); $("giveLbl").textContent = "Give up";
-    game.lives = 0; game.gaveUp = true;
-    settle(); render(); save();
+    game.lives = 0; game.gaveUp = true; game.seq += "!";
+    acted();
   }
 
+  function acted() {
+    settle(); render(); save();
+    if (game.id) { pushGuesses(); if (game.over) goOffline(); }
+  }
   function settle() {
     if (game.over) return;
     if (solved()) finish(true);
@@ -784,6 +1102,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     record.played++;
     if (won) { record.won++; record.streak++; record.best = Math.max(record.best, record.streak); }
     else record.streak = 0;
+    statsCheck();
     setTimeout(function () {
       if (won) { SFX.win(); burstFrom($("scene"), 90, true); }
       else SFX.lose();
@@ -817,29 +1136,26 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 
   function render(fresh) {
     var L = LEVELS[game.level];
-    // header + slab
-    $("modeLabel").textContent = MODE_NAMES[game.mode] + " · " + L.name;
+    $("modeLabel").textContent = (game.mode === "friend" && game.from ? game.from + "'s word" : MODE_NAMES[game.mode]) + " · " + L.name;
+    var n = game.word.replace(/[^a-z]/g, "").length + " letters";
     if (game.mode === "ai") { $("clueLbl").textContent = "Garden bed"; $("clueTxt").textContent = game.bed; }
-    else if (game.clue) { $("clueLbl").textContent = "Clue"; $("clueTxt").textContent = game.clue.charAt(0).toUpperCase() + game.clue.slice(1); }
-    else { $("clueLbl").textContent = MODE_NAMES[game.mode]; $("clueTxt").textContent = game.word.replace(/[^a-z]/g, "").length + " letters, no clue"; }
+    else if (game.clue) { $("clueLbl").textContent = game.from ? "Clue from " + game.from : "Clue"; $("clueTxt").textContent = game.clue.charAt(0).toUpperCase() + game.clue.slice(1); }
+    else { $("clueLbl").textContent = game.from ? game.from + "'s word" : MODE_NAMES[game.mode]; $("clueTxt").textContent = n + ", no clue"; }
     $("livesNum").textContent = Math.max(0, game.lives);
 
     // ivy: one leaf per remaining life
-    var leaves = document.querySelectorAll(".lf");
-    leaves.forEach(function (lf) {
-      var i = +lf.dataset.i;
-      lf.classList.remove("grow");
-      if (i >= game.max) { lf.className.baseVal = "lf gone"; lf.style.display = "none"; return; }
+    document.querySelectorAll(".lf").forEach(function (lf) {
+      var i = +lf.dataset.i, cl = lf.classList;
+      cl.remove("grow");
+      if (i >= game.max) { lf.style.display = "none"; cl.add("gone"); cl.remove("fall"); return; }
       lf.style.display = "";
       if (i < game.lives) {
-        if (fresh && !lf.classList.contains("gone") && !lf.classList.contains("fall")) { lf.className.baseVal = "lf"; }
-        else if (fresh) { lf.className.baseVal = "lf grow"; lf.style.animationDelay = (i * 0.05) + "s"; }
-        else lf.className.baseVal = "lf";
+        var wasDown = cl.contains("gone") || cl.contains("fall");
+        cl.remove("gone", "fall");
+        if (fresh && wasDown) { lf.style.animationDelay = (i * 0.05) + "s"; cl.add("grow"); }
       } else if (!fresh && prevLives !== null && i < prevLives) {
-        lf.style.animationDelay = "0s"; lf.className.baseVal = "lf fall";
-      } else if (!lf.classList.contains("fall")) {
-        lf.className.baseVal = "lf gone";
-      }
+        lf.style.animationDelay = "0s"; cl.remove("gone"); cl.add("fall");
+      } else if (!cl.contains("fall")) cl.add("gone");
     });
     prevLives = game.lives;
 
@@ -848,15 +1164,14 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     var parts = Math.min(6, Math.ceil(lost * 6 / game.max - 1e-9));
     if (game.over && !game.won) parts = 6;
     document.querySelectorAll("#figure .part").forEach(function (p) { p.classList.toggle("on", +p.dataset.k < parts); });
-    var face = $("face"); face.classList.toggle("on", game.over && parts > 0);
+    $("face").classList.toggle("on", game.over && parts > 0);
     if (game.won) { $("eyes").setAttribute("d", "M182 57v3M190 57v3"); $("mouth").setAttribute("d", "M181.5 65q4.5 4 9 0"); }
     else { $("eyes").setAttribute("d", "M181 58l3 3M184 58l-3 3M188 58l3 3M191 58l-3 3"); $("mouth").setAttribute("d", "M182 67q4-3 8 0"); }
     var bud = $("bud"); bud.classList.toggle("wilt", game.over && !game.won); bud.classList.toggle("bloom", game.over && game.won);
 
     // word tiles
     var w = $("word"), words = game.word.split(" "), longest = Math.max.apply(null, words.map(function (x) { return x.length; }));
-    var n = game.word.length <= 13 ? game.word.length : longest;
-    w.style.setProperty("--n", Math.max(n, 6));
+    w.style.setProperty("--n", Math.max(game.word.length <= 13 ? game.word.length : longest, 6));
     w.innerHTML = "";
     words.forEach(function (part) {
       var grp = document.createElement("div"); grp.className = "wgrp";
@@ -872,7 +1187,6 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     });
     w.setAttribute("aria-label", "Word: " + game.word.split("").map(function (c) { return /[a-z]/.test(c) && game.guessed.indexOf(c) < 0 && !game.over ? "blank" : c === " " ? "space" : c; }).join(" "));
 
-    // status
     var st = $("status");
     st.className = "status" + (game.over ? (game.won ? " win" : " lose") : "");
     if (game.over) st.textContent = game.won ? "Solved. The garden blooms." : (game.gaveUp ? "You set down the trowel." : "The ivy is bare.");
@@ -882,7 +1196,6 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
       st.textContent = need + (need === 1 ? " letter" : " letters") + " still buried" + (game.misses.length ? " · missed " + game.misses.join(" ").toUpperCase() : "");
     }
 
-    // keys
     var kb = $("kb"); kb.classList.toggle("over", game.over);
     kb.querySelectorAll("button").forEach(function (b) {
       var k = b.dataset.k, hit = game.guessed.indexOf(k) >= 0, miss = game.misses.indexOf(k) >= 0;
@@ -903,9 +1216,12 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     document.querySelectorAll(".sheet").forEach(function (s) { s.hidden = true; });
     $("scrim").hidden = true;
   }
-  function toast(msg) {
+  var toastT = 0;
+  function toast(msg, onTap) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
     var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
-    setTimeout(function () { t.remove(); }, 2200);
+    if (onTap) { t.classList.add("tap"); t.setAttribute("role", "button"); t.addEventListener("click", function () { t.remove(); onTap(); }); }
+    clearTimeout(toastT); toastT = setTimeout(function () { t.remove(); }, onTap ? 5000 : 2400);
   }
 
   function renderNewSheet() {
@@ -916,9 +1232,13 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     $("pvpOpts").hidden = draft.mode !== "pvp";
     $("sendBox").hidden = draft.friend !== "send";
     $("getBox").hidden = draft.friend !== "get";
+    $("nameBox").hidden = !canLink;
     var sending = draft.mode === "friend" && draft.friend === "send";
-    $("lvlOpts").hidden = sending;
-    $("startBtn").textContent = sending ? "Make code" : "Start game";
+    $("lvlOpts").hidden = draft.mode === "friend" && draft.friend === "get";
+    $("startBtn").textContent = sending ? (canLink ? "Send invite" : "Make code") : "Start game";
+    $("sendNote").textContent = canLink
+      ? "Your friend gets a link to text or message. You'll see their guesses live under Your words. Pick how many leaves they get below."
+      : "Text the code to your friend. They open Leaf & Letter, tap New game, then Play a friend, I have a code.";
     $("beds").innerHTML = BEDS.map(function (b) { return '<button type="button" data-v="' + b + '" aria-pressed="' + (b === prefs.bed) + '">' + (b === "Any" ? "Any bed" : b) + "</button>"; }).join("");
     $("levels").innerHTML = LEVELS.map(function (l, i) {
       return '<button type="button" class="level" data-v="' + i + '" aria-pressed="' + (i === prefs.level) + '">' + LEVEL_ICONS[i] + "<div><b>" + l.name + "</b><span>" + l.blurb + "</span></div></button>";
@@ -929,49 +1249,79 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (friend) draft.friend = friend;
     $("newErr").textContent = "";
     $("codeBox").hidden = true;
+    $("myName").value = settings.myName || "";
     renderNewSheet();
     openSheet("newSheet");
   }
+  var WORD_HELP = "Use letters only (spaces, hyphens and apostrophes are fine), at least two letters.";
   function startFromSheet() {
     var err = $("newErr"); err.textContent = "";
     if (draft.mode === "ai") { closeSheets(); startGame({ mode: "ai" }); return; }
     if (draft.mode === "pvp") {
       var w = normWord($("pWord").value);
-      if (!validWord(w)) { err.textContent = "Use letters only (spaces, hyphens and apostrophes are fine), at least two letters."; return; }
+      if (!validWord(w)) { err.textContent = WORD_HELP; return; }
       var c = cleanClue($("pClue").value);
       $("pWord").value = ""; $("pClue").value = "";
       closeSheets(); startGame({ mode: "pvp", word: w, clue: c }); return;
     }
     if (draft.friend === "send") {
       var fw = normWord($("fWord").value);
-      if (!validWord(fw)) { err.textContent = "Use letters only (spaces, hyphens and apostrophes are fine), at least two letters."; return; }
-      $("codeOut").value = makeCode(fw, cleanClue($("fClue").value));
+      if (!validWord(fw)) { err.textContent = WORD_HELP; return; }
+      var clue = cleanClue($("fClue").value), code = makeCode(fw, clue, prefs.level);
+      $("codeOut").value = code;
       $("codeBox").hidden = false;
-      $("startBtn").textContent = "Make another code";
+      if (!canLink) { $("startBtn").textContent = "Make another code"; return; }
+      sendInvite(fw, clue, code);
       return;
     }
     var got = readCode($("codeIn").value);
     if (!got) { err.textContent = "That code doesn't match. Check each character and try again."; return; }
     $("codeIn").value = "";
-    closeSheets(); startGame({ mode: "friend", word: got.word, clue: got.clue });
+    closeSheets(); startGame({ mode: "friend", word: got.word, clue: got.clue, level: got.level });
+  }
+  function sendInvite(word, clue, code) {
+    var id = randId(12), friend = cleanName($("friendName").value);
+    settings.myName = cleanName($("myName").value);
+    var url = inviteURL(id, code);
+    var text = "I hid a word for you in Leaf & Letter." + (clue ? " Clue: " + clue.charAt(0).toUpperCase() + clue.slice(1) + (/[.?]$/.test(clue) ? "" : ".") : "") + " Can you find it before the ivy is bare?";
+    var done = function (msg) {
+      sent[id] = { word: word, clue: clue, level: prefs.level, name: friend, at: Date.now(), seq: "", opened: false, done: false, seen: true, here: false, hereAt: 0, updated: Date.now() };
+      $("fWord").value = ""; $("fClue").value = ""; $("friendName").value = "";
+      save(); syncWatchers(); renderBadge();
+      track("invite_sent", { level: LEVELS[prefs.level].name });
+      openWords();
+      toast(msg || "Sent. You'll see " + (friend || "your friend") + "'s guesses here.");
+    };
+    var copy = function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text + " " + url).then(function () { done("Invite copied. Paste it into a message to your friend."); }, function () { $("newErr").textContent = "Couldn't copy the link. Send the code above instead."; });
+      else $("newErr").textContent = "Couldn't copy the link. Send the code above instead.";
+    };
+    if (navigator.share) navigator.share({ title: "Leaf & Letter", text: text, url: url }).then(function () { done(); }, function (e) { if (!e || e.name !== "AbortError") copy(); });
+    else copy();
   }
 
+  function overCopy() {
+    var won = game.won;
+    return {
+      title: won ? "The garden blooms" : "The ivy is bare",
+      text: won
+        ? (game.misses.length === 0 && !game.dug ? "Not a single leaf lost. " : "Solved with " + game.lives + (game.lives === 1 ? " leaf" : " leaves") + " still on the vine. ") + "Streak: " + record.streak + "."
+        : (game.gaveUp ? "You set down the trowel on this one. " : "Every leaf has fallen. ") + (game.level > 0 ? "Try a " + LEVELS[game.level - 1].name + " vine for a gentler round." : "Try a new word.")
+    };
+  }
   function showOver() {
     if (!game || !game.over) return;
-    var won = game.won;
+    var won = game.won, oc = overCopy();
     $("overCrest").innerHTML = won
       ? '<svg class="crest" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="40" fill="var(--panel)" stroke="var(--panel-line)"/><g transform="translate(42 44)">' +
         [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ')" d="M0 0C-9-6-9-20 0-26 9-20 9-6 0 0Z" fill="var(--accent)" opacity=".85" stroke="var(--vine)" stroke-width="1"/>'; }).join("") +
         '<circle r="5" fill="#f6d36b" stroke="var(--vine)" stroke-width="1"/></g></svg>'
       : '<svg class="crest" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="40" fill="var(--panel)" stroke="var(--panel-line)"/><path d="M42 70V30" stroke="var(--frame2)" stroke-width="3" stroke-linecap="round"/><path d="M42 40C32 38 26 30 24 20M42 50c10-2 16-8 18-18" fill="none" stroke="var(--frame2)" stroke-width="2.4" stroke-linecap="round"/><path d="M58 60c4 2 6 6 4 10-4-1-6-5-4-10Z" fill="var(--vine2)" opacity=".7"/></svg>';
-    $("overTitle").textContent = won ? "The garden blooms" : "The ivy is bare";
+    $("overTitle").textContent = oc.title;
     $("overWord").textContent = game.word;
-    var L = LEVELS[game.level];
-    $("overText").textContent = won
-      ? (game.misses.length === 0 && !game.dug ? "Not a single leaf lost. " : "Solved with " + game.lives + (game.lives === 1 ? " leaf" : " leaves") + " still on the vine. ") + "Streak: " + record.streak + "."
-      : (game.gaveUp ? "You set down the trowel on this one. " : "Every leaf has fallen. ") + "Try a " + (game.level > 0 ? LEVELS[game.level - 1].name + " vine for a gentler round." : "new word.");
-    $("againBtn").textContent = game.mode === "ai" ? "Next word" : game.mode === "pvp" ? "Swap and play again" : "Enter another code";
-    save();
+    $("overText").textContent = oc.text + (game.id && hasLive ? " " + (game.from || "Your friend") + " can see how it went." : "");
+    $("againBtn").textContent = game.mode === "ai" ? "Next word" : game.mode === "pvp" ? "Swap and play again" : game.id ? "Hide a word back" : "Enter another code";
+    $("live").textContent = oc.title + ". The word was " + game.word + ".";
     openSheet("overSheet");
   }
 
@@ -979,7 +1329,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     $("seasons").innerHTML = SEASONS.map(function (s) {
       return '<button type="button" class="season" data-v="' + s.id + '" aria-pressed="' + (s.id === settings.season) + '"><i style="background:' + s.sw + '"></i>' + s.name + "</button>";
     }).join("");
-    ["swSound", "swAmb"].forEach(function (id) { var b = $(id); b.setAttribute("aria-checked", String(!!settings[b.dataset.k])); });
+    ["swSound", "swAmb", "swStats"].forEach(function (id) { var b = $(id); b.setAttribute("aria-checked", String(!!settings[b.dataset.k])); });
+    $("statsRow").hidden = !canLink;
     $("rPlayed").textContent = record.played; $("rWon").textContent = record.won;
     $("rStreak").textContent = record.streak; $("rBest").textContent = record.best;
   }
@@ -989,9 +1340,103 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     resetAmbient();
   }
 
+  /* ---------- play stats ----------
+     Two destinations, both switched off by the "Share anonymous play stats" setting:
+     1. Google Analytics (when GA_ID is set): city-level location, devices, sessions, plus game events.
+     2. The game's Firebase database: /logs/sessions/<id> (one per visit, app "hangman") and /logs/words/<push id>
+        (one per finished or abandoned round). The database rules make /logs write-only.
+     Friends' secret words are never logged; only the computer's words are. */
+  var GA_ID = "G-K2XD82086T";
+  var STATS_VER = "hangman-2026.11";
+  function statsOn() { return settings.stats && canLink; }
+  var sess = { id: randId(16), start: Date.now(), active: 0, visibleSince: document.hidden ? 0 : Date.now(), games: 0, moves: 0, beat: 0 };
+  function modeName(m) { m = m || (game && game.mode); return m === "ai" ? "computer" : m === "friend" ? "friend" : "same_phone"; }
+  function deviceInfo() {
+    var ua = navigator.userAgent || "", w = screen.width, h = screen.height, s = Math.min(w, h), l = Math.max(w, h);
+    var ipad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var ios = /iPhone|iPod/.test(ua) || ipad;
+    var osv = (ua.match(/OS (\d+)[_.](\d+)/) || [])[0] || "";
+    var kind = /iPhone/.test(ua) ? "iPhone" : ipad ? "iPad" : /Android/.test(ua) ? "Android" : /Mobi/.test(ua) ? "Phone" : "Desktop";
+    var SIZES = { "440x956": "Pro Max (16 or newer)", "430x932": "Pro Max or Plus (14-15)", "420x912": "Air", "402x874": "Pro (16 or newer)",
+      "393x852": "14 Pro-16", "390x844": "12-14", "428x926": "12-13 Pro Max or 14 Plus", "414x896": "XR, 11 or Xs Max", "375x812": "X-13 mini",
+      "414x736": "Plus (6-8)", "375x667": "SE or 6-8", "320x568": "SE (1st gen) or 5" };
+    var guessName = kind === "iPhone" ? (SIZES[s + "x" + l] ? "iPhone " + SIZES[s + "x" + l] : "iPhone " + s + "x" + l) : kind;
+    return {
+      kind: kind, guess: guessName, os: ios ? "iOS" : /Android/.test(ua) ? "Android" : /Windows/.test(ua) ? "Windows" : /Mac OS X/.test(ua) ? "macOS" : "Other",
+      osv: osv.replace(/^OS /, "").replace("_", "."), w: s, h: l, dpr: window.devicePixelRatio || 1,
+      app: !!(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)),
+      lang: (navigator.language || "").slice(0, 12), tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || "").slice(0, 40)
+    };
+  }
+  function activeSecs() { return Math.round((sess.active + (sess.visibleSince ? Date.now() - sess.visibleSince : 0)) / 1000); }
+  function fbLog(path, method, body, keep) {
+    if (!statsOn() || !FB) return;
+    try { fetch(FB + "/logs/" + path + ".json", { method: method, body: JSON.stringify(body), keepalive: !!keep }).catch(noop); } catch (e) {}
+  }
+  function logSession(keep) {
+    fbLog("sessions/" + sess.id, "PUT", { start: sess.start, last: { ".sv": "timestamp" }, active: activeSecs(), games: sess.games, moves: sess.moves, ver: STATS_VER, app: "hangman", dev: deviceInfo() }, keep);
+  }
+  function logGame(result) {
+    var info = {
+      mode: modeName(), level: game.level, result: result, len: game.word.replace(/[^a-z]/g, "").length,
+      guesses: game.seq.replace("!", "").length, misses: game.misses.length, dug: game.dug,
+      dur: Math.max(0, Math.round((Date.now() - (game.t0 || Date.now())) / 1000)), season: settings.season
+    };
+    if (game.mode === "ai") { info.bed = game.bed; info.word = game.word; }
+    sess.games++; sess.moves += info.guesses;
+    fbLog("words", "POST", Object.assign({ at: { ".sv": "timestamp" }, sid: sess.id }, info));
+    track("game_end", { mode: info.mode, result: info.result, guesses: info.guesses, misses: info.misses, duration_sec: info.dur, level: LEVELS[info.level].name });
+    logSession();
+  }
+  function statsCheck() {
+    try { if (game.over && !game.logged) { game.logged = true; save(); logGame(game.won ? "won" : game.gaveUp ? "gave_up" : "lost"); } } catch (e) {}
+  }
+  function logAbandoned() {
+    try { if (game && !game.over && !game.logged && game.seq.length > 0) { game.logged = true; logGame("abandoned"); } } catch (e) {}
+  }
+  /* Error reports: up to 5 per visit go to /logs/errors so problems on real phones can be diagnosed. */
+  var errCount = 0;
+  function reportError(msg, where) {
+    try {
+      msg = String(msg || "");
+      if (errCount >= 5 || !msg || msg === "Script error.") return;
+      errCount++;
+      var d = deviceInfo();
+      fbLog("errors", "POST", { at: { ".sv": "timestamp" }, sid: sess.id, msg: msg.slice(0, 300), where: String(where || "").slice(0, 200), ver: STATS_VER, dev: (d.guess + " / " + d.os + " " + d.osv).slice(0, 60) });
+    } catch (e) {}
+  }
+  window.addEventListener("error", function (e) { reportError(e.message, (e.filename || "").split("/").pop() + ":" + e.lineno + ":" + e.colno); });
+  window.addEventListener("unhandledrejection", function (e) { var r = e.reason; reportError("Unhandled promise: " + (r && r.message ? r.message : r), r && r.stack ? String(r.stack).split("\n")[1] : ""); });
+  function loadGA() {
+    if (!GA_ID || !statsOn() || window.gtag) return;
+    window["ga-disable-" + GA_ID] = false;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", GA_ID, { app_name: "Leaf & Letter", app_version: STATS_VER, allow_google_signals: false, allow_ad_personalization_signals: false });
+    var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(sc);
+  }
+  function track(name, params) { try { if (window.gtag && statsOn() && GA_ID) window.gtag("event", name, params || {}); } catch (e) {} }
+  function statsToggled() {
+    if (statsOn()) { loadGA(); logSession(); }
+    else if (GA_ID) window["ga-disable-" + GA_ID] = true;
+  }
+  function startStats() {
+    loadGA(); logSession();
+    sess.beat = setInterval(function () { if (!document.hidden) logSession(); }, 120000);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { if (sess.visibleSince) { sess.active += Date.now() - sess.visibleSince; sess.visibleSince = 0; } logSession(true); }
+      else { sess.visibleSince = Date.now(); logSession(); }
+    });
+    window.addEventListener("pagehide", function () { logSession(true); });
+  }
+
   /* ---------- wiring ---------- */
   $("menuBtn").addEventListener("click", function () { SFX.tap(); renderMenu(); openSheet("menuSheet"); });
+  $("wordsBtn").addEventListener("click", function () { SFX.tap(); openWords(); });
   $("newBtn").addEventListener("click", function () { SFX.tap(); openNew(); });
+  $("inviteNewBtn").addEventListener("click", function () { openNew("friend", "send"); });
   $("hintBtn").addEventListener("click", dig);
   $("giveBtn").addEventListener("click", giveUp);
   $("scrim").addEventListener("click", closeSheets);
@@ -1004,25 +1449,31 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   $("copyCode").addEventListener("click", function () {
     var inp = $("codeOut"), v = inp.value;
     var fallback = function () { inp.focus(); inp.select(); toast("Code selected. Copy it from here."); };
-    try {
-      navigator.clipboard.writeText(v).then(function () { toast("Code copied"); }, fallback);
-    } catch (e) { fallback(); }
+    try { navigator.clipboard.writeText(v).then(function () { toast("Code copied"); }, fallback); } catch (e) { fallback(); }
+  });
+  $("wordsList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-rm]"); if (!b) return;
+    var id = b.getAttribute("data-rm");
+    if (!b.hasAttribute("data-armed")) { b.setAttribute("data-armed", ""); b.textContent = "Tap to remove"; setTimeout(function () { if (b.isConnected) { b.removeAttribute("data-armed"); b.textContent = "Remove"; } }, 2600); return; }
+    delete sent[id]; save(); syncWatchers(); renderBadge(); paintWords();
   });
   $("againBtn").addEventListener("click", function () {
     var m = game ? game.mode : "ai";
     closeSheets();
     if (m === "ai") startGame({ mode: "ai" });
     else if (m === "pvp") openNew("pvp");
+    else if (game.id && canLink) openNew("friend", "send");
     else openNew("friend", "get");
   });
   $("seasons").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     settings.season = b.dataset.v; applySeason(); renderMenu(); save();
   });
-  ["swSound", "swAmb"].forEach(function (id) {
+  ["swSound", "swAmb", "swStats"].forEach(function (id) {
     $(id).addEventListener("click", function () {
       var k = $(id).dataset.k; settings[k] = !settings[k];
       if (k === "ambience") resetAmbient();
+      if (k === "stats") statsToggled();
       renderMenu(); save();
       if (k === "sound" && settings.sound) SFX.tap();
     });
@@ -1033,7 +1484,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     b.dataset.arm = "1"; b.textContent = "Tap again to clear";
     setTimeout(function () { delete b.dataset.arm; b.textContent = "Clear record"; }, 2600);
   });
-  ["pWord", "pClue", "fWord", "fClue", "codeIn"].forEach(function (id) {
+  ["pWord", "pClue", "fWord", "fClue", "codeIn", "friendName", "myName"].forEach(function (id) {
     $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); startFromSheet(); } });
   });
   document.addEventListener("keydown", function (e) {
@@ -1044,7 +1495,14 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); guess(e.key.toLowerCase()); }
   });
   window.addEventListener("resize", resizeFx);
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) kickFx(); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) { kickFx(); goOnline(); syncWatchers(); }
+    else { goOffline(); closeWatchers(); }
+  });
+  window.addEventListener("hashchange", function () {
+    var L = readLink();
+    if (L) { closeSheets(); joinLink(L); }
+  });
   if (window.matchMedia) {
     var mq = matchMedia("(prefers-color-scheme: dark)");
     var onScheme = function () { if (settings.season === "auto") resetAmbient(); };
@@ -1052,20 +1510,32 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
     new MutationObserver(onScheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   }
 
+  function joinLink(L) {
+    if (sent[L.id]) { toast("This is the word you hid. Your friend's guesses show up under Your words.", openWords); return; }
+    if (game && game.id === L.id) { toast("Welcome back. Keep guessing."); return; }
+    startGame({ mode: "friend", word: L.word, clue: L.clue, level: L.level, id: L.id, from: L.name });
+    toast((L.name || "A friend") + " hid a word for you. " + LEVELS[game.level].lives + " leaves on the ivy.");
+  }
+
   /* ---------- boot ---------- */
   buildKeys(); buildIvy(); resizeFx();
   window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot(function () { return { game: game }; });
   function start(data) {
     load();
-    if (data && data.game) game = data.game;
+    if (data && data.game) game = cleanGame(data.game) || game;
     applySeason();
-    if (game) render(true); else startGame({ mode: "ai" });
-    if (game.over) render(true);
+    if (statsOn()) startStats();
+    var L = readLink();
+    if (game) { render(true); goOnline(); }
+    if (L) joinLink(L);
+    else if (!game) startGame({ mode: "ai" });
+    syncWatchers(); renderBadge();
   }
   if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
   else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
-    navigator.serviceWorker.register("sw.js").catch(function () {});
+    navigator.serviceWorker.register("sw.js").catch(noop);
   }
 })();
 </script>

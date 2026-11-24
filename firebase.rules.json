@@ -39,6 +39,45 @@
         }
       }
     },
+    "hangman": {
+      "$id": {
+        ".read": "$id.length >= 8 && $id.length <= 16 && $id.matches(/^[A-Za-z0-9_-]+$/)",
+        "state": {
+          ".write": "newData.exists() && $id.length >= 8 && $id.length <= 16 && $id.matches(/^[A-Za-z0-9_-]+$/)",
+          ".validate": "newData.hasChildren(['g', 'by', 'at']) && (!data.exists() || newData.child('g').val().beginsWith(data.child('g').val()))",
+          "g": {
+            ".validate": "newData.isString() && newData.val().length <= 48 && newData.val().beginsWith('h=' + $id + '.') && newData.val().matches(/^h=[A-Za-z0-9_-]+[.][A-Za-z]*!?$/)"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length >= 8 && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9_-]+$/)"
+          },
+          "at": {
+            ".validate": "newData.val() == now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "presence": {
+          "$cid": {
+            ".write": "newData.exists() && $cid.length >= 8 && $cid.length <= 40 && $cid.matches(/^[A-Za-z0-9][A-Za-z0-9_-]+$/)",
+            ".validate": "newData.hasChildren(['on', 'at'])",
+            "on": {
+              ".validate": "newData.isBoolean()"
+            },
+            "at": {
+              ".validate": "newData.val() == now"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
     "logs": {
       "sessions": {
         "$sid": {
@@ -66,6 +105,9 @@
             "$k": {
               ".validate": "$k.length <= 12 && ((newData.isString() && newData.val().length <= 60) || newData.isNumber() || newData.isBoolean())"
             }
+          },
+          "app": {
+            ".validate": "newData.isString() && newData.val().length <= 12"
           },
           "$other": {
             ".validate": false
@@ -108,6 +150,54 @@
           },
           "view": {
             ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "words": {
+        "$wid": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['at', 'sid', 'mode', 'result'])",
+          "at": {
+            ".validate": "newData.val() == now"
+          },
+          "sid": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "mode": {
+            ".validate": "newData.isString() && newData.val().length <= 12"
+          },
+          "level": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+          },
+          "result": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "len": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 40"
+          },
+          "guesses": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 40"
+          },
+          "misses": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 26"
+          },
+          "dug": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 26"
+          },
+          "dur": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+          },
+          "season": {
+            ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "bed": {
+            ".validate": "newData.isString() && newData.val().length <= 12"
+          },
+          "word": {
+            ".validate": "newData.isString() && newData.val().length <= 24 && newData.val().matches(/^[a-z '-]+$/)"
           },
           "$other": {
             ".validate": false
