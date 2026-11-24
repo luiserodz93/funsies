@@ -263,7 +263,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .season{border:2px solid transparent; border-radius:14px; padding:4px 4px 6px; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; font-size:11.5px; font-weight:700}
 .season[aria-pressed="true"]{border-color:var(--accent)}
 .season i{display:block; width:100%; aspect-ratio:1; border-radius:10px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
-.links{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px}
+.links{display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:16px}
 .links button{border:1.5px solid var(--panel-line); background:transparent; border-radius:12px; padding:12px 8px; font-weight:700; cursor:pointer}
 .links .danger{color:var(--check)}
 .guide{display:grid; gap:10px}
@@ -420,6 +420,15 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 <section class="sheet" id="menuSheet" hidden role="dialog" aria-labelledby="menuTitle">
   <div class="grab"></div>
   <h2 id="menuTitle">Garden settings</h2>
+  <div id="strengthBox" hidden>
+    <h3>Computer strength</h3>
+    <div class="seg" id="strengthSeg">
+      <button data-i="0">Seedling</button>
+      <button data-i="1">Willow</button>
+      <button data-i="2">Ancient Oak</button>
+    </div>
+    <p class="note" id="strengthNote"></p>
+  </div>
   <h3>Season</h3>
   <div class="seasons" id="seasons"></div>
   <h3>Comforts</h3>
@@ -436,6 +445,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   </div>
   <p class="note viewNote"></p>
   <div class="links">
+    <button id="restartBtn">Restart game</button>
     <button id="shareBtn">Share link</button>
     <button id="resignBtn" class="danger">Resign</button>
   </div>
@@ -954,7 +964,7 @@ var Chess = (function () {
     slots[activeKey] = snap;
     try { localStorage.setItem(STORE, JSON.stringify({ settings: settings, game: game, moves: snap.moves })); } catch (e) {}
     persistSlots();
-    renderBadge();
+    try { renderBadge(); } catch (e) {}
   }
   function cleanGame(g) {
     g = g || {};
@@ -967,7 +977,7 @@ var Chess = (function () {
   }
   /* Load a stored game into the live position without rendering. */
   function applySlot(s) {
-    token++; thinking = false;
+    cancelAI();
     pos = new C.Pos(); hist = []; keys = [];
     (s.moves || []).every(function (m) { var lg = pos.legal(); if (lg.indexOf(m) < 0) return false; record(m, lg); return true; });
     legal = pos.legal();
@@ -1134,6 +1144,8 @@ var Chess = (function () {
       o.start(t); o2.start(t); o.stop(t + dec + 0.1); o2.stop(t + dec + 0.1);
     });
   }
+  function safe(f) { return function () { try { return f.apply(this, arguments); } catch (e) {} }; }
+  tock = safe(tock); rustle = safe(rustle); bell = safe(bell);
   var SFX = {
     move: function () { tock(0.9, 1); },
     capture: function () { tock(1.2, 0.8); rustle(1); },
@@ -1439,7 +1451,7 @@ var Chess = (function () {
     return { id: mt[1], ms: ms, resign: mt[3] == null ? -1 : +mt[3], sender: mt[4] == null ? -1 : +mt[4], name: mt[5] ? decName(mt[5]) : "" };
   }
   function adopt(ms) {
-    token++; thinking = false;
+    cancelAI();
     pos = new C.Pos(); hist = []; keys = [];
     ms.forEach(function (m) { record(m, pos.legal()); });
     legal = pos.legal();
@@ -1714,7 +1726,7 @@ var Chess = (function () {
   function undoOne() { pos.unmake(); hist.pop(); keys.pop(); if (keys.length === 1 && !hist.length) keys = []; }
   function undo() {
     if (!canUndo()) return;
-    token++; thinking = false;
+    cancelAI();
     if (game.mode === "ai") {
       if (pos.turn !== game.ai) { undoOne(); }
       while (hist.length && pos.turn === game.ai) undoOne();
@@ -1730,6 +1742,15 @@ var Chess = (function () {
 
   /* ---------- AI ---------- */
   var worker = null, wid = 0, waiting = {};
+  /* Cancel the computer's turn: ignore its result and stop the search still running in the worker. */
+  function cancelAI() {
+    var busySearch = thinking || Object.keys(waiting).length > 0;
+    token++; thinking = false;
+    if (busySearch && worker) { try { worker.terminate(); } catch (e) {} worker = null; }
+    waiting = {};
+  }
+  /* Without a worker the search runs on the main thread, so keep it short to keep the screen responsive. */
+  function lite(opt) { return { depth: Math.min(opt.depth, 4), time: Math.min(opt.time, 600), noise: opt.noise }; }
   function getWorker() {
     if (worker !== null) return worker;
     try {
@@ -1738,7 +1759,7 @@ var Chess = (function () {
       worker.onmessage = function (e) { var cb = waiting[e.data.id]; delete waiting[e.data.id]; if (cb) cb.res(e.data.m); };
       worker.onerror = function () {
         worker = false;
-        Object.keys(waiting).forEach(function (id) { var w = waiting[id]; delete waiting[id]; w.res(C.think(new C.Pos(w.fen), w.opt)); });
+        Object.keys(waiting).forEach(function (id) { var w = waiting[id]; delete waiting[id]; w.res(C.think(new C.Pos(w.fen), lite(w.opt))); });
       };
     } catch (e) { worker = false; }
     return worker;
@@ -1750,8 +1771,8 @@ var Chess = (function () {
         var id = ++wid;
         waiting[id] = { res: res, fen: fen, opt: opt };
         w.postMessage({ id: id, fen: fen, opt: opt });
-        setTimeout(function () { if (waiting[id]) { delete waiting[id]; res(C.think(new C.Pos(fen), opt)); } }, opt.time + 5000);
-      } else setTimeout(function () { res(C.think(new C.Pos(fen), opt)); }, 40);
+        setTimeout(function () { if (waiting[id]) { delete waiting[id]; res(C.think(new C.Pos(fen), lite(opt))); } }, opt.time + 5000);
+      } else setTimeout(function () { res(C.think(new C.Pos(fen), lite(opt))); }, 40);
     });
   }
   function maybeAI() {
@@ -1968,7 +1989,7 @@ var Chess = (function () {
     if (game.mode !== "link" && mode !== "link") logAbandoned();
     save();
     disconnect();
-    token++; thinking = false;
+    cancelAI();
     pos = new C.Pos(); hist = []; keys = []; legal = pos.legal();
     game = { mode: mode, ai: human ^ 1, level: level, result: null, me: human, id: mode === "link" ? newId() + newId().slice(0, 4) : "", sent: false, invited: false, pub: 0, t0: Date.now(), logged: false, name: name || "", pid: mode === "link" ? newPid() : "" };
     track("game_start", { mode: modeName(), level: mode === "ai" ? LEVELS[level].name : "", side: SIDE[human] });
@@ -1990,7 +2011,11 @@ var Chess = (function () {
       return '<button class="season" data-s="' + s.id + '" aria-pressed="' + (settings.season === s.id) + '"><i style="background:' + s.sw + '"></i>' + s.name + "</button>";
     }).join("");
     ["swSound", "swAmb", "swMoves", "swStats"].forEach(function (id) { var b = $(id); b.setAttribute("aria-checked", !!settings[b.dataset.k]); });
-    $("resignBtn").disabled = !!game.result || (!hist.length);
+    $("resignBtn").disabled = !!game.result;
+    $("strengthBox").hidden = game.mode !== "ai";
+    document.querySelectorAll("#strengthSeg button").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.i === game.level); });
+    $("strengthNote").textContent = LEVELS[game.level].blurb + " Changing it keeps your current game going.";
+    $("restartBtn").hidden = game.mode === "link";
     $("viewOff").hidden = game.mode === "pvp";
     $("menuViewSeg").hidden = game.mode !== "pvp";
     paintView();
@@ -2010,13 +2035,24 @@ var Chess = (function () {
     });
   });
   $("resignBtn").addEventListener("click", function () {
-    if (game.result || !hist.length) return;
+    if (game.result) return;
     var loser = game.mode === "ai" ? game.ai ^ 1 : game.mode === "link" ? game.me : pos.turn;
-    token++; thinking = false;
+    cancelAI();
     game.result = { type: "resign", winner: loser ^ 1 };
     if (game.mode === "link") { game.sent = false; syncURL(); pushState(); }
     closeSheets(); render(); save(); SFX.draw();
     setTimeout(showOver, 300);
+  });
+  $("strengthSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b || game.mode !== "ai") return;
+    game.level = +b.dataset.i;
+    save(); paintMenu(); renderTools();
+    toast(LEVELS[game.level].name + " takes over from the next move.");
+  });
+  $("restartBtn").addEventListener("click", function () {
+    closeSheets();
+    if (game.mode === "link") return;
+    newGame(game.mode, game.level, game.mode === "ai" ? game.ai ^ 1 : 0);
   });
   $("shareBtn").addEventListener("click", function () {
     if (game.mode === "link" && canLink) { closeSheets(); sendLink(); return; }
@@ -2207,11 +2243,24 @@ var Chess = (function () {
     logSession();
   }
   function statsCheck() {
-    if (game.result && !game.logged) { game.logged = true; save(); logGame(game.result); }
+    try { if (game.result && !game.logged) { game.logged = true; save(); logGame(game.result); } } catch (e) {}
   }
   function logAbandoned() {
-    if (!game.result && !game.logged && hist.length > 0) { game.logged = true; logGame(null); }
+    try { if (!game.result && !game.logged && hist.length > 0) { game.logged = true; logGame(null); } } catch (e) {}
   }
+  /* Error reports: up to 5 per visit go to /logs/errors so problems on real phones can be diagnosed. */
+  var errCount = 0;
+  function reportError(msg, where) {
+    try {
+      msg = String(msg || "");
+      if (errCount >= 5 || !msg || msg === "Script error.") return;
+      errCount++;
+      var d = deviceInfo();
+      fbLog("errors", "POST", { at: { ".sv": "timestamp" }, sid: sess.id, msg: msg.slice(0, 300), where: String(where || "").slice(0, 200), ver: STATS_VER, dev: (d.guess + " / " + d.os + " " + d.osv).slice(0, 60) });
+    } catch (e) {}
+  }
+  window.addEventListener("error", function (e) { reportError(e.message, (e.filename || "").split("/").pop() + ":" + e.lineno + ":" + e.colno); });
+  window.addEventListener("unhandledrejection", function (e) { var r = e.reason; reportError("Unhandled promise: " + (r && r.message ? r.message : r), r && r.stack ? String(r.stack).split("\n")[1] : ""); });
   function loadGA() {
     if (!GA_ID || !statsOn() || window.gtag) return;
     window["ga-disable-" + GA_ID] = false;
@@ -2222,7 +2271,7 @@ var Chess = (function () {
     var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
     document.head.appendChild(sc);
   }
-  function track(name, params) { if (window.gtag && statsOn() && GA_ID) window.gtag("event", name, params || {}); }
+  function track(name, params) { try { if (window.gtag && statsOn() && GA_ID) window.gtag("event", name, params || {}); } catch (e) {} }
   function statsToggled() {
     if (statsOn()) { loadGA(); logSession(); }
     else if (GA_ID) window["ga-disable-" + GA_ID] = true;

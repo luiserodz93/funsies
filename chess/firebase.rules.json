@@ -113,6 +113,33 @@
             ".validate": false
           }
         }
+      },
+      "errors": {
+        "$eid": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['at', 'msg'])",
+          "at": {
+            ".validate": "newData.val() == now"
+          },
+          "sid": {
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          },
+          "msg": {
+            ".validate": "newData.isString() && newData.val().length <= 300"
+          },
+          "where": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "ver": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "dev": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
       }
     }
   }
