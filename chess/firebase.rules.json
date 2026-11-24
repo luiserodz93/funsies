@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "games": {
+      "$id": {
+        ".read": "$id.length >= 8 && $id.length <= 16 && $id.matches(/^[A-Za-z0-9_-]+$/)",
+        "state": {
+          ".write": "newData.exists() && $id.length >= 8 && $id.length <= 16 && $id.matches(/^[A-Za-z0-9_-]+$/)",
+          ".validate": "newData.hasChildren(['g', 'by', 'at']) && (!data.exists() || newData.child('g').val().length >= data.child('g').val().length)",
+          "g": { ".validate": "newData.isString() && newData.val().length <= 2000 && newData.val().beginsWith('g=' + $id + '.')" },
+          "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "at": { ".validate": "newData.val() == now" },
+          "$other": { ".validate": false }
+        },
+        "presence": {
+          "$cid": {
+            ".write": "newData.exists() && $cid.length >= 8 && $cid.length <= 40 && $cid.matches(/^[A-Za-z0-9_-]+$/)",
+            ".validate": "newData.hasChildren(['on', 'at'])",
+            "on": { ".validate": "newData.isBoolean()" },
+            "at": { ".validate": "newData.val() == now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

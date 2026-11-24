@@ -356,7 +356,7 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
   <div id="linkOpts">
     <h3>How it works</h3>
     <p class="note" style="margin-top:0">Text your friend one invite link from Messages or WhatsApp. While you both have the game open, moves appear on each other's phone instantly. If one of you steps away, the game catches up when you come back. No account or app needed.</p>
-    <p class="note">Moves travel through the free ntfy.sh relay on a private, randomly named channel.</p>
+    <p class="note" id="relayNote"></p>
     <p class="note" id="linkWarn" hidden><b>This preview can't connect to other phones.</b> Use the GitHub Pages version of the game for this mode.</p>
     <h3>Play as</h3>
     <div class="seg" id="linkSideSeg">
@@ -1395,18 +1395,27 @@ var Chess = (function () {
     return null;
   }
 
-  /* ---------- live play: game states relayed through ntfy.sh (public, account-free pub/sub) ---------- */
+  /* ---------- live play ----------
+     Firebase Realtime Database (when FIREBASE_DB is set) or the ntfy.sh relay as a fallback.
+     Firebase is used through its REST + streaming API, so no SDK is loaded.
+     Firebase data: /games/<id>/state {g, by, at} and /games/<id>/presence/<clientId> {on, at}. */
+  var FIREBASE_DB = "";
+  var FB = (window.ARBOR_FIREBASE || FIREBASE_DB || "").replace(/\/+$/, "");
   var RELAY = window.ARBOR_RELAY || "https://ntfy.sh/";
   var hasLive = canLink && typeof EventSource !== "undefined" && typeof fetch !== "undefined";
-  var live = { es: null, connected: false, friend: "", friendAt: 0, hi: false };
+  var live = { es: null, connected: false, friend: "", friendAt: 0, hi: false, mirror: {}, beat: 0 };
   function topic() { return "arborarch_" + game.id; }
   function friendHere() { return game.mode === "link" && live.friend === "here" && Date.now() / 1000 - live.friendAt < 900; }
-  function disconnect() { if (live.es) { live.es.close(); live.es = null; } live.connected = false; live.friend = ""; }
+  function disconnect() {
+    if (live.es) { live.es.close(); live.es = null; }
+    clearInterval(live.beat); live.beat = 0;
+    live.connected = false; live.friend = ""; live.mirror = {};
+  }
   function connect() {
     disconnect();
     if (game.mode !== "link" || !hasLive || !game.id) return;
     var es;
-    try { es = new EventSource(RELAY + topic() + "/sse?since=all"); } catch (e) { return; }
+    try { es = new EventSource(FB ? FB + "/games/" + game.id + ".json" : RELAY + topic() + "/sse?since=all"); } catch (e) { return; }
     live.es = es; live.hi = false;
     es.onopen = function () {
       if (live.es !== es) return;
@@ -1416,11 +1425,34 @@ var Chess = (function () {
       renderPlayers(); renderTools();
     };
     es.onerror = function () { if (live.es !== es) return; live.connected = false; renderPlayers(); renderTools(); };
-    es.onmessage = function (e) { if (live.es !== es) return; var d; try { d = JSON.parse(e.data); } catch (x) { return; } onRelay(d); };
+    if (FB) {
+      var onFb = function (e) {
+        if (live.es !== es) return;
+        var d; try { d = JSON.parse(e.data); } catch (x) { return; }
+        if (!d || typeof d.path !== "string") return;
+        fbApply(live.mirror, d.path, d.data, e.type === "patch");
+        fbSync();
+      };
+      es.addEventListener("put", onFb);
+      es.addEventListener("patch", onFb);
+      es.addEventListener("cancel", function () { if (live.es === es) { es.close(); live.connected = false; renderTools(); } });
+      live.beat = setInterval(function () { if (live.connected && !document.hidden) publish("hi").catch(function () {}); }, 240000);
+    } else {
+      es.onmessage = function (e) { if (live.es !== es) return; var d; try { d = JSON.parse(e.data); } catch (x) { return; } onRelay(d); };
+    }
   }
   function publish(t) {
     if (!hasLive || game.mode !== "link") return Promise.reject(new Error("offline"));
-    var body = JSON.stringify({ v: 1, t: t, from: clientId, g: linkURL().split("#")[1] });
+    var g = linkURL().split("#")[1], req;
+    if (FB) {
+      var stamp = { ".sv": "timestamp" };
+      req = t === "s"
+        ? { url: FB + "/games/" + game.id + "/state.json", body: { g: g, by: clientId, at: stamp } }
+        : { url: FB + "/games/" + game.id + "/presence/" + clientId + ".json", body: { on: t !== "bye", at: stamp } };
+      return fetch(req.url, { method: "PUT", body: JSON.stringify(req.body), keepalive: t === "bye" })
+        .then(function (r) { if (!r.ok) throw new Error("firebase " + r.status); });
+    }
+    var body = JSON.stringify({ v: 1, t: t, from: clientId, g: g });
     return fetch(RELAY + topic(), { method: "POST", body: body, keepalive: t === "bye" }).then(function (r) { if (!r.ok) throw new Error("relay " + r.status); });
   }
   function pushState() {
@@ -1430,6 +1462,42 @@ var Chess = (function () {
       if (game.invited) game.sent = true;
       save(); renderTools(); renderPlayers();
     }, function () { game.sent = false; save(); renderTools(); renderPlayers(); });
+  }
+  /* Apply a Firebase streaming event (put replaces, patch merges children) to the local mirror. */
+  function fbApply(root, path, data, patch) {
+    var parts = path.split("/").filter(Boolean), node, i, k;
+    if (!parts.length) {
+      if (!patch) { root.v = data; return; }
+      if (!root.v || typeof root.v !== "object") root.v = {};
+      node = root.v;
+    } else {
+      if (!root.v || typeof root.v !== "object") root.v = {};
+      var o = root.v;
+      for (i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== "object") o[parts[i]] = {}; o = o[parts[i]]; }
+      var last = parts[parts.length - 1];
+      if (!patch) { if (data === null) delete o[last]; else o[last] = data; return; }
+      if (!o[last] || typeof o[last] !== "object") o[last] = {};
+      node = o[last];
+    }
+    if (data && typeof data === "object") for (k in data) { if (data[k] === null) delete node[k]; else node[k] = data[k]; }
+  }
+  function fbSync() {
+    var v = live.mirror.v || {};
+    if (v.state && typeof v.state.g === "string") mergeRemote(v.state.g);
+    var pres = v.presence || {}, best = null, wasHere = friendHere();
+    Object.keys(pres).forEach(function (cid) {
+      var p = pres[cid];
+      if (cid === clientId || !p || typeof p.at !== "number") return;
+      if (!best || p.at > best.at) best = p;
+    });
+    if (best) {
+      game.invited = true;
+      if (game.pub >= hist.length && !game.result) game.sent = true;
+      live.friend = best.on ? "here" : "away"; live.friendAt = best.at / 1000;
+      if (!wasHere && friendHere()) toast("Your friend is here. Moves now sync live.");
+      save();
+    }
+    renderPlayers(); renderTools();
   }
   function onRelay(d) {
     if (!d || (d.event && d.event !== "message") || typeof d.message !== "string") return;
@@ -1713,6 +1781,7 @@ var Chess = (function () {
     $("modeLink").setAttribute("aria-pressed", draft.mode === "link");
     $("linkOpts").hidden = draft.mode !== "link";
     $("linkWarn").hidden = canLink;
+    $("relayNote").textContent = FB ? "Moves sync through the game's own Firebase database, on a private, randomly named game." : "Moves travel through the free ntfy.sh relay on a private, randomly named channel.";
     $("startBtn").disabled = draft.mode === "link" && !canLink;
     $("startBtn").style.opacity = $("startBtn").disabled ? ".45" : "";
     document.querySelectorAll("#linkSideSeg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.v === draft.linkSide); });
