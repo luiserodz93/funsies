@@ -1,0 +1,15 @@
+{
+  "name": "La Mesa",
+  "short_name": "La Mesa",
+  "description": "Puerto Rican dominoes for four, in two teams.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#d9cfb4",
+  "theme_color": "#d9cfb4",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

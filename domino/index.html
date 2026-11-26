@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>La Mesa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.firebaseio.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#d9cfb4">
+<meta name="description" content="Puerto Rican dominoes for four, in two teams: play with a friend and two computers, or alone with three.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="La Mesa">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: a domino table in a stone plaza. The other three seats sit along the top, the table
+   fills the middle, and your tiles stand in a rack at the bottom. */
+:root{
+  --bg1:#f3ecd9; --bg2:#d9cfb4; --ink:#2c2618; --ink2:#6a604a;
+  --panel:rgba(255,252,242,.7); --panel-line:rgba(70,56,30,.16); --panel-solid:#faf5e8;
+  --felt1:#2f6b4f; --felt2:#1f4a37; --rim1:#9a6a3e; --rim2:#5e3c1f;
+  --tile:#fbf7ec; --tile2:#e9e0c8; --pip:#1f1a12; --tile-line:rgba(40,30,10,.35);
+  --back1:#7a2e2a; --back2:#4e1b19;
+  --accent:#b8466a; --accent-ink:#fff8f6; --teamA:#3f7d4a; --teamB:#b4572d;
+  --glow:#f2c94c; --shadow:rgba(50,40,20,.3);
+  --font-display:"Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg1:#1b2320; --bg2:#0e1412; --ink:#ece9de; --ink2:#a9a896;
+    --panel:rgba(30,40,36,.74); --panel-line:rgba(220,230,200,.12); --panel-solid:#1d2824;
+    --felt1:#24533e; --felt2:#143024; --rim1:#5d4026; --rim2:#33210f;
+    --tile:#f1eadb; --tile2:#d6ccb2; --pip:#1a150d; --tile-line:rgba(30,20,5,.4);
+    --back1:#6b2724; --back2:#3a1312;
+    --accent:#e8c45e; --accent-ink:#1b1608; --teamA:#7dbb7f; --teamB:#e48a5c;
+    --glow:#f2c94c; --shadow:rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg1:#1b2320; --bg2:#0e1412; --ink:#ece9de; --ink2:#a9a896;
+  --panel:rgba(30,40,36,.74); --panel-line:rgba(220,230,200,.12); --panel-solid:#1d2824;
+  --felt1:#24533e; --felt2:#143024; --rim1:#5d4026; --rim2:#33210f;
+  --tile:#f1eadb; --tile2:#d6ccb2; --pip:#1a150d; --tile-line:rgba(30,20,5,.4);
+  --back1:#6b2724; --back2:#3a1312;
+  --accent:#e8c45e; --accent-ink:#1b1608; --teamA:#7dbb7f; --teamB:#e48a5c;
+  --glow:#f2c94c; --shadow:rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:var(--appH, 100%)}
+body{margin:0; overflow:hidden; background:var(--bg2); color:var(--ink); font-family:var(--font-ui); font-size:15px;
+  -webkit-tap-highlight-color:transparent; overscroll-behavior:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none}
+body::before{content:""; position:fixed; inset:0; bottom:calc(-1 * var(--gapB, 0px)); z-index:-2;
+  background:radial-gradient(120% 80% at 50% 0%, var(--bg1) 0%, var(--bg2) 100%)}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.app{height:100%; display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto minmax(0,1fr) auto auto; grid-template-areas:"top" "seats" "table" "status" "rack";
+  gap:8px; max-width:900px; margin:0 auto;
+  padding-top:max(8px, env(safe-area-inset-top, 0px)); padding-bottom:max(10px, env(safe-area-inset-bottom, 0px));
+  padding-left:max(14px, env(safe-area-inset-left, 0px)); padding-right:max(14px, env(safe-area-inset-right, 0px))}
+
+header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:0}
+.brand{display:flex; align-items:center; gap:8px; min-width:0; flex:none}
+.brand svg{width:32px; height:32px; flex:none}
+.brand h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:21px; letter-spacing:-.01em; line-height:1; white-space:nowrap}
+.brand h1 em{font-style:italic; font-weight:500; color:var(--accent)}
+.scores{flex:1; display:flex; justify-content:flex-end; gap:6px; min-width:0}
+.score{display:flex; flex-direction:column; align-items:flex-end; padding:4px 10px; border-radius:12px; background:var(--panel); border:1px solid var(--panel-line); min-width:0; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.score b{font-family:var(--font-display); font-size:20px; line-height:1.05; font-variant-numeric:tabular-nums}
+.score span{font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+.score.a{border-left:4px solid var(--teamA)} .score.b{border-left:4px solid var(--teamB)}
+.score{min-width:56px}
+.target{display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--ink2); padding:0 2px}
+.target span{font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase}
+.target b{font-size:13px; font-weight:800}
+.iconbtn{width:40px; height:40px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); display:grid; place-items:center; flex:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.iconbtn svg{width:22px; height:22px}
+
+.seats{grid-area:seats; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px}
+.seat{position:relative; display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:12px; background:var(--panel); border:1px solid var(--panel-line); min-width:0; transition:box-shadow .25s, border-color .25s}
+.seat .av{width:28px; height:28px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:800; font-size:13px; color:#fff; background:var(--teamB)}
+.seat.ta .av{background:var(--teamA)}
+.seat .who{min-width:0; flex:1}
+.seat .who b{display:block; font-size:13px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.seat .who small{display:block; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.seat .cnt{display:inline-flex; align-items:center; gap:3px; margin-left:6px; font-weight:800; font-variant-numeric:tabular-nums; font-size:12px; color:var(--ink); letter-spacing:0}
+.seat .cnt i{display:block; width:6px; height:11px; border-radius:1.5px; background:linear-gradient(var(--back1), var(--back2))}
+.seat .who small{display:flex; align-items:center}
+.seat.turn{border-color:var(--glow); box-shadow:0 0 0 2px var(--glow), 0 0 16px -2px var(--glow)}
+.seat .dir{font-size:10px; color:var(--ink2); flex:none}
+.bubble{position:absolute; left:50%; top:100%; transform:translate(-50%, 4px); background:var(--ink); color:var(--bg1); font-weight:800; font-size:12px; padding:3px 9px; border-radius:10px; white-space:nowrap; z-index:5; pointer-events:none; animation:pop .25s ease-out}
+@keyframes pop{from{transform:translate(-50%, -2px) scale(.8); opacity:0}}
+
+.table{grid-area:table; position:relative; min-height:0; border-radius:20px; padding:8px;
+  background:linear-gradient(145deg, var(--rim1), var(--rim2)); box-shadow:0 18px 40px -18px var(--shadow), inset 0 1px 0 rgba(255,255,255,.2)}
+.felt{position:absolute; inset:8px; border-radius:14px; overflow:hidden;
+  background:radial-gradient(110% 90% at 50% 40%, var(--felt1), var(--felt2)); box-shadow:inset 0 2px 10px rgba(0,0,0,.35)}
+.felt svg{position:absolute; inset:0; width:100%; height:100%; display:block}
+.felt .hint{position:absolute; inset:0; display:grid; place-items:center; color:rgba(255,255,255,.55); font-family:var(--font-display); font-size:17px; text-align:center; padding:20px; pointer-events:none}
+.ghost{cursor:pointer}
+.ghost rect{animation:breathe 1.2s ease-in-out infinite alternate}
+@keyframes breathe{from{opacity:.55} to{opacity:1}}
+
+.status{grid-area:status; display:flex; align-items:center; justify-content:center; gap:8px; min-height:22px; text-align:center; font-size:13.5px; font-weight:700; color:var(--ink2)}
+.status b{color:var(--ink)}
+.status .me-turn{color:var(--ink); background:var(--glow); color:#2a2208; padding:2px 10px; border-radius:10px}
+
+.rack{grid-area:rack; position:relative; display:flex; justify-content:center; align-items:flex-end; gap:var(--rg, 6px); padding:8px 8px 6px; border-radius:16px; background:var(--panel); border:1px solid var(--panel-line); min-height:calc(var(--tw, 46px) * 2 + 20px); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); transition:box-shadow .25s, border-color .25s}
+.rack.turn{border-color:var(--glow); box-shadow:0 0 0 2px var(--glow)}
+.rack .lbl{position:absolute; left:12px; top:-9px; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; background:var(--panel-solid); color:var(--ink2); padding:1px 8px; border-radius:8px; border:1px solid var(--panel-line); white-space:nowrap; max-width:calc(100% - 24px); overflow:hidden; text-overflow:ellipsis}
+.rack .lbl.ta{color:var(--teamA)}
+.tile{width:var(--tw, 46px); height:calc(var(--tw, 46px) * 2); padding:0; border:0; background:none; flex:none; transition:transform .18s, opacity .18s, filter .18s; position:relative}
+.tile svg{width:100%; height:100%; display:block; filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
+.tile.can{transform:translateY(-6px)}
+.tile.can::after{content:""; position:absolute; left:20%; right:20%; bottom:-7px; height:3px; border-radius:2px; background:var(--glow)}
+.tile.dim{opacity:.45; filter:saturate(.4)}
+.tile.sel{transform:translateY(-14px)}
+.tile.sel svg{filter:drop-shadow(0 0 6px var(--glow)) drop-shadow(0 4px 4px rgba(0,0,0,.3))}
+.reveal{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:3}
+.reveal button{border:0; border-radius:14px; background:var(--accent); color:var(--accent-ink); font-weight:800; padding:12px 18px; box-shadow:0 8px 20px -8px var(--shadow); max-width:90%}
+
+/* Narrow phones (SE, mini): the title gives way to the scores, and seats drop their avatars. */
+@media (max-width: 420px){
+  .brand h1{display:none}
+  .seat{padding:5px 7px}
+  .seat .av{display:none}
+  .seat .who small{font-size:9.5px; letter-spacing:.04em}
+}
+@media (max-width: 340px){ .seat .who small .role{display:none} }
+/* Landscape: brand, scores and seats share one row so the table keeps its height. */
+@media (orientation: landscape) and (max-height: 560px){
+  .app{grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto auto; grid-template-areas:"top seats" "table table" "status status" "rack rack"; gap:6px; max-width:none}
+  .brand h1{display:none}
+  .scores{flex:none}
+  .score{padding:3px 8px} .score b{font-size:17px}
+  .status{min-height:18px; font-size:12.5px}
+  .rack{padding:6px 8px 4px; min-height:calc(var(--tw, 34px) * 2 + 14px)}
+}
+
+/* Sheets */
+.scrim{position:fixed; inset:0; bottom:calc(-1 * var(--gapB, 0px)); background:rgba(10,12,8,.45); z-index:20; opacity:0; pointer-events:none; transition:opacity .2s}
+.scrim.on{opacity:1; pointer-events:auto}
+.sheet{position:fixed; left:50%; bottom:calc(-1 * var(--gapB, 0px)); width:min(560px, 100%); max-height:calc(var(--appH, 100vh) - max(24px, env(safe-area-inset-top, 0px)) - 8px); overflow:auto; transform:translate(-50%, 105%); transition:transform .28s cubic-bezier(.2,.8,.2,1); z-index:21;
+  background:var(--panel-solid); color:var(--ink); border-radius:22px 22px 0 0; border:1px solid var(--panel-line); box-shadow:0 -10px 40px -10px var(--shadow);
+  padding:18px max(18px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px) + var(--gapB, 0px)) max(18px, env(safe-area-inset-left, 0px)); -webkit-user-select:text; user-select:text}
+.sheet.on{transform:translate(-50%, 0)}
+.sheet h2{margin:0 0 4px; font-family:var(--font-display); font-size:24px; line-height:1.15}
+.sheet h3{margin:16px 0 8px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2)}
+.sheet p{margin:6px 0; line-height:1.45; color:var(--ink2)}
+.sheet .x{position:absolute; right:12px; top:12px}
+.opts{display:grid; gap:8px}
+.opt{display:flex; align-items:center; gap:12px; text-align:left; padding:11px 12px; border-radius:14px; border:1.5px solid var(--panel-line); background:var(--panel)}
+.opt b{display:block; font-size:15px}
+.opt small{display:block; color:var(--ink2); font-size:12.5px; line-height:1.3; margin-top:2px}
+.opt[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent)}
+.opt .pic{flex:none; width:46px; height:46px}
+.seg{display:flex; gap:6px; flex-wrap:wrap}
+.seg button{flex:1; min-width:70px; padding:10px 8px; border-radius:12px; border:1.5px solid var(--panel-line); background:var(--panel); font-weight:800}
+.seg button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent); color:var(--accent-ink)}
+.field{display:flex; flex-direction:column; gap:4px; flex:1; min-width:0}
+.field span{font-size:12px; font-weight:700; color:var(--ink2)}
+.field input{padding:11px 12px; border-radius:12px; border:1.5px solid var(--panel-line); background:var(--panel); font-size:16px; width:100%}
+.row{display:flex; gap:10px}
+.big{width:100%; margin-top:18px; padding:14px; border:0; border-radius:14px; background:var(--accent); color:var(--accent-ink); font-weight:800; font-size:16px}
+.ghostbtn{width:100%; margin-top:8px; padding:12px; border-radius:14px; border:1.5px solid var(--panel-line); background:none; font-weight:800}
+.mitem{display:flex; align-items:center; justify-content:space-between; width:100%; padding:13px 4px; border:0; border-bottom:1px solid var(--panel-line); background:none; font-weight:700; font-size:15px; text-align:left}
+.sw{width:44px; height:26px; border-radius:13px; background:var(--panel-line); position:relative; flex:none; transition:background .2s}
+.sw::after{content:""; position:absolute; left:3px; top:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s}
+.sw.on{background:var(--teamA)} .sw.on::after{transform:translateX(18px)}
+.note{font-size:12.5px; color:var(--ink2); margin-top:8px; line-height:1.4}
+
+/* Hand result */
+.res-title{display:flex; align-items:center; gap:10px}
+.res-title .tag{font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:3px 9px; border-radius:9px; color:#fff; background:var(--teamA)}
+.res-title .tag.b{background:var(--teamB)} .res-title .tag.n{background:var(--ink2)}
+.hands{display:grid; gap:6px; margin-top:10px}
+.hrow{display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:12px; background:var(--panel); border:1px solid var(--panel-line)}
+.hrow .nm{width:78px; flex:none; font-weight:800; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hrow .nm.ta{color:var(--teamA)} .hrow .nm.tb{color:var(--teamB)}
+.hrow .ts{flex:1; display:flex; flex-wrap:wrap; gap:3px; min-width:0}
+.hrow .ts svg{width:34px; height:17px}
+.hrow .pt{flex:none; font-weight:800; font-variant-numeric:tabular-nums; min-width:28px; text-align:right}
+.hrow.out{opacity:.7}
+.lines{margin-top:12px; border-top:1px solid var(--panel-line)}
+.lines div{display:flex; justify-content:space-between; padding:7px 2px; border-bottom:1px solid var(--panel-line); font-size:14px}
+.lines div b{font-variant-numeric:tabular-nums}
+.lines .tot{font-weight:800; font-size:15px}
+.board2{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px}
+.board2 > div{padding:10px; border-radius:14px; background:var(--panel); border:1px solid var(--panel-line)}
+.board2 > div.a{border-left:4px solid var(--teamA)} .board2 > div.b{border-left:4px solid var(--teamB)}
+.board2 small{display:block; font-size:11px; font-weight:800; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.board2 b{font-family:var(--font-display); font-size:26px}
+.rules h3{margin-top:14px}
+.rules ul{margin:4px 0; padding-left:20px; color:var(--ink2); line-height:1.45}
+.rules li{margin:3px 0}
+.rules b{color:var(--ink)}
+.toast{position:fixed; left:50%; top:calc(max(8px, env(safe-area-inset-top, 0px)) + 54px); transform:translateX(-50%); background:var(--ink); color:var(--bg1); padding:8px 14px; border-radius:12px; font-weight:700; font-size:14px; z-index:30; opacity:0; transition:opacity .2s; pointer-events:none; max-width:90vw; text-align:center}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="9" y="2" width="14" height="28" rx="3.5" fill="var(--tile)" stroke="var(--pip)" stroke-opacity=".5"/><line x1="11" y1="16" x2="21" y2="16" stroke="var(--pip)" stroke-opacity=".5"/><circle cx="16" cy="16" r="1.3" fill="var(--accent)"/><circle cx="13" cy="6.5" r="1.6" fill="var(--pip)"/><circle cx="19" cy="11.5" r="1.6" fill="var(--pip)"/><circle cx="13" cy="20.5" r="1.6" fill="var(--pip)"/><circle cx="19" cy="20.5" r="1.6" fill="var(--pip)"/><circle cx="13" cy="25.5" r="1.6" fill="var(--pip)"/><circle cx="19" cy="25.5" r="1.6" fill="var(--pip)"/></svg>
+      <h1>La <em>Mesa</em></h1>
+    </div>
+    <div class="scores" id="scores"></div>
+    <button class="iconbtn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </header>
+  <div class="seats" id="seats"></div>
+  <div class="table"><div class="felt" id="felt"><svg id="board" aria-label="Table"></svg><div class="hint" id="hint" hidden></div></div></div>
+  <div class="status" id="status" aria-live="polite"></div>
+  <div class="rack" id="rack"></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="scrim" id="scrim"></div>
+
+<section class="sheet" id="newSheet" aria-label="New game">
+  <h2>New game</h2>
+  <p>Puerto Rican dominoes: four seats, two teams, partners sit across.</p>
+  <h3>Who's playing</h3>
+  <div class="opts" id="modeOpts">
+    <button class="opt" data-v="solo"><svg class="pic" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="38" r="6" fill="var(--teamA)"/><circle cx="23" cy="8" r="6" fill="var(--teamA)" opacity=".55"/><circle cx="8" cy="23" r="6" fill="var(--teamB)" opacity=".55"/><circle cx="38" cy="23" r="6" fill="var(--teamB)" opacity=".55"/></svg><span><b>Just me</b><small>You and a computer partner against two computers.</small></span></button>
+    <button class="opt" data-v="partner"><svg class="pic" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="38" r="6" fill="var(--teamA)"/><circle cx="23" cy="8" r="6" fill="var(--teamA)"/><circle cx="8" cy="23" r="6" fill="var(--teamB)" opacity=".55"/><circle cx="38" cy="23" r="6" fill="var(--teamB)" opacity=".55"/></svg><span><b>Me and a friend, as partners</b><small>You two against two computers, passing this phone.</small></span></button>
+    <button class="opt" data-v="rival"><svg class="pic" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="38" r="6" fill="var(--teamA)"/><circle cx="23" cy="8" r="6" fill="var(--teamA)" opacity=".55"/><circle cx="8" cy="23" r="6" fill="var(--teamB)" opacity=".55"/><circle cx="38" cy="23" r="6" fill="var(--teamB)"/></svg><span><b>Me against a friend</b><small>Each of you gets a computer partner, passing this phone.</small></span></button>
+  </div>
+  <h3>Names</h3>
+  <div class="row">
+    <label class="field"><span>Your name</span><input id="nameMe" maxlength="14" autocomplete="off" placeholder="You"></label>
+    <label class="field" id="friendField"><span>Friend's name</span><input id="nameFriend" maxlength="14" autocomplete="off" placeholder="Friend"></label>
+  </div>
+  <h3>Play to</h3>
+  <div class="seg" id="targetSeg"><button data-v="100">100</button><button data-v="200">200</button><button data-v="500">500</button></div>
+  <p class="note" id="targetNote"></p>
+  <h3>Computer players</h3>
+  <div class="seg" id="levelSeg"><button data-v="0">Relaxed</button><button data-v="1">Sharp</button></div>
+  <button class="big" id="startBtn">Deal the tiles</button>
+  <button class="ghostbtn" id="newCancel" data-close>Cancel</button>
+</section>
+
+<section class="sheet" id="menuSheet" aria-label="Menu">
+  <h2>Menu</h2>
+  <button class="mitem" id="mNew">New game <span>›</span></button>
+  <button class="mitem" id="mRules">How to play <span>›</span></button>
+  <button class="mitem" id="mSound">Sound <span class="sw" id="swSound"></span></button>
+  <button class="mitem" id="mStats">Share anonymous play stats <span class="sw" id="swStats"></span></button>
+  <p class="note" id="menuNote"></p>
+  <button class="ghostbtn" data-close>Close</button>
+</section>
+
+<section class="sheet rules" id="rulesSheet" aria-label="How to play">
+  <h2>How to play</h2>
+  <p>Puerto Rican dominoes (dominó boricua), with double-six tiles and the scoring used on Mesa28.</p>
+  <h3>The table</h3>
+  <ul>
+    <li><b>Four players in two teams.</b> Your partner sits across from you. Each player gets <b>7 tiles</b>, so all 28 are dealt.</li>
+    <li>Play goes <b>counterclockwise</b>: from you, to the player on your right, to your partner, to the player on your left.</li>
+  </ul>
+  <h3>Playing</h3>
+  <ul>
+    <li><b>First hand:</b> whoever has the <b>double six</b> starts, and must play it.</li>
+    <li><b>Later hands:</b> the winner of the last hand starts with any tile.</li>
+    <li>Match a tile to either open end. If you can play, you must. If nothing fits, you pass (<b>paso</b>) automatically.</li>
+    <li>Tap a tile to play it. When it fits both ends, tap the glowing spot where you want it.</li>
+  </ul>
+  <h3>Ending a hand</h3>
+  <ul>
+    <li><b>Dominó:</b> a player plays their last tile. Their team wins the hand.</li>
+    <li><b>Capicú:</b> the last tile is not a double and fits on either end.</li>
+    <li><b>Chuchazo:</b> the last tile is the double blank, la chucha.</li>
+    <li><b>Dominau:</b> the last tile is a double that closes both ends.</li>
+    <li><b>Tranque:</b> nobody can play. In games to 100 or 200, the team with the <b>fewest points between both players</b> wins. In games to 500, only the player who closed the game and the <b>next player after them</b> count: whoever holds fewer points wins the hand for their team. On a tie, nobody scores and the last hand's winner starts again.</li>
+  </ul>
+  <h3>Scoring</h3>
+  <ul>
+    <li>The winning team scores <b>every pip left in all four hands</b>, theirs included.</li>
+    <li><b>Games to 500</b> add prizes: capicú <b>+100</b>, chuchazo <b>+100</b>, and winning the first four hands <b>+100, +75, +50, +25</b>.</li>
+    <li>The first team to reach the target wins the game.</li>
+  </ul>
+  <h3>Playing with a friend</h3>
+  <ul>
+    <li>Pass the phone. Your tiles turn face down after you play, and the next person taps to see theirs.</li>
+  </ul>
+  <button class="ghostbtn" data-close>Close</button>
+</section>
+
+<section class="sheet" id="resSheet" aria-label="Hand result">
+  <div id="resBody"></div>
+  <button class="big" id="resNext">Next hand</button>
+</section>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var noop = function () {};
+  var KEY = "pips-plaza-v1";
+
+  /* ---------- names ---------- */
+  var AI_NAMES = ["Don Chago", "Tití Carmen", "Papo", "Wichy", "Doña Nilda", "Cuco", "Millie", "Tato", "Junior", "Lourdes"];
+  function cleanName(s, d) {
+    s = String(s || "").replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁦-⁩]/g, "").replace(/\s+/g, " ").trim().slice(0, 14);
+    return s || d;
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  /* ---------- storage ---------- */
+  var prefs = { mode: "solo", me: "", friend: "", target: 500, level: 1, sound: true, stats: true };
+  var G = null;
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ prefs: prefs, game: G })); } catch (e) {} }
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (!d) return;
+      var p = d.prefs || {};
+      if (["solo", "partner", "rival"].indexOf(p.mode) >= 0) prefs.mode = p.mode;
+      prefs.me = cleanName(p.me, ""); prefs.friend = cleanName(p.friend, "");
+      if ([100, 200, 500].indexOf(p.target) >= 0) prefs.target = p.target;
+      prefs.level = p.level === 0 ? 0 : 1;
+      prefs.sound = p.sound !== false; prefs.stats = p.stats !== false;
+      if (validGame(d.game)) G = d.game;
+    } catch (e) {}
+  }
+  function isTile(t) { return Array.isArray(t) && t.length === 2 && t.every(function (v) { return v === (v | 0) && v >= 0 && v <= 6; }); }
+  function validGame(g) {
+    try {
+      if (!g || !g.cfg || !Array.isArray(g.hands) || g.hands.length !== 4 || !Array.isArray(g.score)) return false;
+      if (!g.hands.every(function (h) { return Array.isArray(h) && h.every(isTile); })) return false;
+      if (g.chain && !(isTile(g.chain.s) && Array.isArray(g.chain.L) && Array.isArray(g.chain.R) && g.chain.L.concat(g.chain.R).every(isTile))) return false;
+      var n = g.hands.reduce(function (a, h) { return a + h.length; }, 0) + (g.chain ? 1 + g.chain.L.length + g.chain.R.length : 0);
+      if (n !== 28) return false;
+      if (!(g.turn >= 0 && g.turn < 4) || !Array.isArray(g.cfg.names) || !Array.isArray(g.cfg.human)) return false;
+      g.cfg.names = g.cfg.names.map(function (s, i) { return cleanName(s, "Player " + (i + 1)); });
+      if (!Array.isArray(g.passed) || g.passed.length !== 4) g.passed = [[], [], [], []];
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- tiles ---------- */
+  function pips(t) { return t[0] + t[1]; }
+  function isDbl(t) { return t[0] === t[1]; }
+  function same(a, b) { return (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0]); }
+  function handPips(h) { return h.reduce(function (a, t) { return a + pips(t); }, 0); }
+  function team(s) { return s % 2; }   /* seats 0 & 2 are team A, 1 & 3 team B */
+  function next(s) { return (s + 1) % 4; }
+  /* Chain: s = spine tile [leftValue, rightValue]; L and R are arms, each entry [near, far]. */
+  function ends(ch) {
+    if (!ch) return null;
+    return [ch.L.length ? ch.L[ch.L.length - 1][1] : ch.s[0], ch.R.length ? ch.R[ch.R.length - 1][1] : ch.s[1]];
+  }
+  function movesFor(hand, ch, forced) {
+    var out = [];
+    if (!ch) {
+      hand.forEach(function (t, i) { if (!forced || same(t, forced)) out.push({ i: i, side: "S" }); });
+      return out;
+    }
+    var e = ends(ch);
+    hand.forEach(function (t, i) {
+      if (t[0] === e[0] || t[1] === e[0]) out.push({ i: i, side: "L" });
+      if ((t[0] === e[1] || t[1] === e[1])) out.push({ i: i, side: "R" });
+    });
+    return out;
+  }
+  function anyCanPlay(g) {
+    for (var s = 0; s < 4; s++) if (movesFor(g.hands[s], g.chain, null).length) return true;
+    return false;
+  }
+
+  /* ---------- game flow ---------- */
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var r = new Uint32Array(1); crypto.getRandomValues(r);
+      var j = r[0] % (i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function newGame(cfg) {
+    var pool = AI_NAMES.slice(); shuffle(pool);
+    var names = [cleanName(prefs.me, "You"), pool[0], pool[1], pool[2]];
+    var human = [true, false, false, false];
+    if (cfg.mode === "partner") { names[2] = cleanName(prefs.friend, "Friend"); human[2] = true; }
+    if (cfg.mode === "rival") { names[1] = cleanName(prefs.friend, "Friend"); human[1] = true; }
+    G = { cfg: { mode: cfg.mode, names: names, human: human, target: cfg.target, level: cfg.level },
+      score: [0, 0], handNo: 0, leader: -1, t0: Date.now(), over: false, winner: -1, hands: [[], [], [], []], chain: null, turn: 0 };
+    sess.games++;
+    track("game_start", { mode: cfg.mode, target: cfg.target, level: cfg.level });
+    dealHand();
+  }
+  function dealHand() {
+    var all = [];
+    for (var a = 0; a <= 6; a++) for (var b = a; b <= 6; b++) all.push([a, b]);
+    shuffle(all);
+    G.hands = [0, 1, 2, 3].map(function (s) { return sortHand(all.slice(s * 7, s * 7 + 7)); });
+    G.handNo++;
+    G.chain = null; G.passed = [[], [], [], []]; G.last = -1; G.lastTile = null; G.result = null; G.log = "";
+    G.forced = null;
+    if (G.handNo === 1 || G.leader < 0) {
+      for (var s = 0; s < 4; s++) if (G.hands[s].some(function (t) { return t[0] === 6 && t[1] === 6; })) G.turn = s;
+      G.forced = [6, 6];
+    } else G.turn = G.leader;
+    G.viewer = soloViewer(); G.shown = G.viewer >= 0;
+    save();
+  }
+  function soloViewer() { var h = G.cfg.human.filter(Boolean).length; return h === 1 ? 0 : -1; }
+  function sortHand(h) { return h.sort(function (x, y) { return (y[0] + y[1]) - (x[0] + x[1]) || y[1] - x[1]; }).map(function (t) { return t[0] <= t[1] ? [t[1], t[0]] : t; }); }
+  function humans() { return G.cfg.human.filter(Boolean).length; }
+
+  function place(s, i, side) {
+    var hand = G.hands[s], t = hand[i], ch = G.chain;
+    var e = ends(ch), fitsBoth = false;
+    if (!ch) {
+      G.chain = { s: [t[0], t[1]], L: [], R: [] };
+      if (G.forced) G.forced = null;
+    } else {
+      fitsBoth = (t[0] === e[0] || t[1] === e[0]) && (t[0] === e[1] || t[1] === e[1]);
+      var end = side === "L" ? e[0] : e[1];
+      var tile = t[0] === end ? [t[0], t[1]] : [t[1], t[0]];
+      (side === "L" ? ch.L : ch.R).push(tile);
+    }
+    hand.splice(i, 1);
+    G.last = s; G.lastTile = { t: t, side: side || "S" };
+    G.log = name(s) + " played " + t[0] + "·" + t[1];
+    sess.moves++;
+    SFX.clack();
+    if (humans() > 1 && G.cfg.human[s]) G.shown = false;
+    if (!hand.length) return endHand("domino", s, { fitsBoth: fitsBoth, t: t, e: e });
+    if (!anyCanPlay(G)) return endHand("tranque", s, {});
+    G.turn = next(s);
+    save(); render(); schedule();
+  }
+  function pass(s) {
+    var e = ends(G.chain);
+    e.forEach(function (v) { if (G.passed[s].indexOf(v) < 0) G.passed[s].push(v); });
+    G.log = name(s) + " passed";
+    bubble(s, "¡Paso!");
+    SFX.knock();
+    G.turn = next(s);
+    save(); render(); schedule(900);
+  }
+
+  function endHand(kind, by, info) {
+    var all = G.hands.map(handPips), base = all.reduce(function (a, b) { return a + b; }, 0);
+    var r = { kind: kind, by: by, pips: all, base: base, bonus: [], win: -1, seat: -1, handNo: G.handNo, hands: G.hands.map(function (h) { return h.map(function (t) { return t.slice(); }); }) };
+    var big = G.cfg.target === 500;
+    if (kind === "domino") {
+      r.win = team(by); r.seat = by;
+      var t = info.t;
+      if (isDbl(t) && info.fitsBoth && info.e[0] === info.e[1]) r.style = "Dominau";
+      else if (t[0] === 0 && t[1] === 0) r.style = "Chuchazo";
+      else if (!isDbl(t) && info.fitsBoth) r.style = "Capicú";
+      if (big && r.style === "Capicú") r.bonus.push(["Capicú", 100]);
+      if (big && r.style === "Chuchazo") r.bonus.push(["Chuchazo", 100]);
+      G.leader = by;
+    } else {
+      var w;
+      if (big) {
+        /* To 500: the player who closed it against the player after them; fewer points wins. */
+        var nx = next(by);
+        r.duel = [by, nx];
+        w = all[by] < all[nx] ? team(by) : all[nx] < all[by] ? team(nx) : -1;
+      } else {
+        /* To 100 or 200: the team with fewer points between both players wins. */
+        var ta = all[0] + all[2], tb = all[1] + all[3];
+        w = ta < tb ? 0 : tb < ta ? 1 : -1;
+        r.teamPips = [ta, tb];
+      }
+      r.win = w;
+      if (w < 0) { /* A tie scores nothing; the last hand's winner starts again (the double six again after a tied first hand). */ }
+      else {
+        /* The winning team's player with fewer points leads; ties go to the first in turn order after the closer. */
+        if (r.duel) { G.leader = r.seat = all[r.duel[0]] < all[r.duel[1]] ? r.duel[0] : r.duel[1]; }
+        else {
+        var cand = [0, 1, 2, 3].map(function (k) { return (by + 1 + k) % 4; }).filter(function (s) { return team(s) === w; });
+        cand.sort(function (x, y) { return all[x] - all[y]; });
+        G.leader = cand[0]; r.seat = cand[0];
+        }
+      }
+    }
+    if (r.win >= 0 && big && G.handNo <= 4) r.bonus.push(["Hand " + G.handNo + " prize", [100, 75, 50, 25][G.handNo - 1]]);
+    r.total = r.win >= 0 ? base + r.bonus.reduce(function (a, b) { return a + b[1]; }, 0) : 0;
+    if (r.win >= 0) G.score[r.win] += r.total;
+    if (G.score[0] >= G.cfg.target || G.score[1] >= G.cfg.target) {
+      G.over = true; G.winner = G.score[0] >= G.score[1] ? 0 : 1;
+      logGame("finished");
+    }
+    G.result = r; G.turn = -1;
+    track("hand_end", { kind: kind, style: r.style || "", points: r.total });
+    save(); render();
+    setTimeout(function () { SFX.win(r.win === 0 || (humans() > 1 && r.win >= 0)); showResult(); }, kind === "domino" ? 650 : 900);
+  }
+
+  /* ---------- turns ---------- */
+  var timer = 0;
+  function schedule(delay) {
+    clearTimeout(timer);
+    if (!G || G.over || G.result || G.turn < 0) return;
+    var s = G.turn, mv = movesFor(G.hands[s], G.chain, G.forced);
+    if (G.cfg.human[s]) {
+      if (!mv.length) { timer = setTimeout(function () { pass(s); }, delay || 700); return; }
+      if (humans() > 1 && G.viewer !== s) { G.shown = false; G.viewer = s; }
+      render();
+      /* Only one tile can be played on the very first lead (the double six): play it for them. */
+      if (G.forced && mv.length === 1 && (G.shown || humans() === 1)) {
+        timer = setTimeout(function () { if (G.turn === s && G.forced) place(s, mv[0].i, "S"); }, 900);
+      }
+      return;
+    }
+    timer = setTimeout(function () {
+      if (!G || G.turn !== s || G.result) return;
+      if (!mv.length) return pass(s);
+      var m = choose(s, mv);
+      place(s, m.i, m.side);
+    }, (delay || 0) + 650 + Math.random() * 450);
+  }
+
+  /* ---------- computer players ---------- */
+  function choose(s, mv) {
+    var hand = G.hands[s];
+    if (G.cfg.level === 0) {
+      var w = mv.map(function (m) { return 1 + pips(hand[m.i]) * 0.6; }), tot = w.reduce(function (a, b) { return a + b; }, 0), r = Math.random() * tot;
+      for (var k = 0; k < mv.length; k++) { r -= w[k]; if (r <= 0) return mv[k]; }
+      return mv[0];
+    }
+    var seen = [0, 0, 0, 0, 0, 0, 0];
+    if (G.chain) [G.chain.s].concat(G.chain.L, G.chain.R).forEach(function (t) { seen[t[0]]++; if (t[1] !== t[0]) seen[t[1]]++; });
+    var partner = (s + 2) % 4, opps = [next(s), (s + 3) % 4];
+    var best = null, bestScore = -1e9;
+    mv.forEach(function (m) {
+      var t = hand[m.i], rest = hand.filter(function (_, j) { return j !== m.i; });
+      var sc = pips(t) * 1.1 + (isDbl(t) ? 5 : 0);
+      var ne;
+      if (!G.chain) ne = [t[0], t[1]];
+      else {
+        var e = ends(G.chain), end = m.side === "L" ? e[0] : e[1], other = t[0] === end ? t[1] : t[0];
+        ne = m.side === "L" ? [other, e[1]] : [e[0], other];
+      }
+      if (!rest.length) sc += 1000;
+      var mine = function (v) { return rest.filter(function (x) { return x[0] === v || x[1] === v; }).length; };
+      if (!G.chain) {
+        sc += mine(t[0]) * 3 + (t[0] !== t[1] ? mine(t[1]) * 3 : 0);
+      } else {
+        ne.forEach(function (v) {
+          opps.forEach(function (o) { if (G.passed[o].indexOf(v) >= 0) sc += 7; });
+          if (G.passed[partner].indexOf(v) >= 0) sc -= 6;
+          sc += Math.min(mine(v), 3) * 1.6;
+        });
+        if (G.passed[next(s)].indexOf(ne[0]) >= 0 && G.passed[next(s)].indexOf(ne[1]) >= 0) sc += 5;
+        /* Would this close the game? Judge it from what this player can see. */
+        var seen2 = seen.slice(); seen2[t[0]]++; if (t[1] !== t[0]) seen2[t[1]]++;
+        if (ne[0] === ne[1] && seen2[ne[0]] >= 7 && rest.length) {
+          sc += handPips(rest) < estimateOthers(s, rest) ? 25 : -25;
+        }
+      }
+      sc += Math.random() * 1.5;
+      if (sc > bestScore) { bestScore = sc; best = m; }
+    });
+    return best;
+  }
+  function estimateOthers(s, rest) {
+    /* Average pips per tile still hidden, times a typical hand: a rough line for whether closing helps. */
+    var onBoard = 0, n = 0;
+    [G.chain.s].concat(G.chain.L, G.chain.R).forEach(function (t) { onBoard += pips(t); n++; });
+    var hidden = 168 - onBoard - handPips(rest), cnt = 28 - n - rest.length;
+    var per = cnt > 0 ? hidden / cnt : 0, oppTiles = Math.min(G.hands[next(s)].length, G.hands[(s + 3) % 4].length);
+    return per * Math.max(1, oppTiles);
+  }
+
+  /* ---------- board layout ----------
+     Units: a tile is 2 × 1. The first tile sits in the centre; the right arm runs right then
+     snakes down, the left arm runs left then snakes up. Doubles lie across the line. */
+  function walker(sx, dir) { return { x: sx * dir, y: 0, dx: dir, dy: 0, hd: dir, vd: dir }; }
+  function advance(w, dbl, B) {
+    var o = {}, n = { x: w.x, y: w.y, dx: w.dx, dy: w.dy, hd: w.hd, vd: w.vd };
+    if (w.dy === 0) {
+      var len = dbl ? 1 : 2;
+      if ((w.x + w.dx * len) * w.dx > B) {
+        o = { cx: w.x + w.dx * 0.5, cy: w.y + w.vd * 0.5, ox: 0, oy: w.vd, cross: false };
+        n.x = w.x + w.dx * 0.5; n.y = w.y + w.vd * 1.5; n.dx = 0; n.dy = w.vd; n.hd = w.dx;
+      } else if (dbl) {
+        o = { cx: w.x + w.dx * 0.5, cy: w.y, ox: w.dx, oy: 0, cross: true }; n.x = w.x + w.dx;
+      } else {
+        o = { cx: w.x + w.dx, cy: w.y, ox: w.dx, oy: 0, cross: false }; n.x = w.x + w.dx * 2;
+      }
+    } else {
+      var nd = -w.hd;
+      o = { cx: w.x + nd * 0.5, cy: w.y + w.vd * 0.5, ox: nd, oy: 0, cross: false };
+      n.x = w.x + nd * 1.5; n.y = w.y + w.vd * 0.5; n.dx = nd; n.dy = 0; n.hd = nd;
+    }
+    return { o: o, w: n };
+  }
+  function layout(ch, B) {
+    var items = [], wl, wr;
+    var sd = isDbl(ch.s);
+    items.push({ cx: 0, cy: 0, ox: 1, oy: 0, cross: sd, v: ch.s, spine: true });
+    wl = walker(sd ? 0.5 : 1, -1); wr = walker(sd ? 0.5 : 1, 1);
+    ch.L.forEach(function (t) { var r = advance(wl, isDbl(t), B); r.o.v = t; items.push(r.o); wl = r.w; });
+    ch.R.forEach(function (t) { var r = advance(wr, isDbl(t), B); r.o.v = t; items.push(r.o); wr = r.w; });
+    return { items: items, wl: wl, wr: wr };
+  }
+  function rectOf(it) {
+    var horiz = it.cross ? it.oy !== 0 : it.ox !== 0;
+    return horiz ? { x: it.cx - 1, y: it.cy - 0.5, w: 2, h: 1, horiz: true } : { x: it.cx - 0.5, y: it.cy - 1, w: 1, h: 2, horiz: false };
+  }
+  var Bcache = {};
+  function pickB(aspect) {
+    var key = Math.round(aspect * 20);
+    if (Bcache[key]) return Bcache[key];
+    var best = 4, bs = 0, fake = { s: [5, 3], L: [], R: [] };
+    for (var k = 0; k < 13; k++) { fake.L.push([1, 2]); fake.R.push([1, 2]); }
+    for (var B = 3; B <= 18; B++) {
+      var bb = bbox(layout(fake, B).items), s = Math.min(1 / (bb.w + 1), aspect / (bb.h + 1));
+      if (s > bs * 1.02) { bs = s; best = B; }
+    }
+    return (Bcache[key] = best);
+  }
+  function bbox(items) {
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    items.forEach(function (it) { var r = rectOf(it); x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y); x1 = Math.max(x1, r.x + r.w); y1 = Math.max(y1, r.y + r.h); });
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+
+  /* ---------- drawing ---------- */
+  var PIP = { 0: [], 1: [[.5, .5]], 2: [[.27, .27], [.73, .73]], 3: [[.25, .25], [.5, .5], [.75, .75]], 4: [[.27, .27], [.73, .27], [.27, .73], [.73, .73]],
+    5: [[.25, .25], [.75, .25], [.5, .5], [.25, .75], [.75, .75]], 6: [[.27, .22], [.27, .5], [.27, .78], [.73, .22], [.73, .5], [.73, .78]] };
+  function halfPips(v, x, y, s, rot) {
+    return PIP[v].map(function (p) {
+      var px = rot ? p[1] : p[0], py = rot ? p[0] : p[1];
+      return '<circle cx="' + (x + px * s).toFixed(3) + '" cy="' + (y + py * s).toFixed(3) + '" r="' + (s * 0.095).toFixed(3) + '"/>';
+    }).join("");
+  }
+  /* A tile drawn in a box: horizontal (a on the left, b on the right) or vertical (a on top). */
+  function tileSVG(x, y, horiz, a, b, s, cls) {
+    var w = horiz ? 2 * s : s, h = horiz ? s : 2 * s, r = s * 0.14, ins = s * 0.03;
+    var out = '<g class="' + (cls || "") + '">';
+    out += '<rect x="' + (x + ins) + '" y="' + (y + ins) + '" width="' + (w - 2 * ins) + '" height="' + (h - 2 * ins) + '" rx="' + r + '" fill="url(#tg)" stroke="var(--tile-line)" stroke-width="' + (s * 0.03) + '"/>';
+    if (horiz) out += '<line x1="' + (x + s) + '" y1="' + (y + s * 0.16) + '" x2="' + (x + s) + '" y2="' + (y + s * 0.84) + '" stroke="var(--tile-line)" stroke-width="' + (s * 0.035) + '"/>';
+    else out += '<line x1="' + (x + s * 0.16) + '" y1="' + (y + s) + '" x2="' + (x + s * 0.84) + '" y2="' + (y + s) + '" stroke="var(--tile-line)" stroke-width="' + (s * 0.035) + '"/>';
+    out += '<g fill="var(--pip)">' + halfPips(a, x, y, s, horiz) + halfPips(b, horiz ? x + s : x, horiz ? y : y + s, s, horiz) + '</g>';
+    out += '<circle cx="' + (horiz ? x + s : x + s / 2) + '" cy="' + (horiz ? y + s / 2 : y + s) + '" r="' + (s * 0.05) + '" fill="#b08a3e"/>';
+    return out + "</g>";
+  }
+  var DEFS = '<defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--tile)"/><stop offset="1" stop-color="var(--tile2)"/></linearGradient>' +
+    '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--back1)"/><stop offset="1" stop-color="var(--back2)"/></linearGradient>' +
+    '<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="0.06" stdDeviation="0.05" flood-opacity=".45"/></filter></defs>';
+  function itemSVG(it, cls) {
+    var r = rectOf(it), a, b, v = it.v;
+    if (it.cross) { a = v[0]; b = v[1]; }
+    else if (it.spine) { a = v[0]; b = v[1]; }
+    else if (r.horiz) { a = it.ox > 0 ? v[0] : v[1]; b = it.ox > 0 ? v[1] : v[0]; }
+    else { a = it.oy > 0 ? v[0] : v[1]; b = it.oy > 0 ? v[1] : v[0]; }
+    return tileSVG(r.x, r.y, r.horiz, a, b, 1, cls);
+  }
+
+  var sel = -1;   /* index in the viewer's hand of the selected tile */
+  function renderBoard() {
+    var svg = $("board"), felt = $("felt"), W = felt.clientWidth || 300, H = felt.clientHeight || 300;
+    var hint = $("hint");
+    if (!G || !G.chain) {
+      svg.innerHTML = DEFS + ghostEmpty();
+      svg.setAttribute("viewBox", "-6 -4 12 8");
+      hint.hidden = !G || !!ghostEmptyOn();
+      if (G && !G.result) {
+        var s = G.turn;
+        hint.textContent = s < 0 ? "" : G.forced ? name(s) + (s === G.viewer && G.shown ? ", you have" : " has") + " the double six and starts." : name(s) + " leads.";
+      }
+      return;
+    }
+    hint.hidden = true;
+    var B = pickB(H / W), L = layout(G.chain, B), items = L.items.slice(), ghosts = [];
+    var me = G.viewer, mv = myMoves();
+    if (sel >= 0 && me >= 0) {
+      var t = G.hands[me][sel];
+      mv.filter(function (m) { return m.i === sel; }).forEach(function (m) {
+        var r = advance(m.side === "L" ? L.wl : L.wr, isDbl(t), B);
+        r.o.v = [0, 0]; r.o.side = m.side; ghosts.push(r.o);
+      });
+    }
+    var bb = bbox(items.concat(ghosts)), pad = 0.7;
+    var fake = Math.max(bb.w + pad * 2, (H / W) > 1.2 ? 9 : 13), vw = fake, vh = Math.max(bb.h + pad * 2, vw * H / W);
+    vw = Math.max(vw, vh * W / H);
+    var cx = bb.x + bb.w / 2, cy = bb.y + bb.h / 2;
+    svg.setAttribute("viewBox", (cx - vw / 2).toFixed(3) + " " + (cy - vh / 2).toFixed(3) + " " + vw.toFixed(3) + " " + vh.toFixed(3));
+    var lastIdx = -1;
+    if (G.lastTile && G.lastTile.side !== "S") lastIdx = G.lastTile.side === "L" ? G.chain.L.length : G.chain.L.length + G.chain.R.length;
+    else if (G.lastTile) lastIdx = 0;
+    var out = DEFS + '<g filter="url(#sh)">';
+    items.forEach(function (it, k) { out += itemSVG(it, k === lastIdx ? "last" : ""); });
+    out += "</g>";
+    if (lastIdx >= 0 && items[lastIdx]) {
+      var r = rectOf(items[lastIdx]);
+      out += '<rect x="' + (r.x - 0.06) + '" y="' + (r.y - 0.06) + '" width="' + (r.w + 0.12) + '" height="' + (r.h + 0.12) + '" rx="0.2" fill="none" stroke="var(--glow)" stroke-width="0.07" opacity=".85"/>';
+    }
+    ghosts.forEach(function (g) {
+      var r = rectOf(g);
+      out += '<g class="ghost" data-side="' + g.side + '"><rect x="' + (r.x + 0.04) + '" y="' + (r.y + 0.04) + '" width="' + (r.w - 0.08) + '" height="' + (r.h - 0.08) + '" rx="0.16" fill="rgba(242,201,76,.28)" stroke="var(--glow)" stroke-width="0.08" stroke-dasharray="0.22 0.14"/>' +
+        '<rect x="' + (r.x - 0.5) + '" y="' + (r.y - 0.5) + '" width="' + (r.w + 1) + '" height="' + (r.h + 1) + '" fill="transparent"/></g>';
+    });
+    svg.innerHTML = out;
+  }
+  function ghostEmptyOn() { return sel >= 0 && G && !G.chain && G.viewer === G.turn; }
+  function ghostEmpty() {
+    if (!ghostEmptyOn()) return "";
+    return '<g class="ghost" data-side="S"><rect x="-1" y="-0.5" width="2" height="1" rx="0.16" fill="rgba(242,201,76,.28)" stroke="var(--glow)" stroke-width="0.08" stroke-dasharray="0.22 0.14"/><rect x="-3" y="-2" width="6" height="4" fill="transparent"/></g>';
+  }
+
+  function name(s) { return G.cfg.names[s]; }
+  function myMoves() {
+    if (!G || G.result || G.turn < 0 || G.turn !== G.viewer || !G.shown || !G.cfg.human[G.turn]) return [];
+    return movesFor(G.hands[G.turn], G.chain, G.forced);
+  }
+  function renderScores() {
+    var c = G.cfg, n = c.names;
+    $("scores").innerHTML =
+      '<div class="score a"><span>' + (c.mode === "rival" ? esc(n[0]) : "Us") + '</span><b>' + G.score[0] + '</b></div>' +
+      '<div class="score b"><span>' + (c.mode === "rival" ? esc(n[1]) : "Them") + '</span><b>' + G.score[1] + '</b></div>' +
+      '<div class="target"><span>to</span><b>' + c.target + '</b></div>';
+  }
+  function renderSeats() {
+    var order = [3, 2, 1], arrows = ["◀", "▲", "▶"];
+    $("seats").innerHTML = order.map(function (s, k) {
+      var role = s === 2 ? "Partner" : "Rival";
+      return '<div class="seat ' + (team(s) === 0 ? "ta" : "tb") + (G.turn === s ? " turn" : "") + '" data-seat="' + s + '">' +
+        '<div class="av">' + esc(name(s).replace(/^(Don|Doña|Tití)\s+/, "").charAt(0).toUpperCase()) + '</div>' +
+        '<div class="who"><b>' + esc(name(s)) + '</b><small>' + arrows[k] + ' <span class="role">' + role + '</span><span class="cnt"><i></i>' + G.hands[s].length + '</span></small></div></div>';
+    }).join("");
+  }
+  function renderRack() {
+    var rack = $("rack"), v = G.viewer, out = "";
+    var showSeat = v >= 0 ? v : (G.cfg.human[G.turn] ? G.turn : lastHuman());
+    var faceUp = v >= 0 && G.shown && v === showSeat;
+    var hand = G.hands[showSeat], mv = faceUp ? myMoves() : [];
+    var can = {}; mv.forEach(function (m) { can[m.i] = true; });
+    var label = showSeat === 0 && humans() === 1 ? "Your tiles" : name(showSeat) + "'s tiles";
+    out += '<div class="lbl ta' + '">' + esc(label) + " · " + handPips(hand) + " pts</div>";
+    hand.forEach(function (t, i) {
+      var cls = "tile" + (mv.length ? (can[i] ? " can" : " dim") : "") + (i === sel && faceUp ? " sel" : "");
+      out += '<button class="' + cls + '" data-i="' + i + '" aria-label="' + (faceUp ? t[0] + " and " + t[1] : "Face-down tile") + '">' + (faceUp ? rackTile(t) : rackBack()) + "</button>";
+    });
+    if (!faceUp) {
+      out = out.replace(/ · \d+ pts/, "");
+      var s = G.turn;
+      if (s >= 0 && G.cfg.human[s] && !G.result && humans() > 1)
+        out += '<div class="reveal"><button id="revealBtn">' + esc(name(s)) + ", tap to see your tiles</button></div>";
+    }
+    rack.innerHTML = out;
+    rack.classList.toggle("turn", G.turn >= 0 && G.turn === showSeat && !G.result);
+  }
+  function lastHuman() { for (var s = 0; s < 4; s++) if (G.cfg.human[s]) return s; return 0; }
+  function rackTile(t) { return '<svg viewBox="0 0 1 2">' + DEFS + tileSVG(0, 0, false, t[0], t[1], 1) + "</svg>"; }
+  function rackBack() {
+    return '<svg viewBox="0 0 1 2">' + DEFS + '<rect x=".03" y=".03" width=".94" height="1.94" rx=".14" fill="url(#bg)"/><rect x=".14" y=".14" width=".72" height="1.72" rx=".08" fill="none" stroke="rgba(255,230,180,.35)" stroke-width=".03"/><circle cx=".5" cy="1" r=".12" fill="none" stroke="rgba(255,230,180,.45)" stroke-width=".03"/></svg>';
+  }
+  function renderStatus() {
+    var st = $("status"), s = G.turn, txt = "";
+    if (G.result) txt = G.log ? esc(G.log) : "";
+    else if (s >= 0) {
+      var mine = G.cfg.human[s] && G.viewer === s && G.shown;
+      if (mine) {
+        var mv = myMoves();
+        txt = (G.log ? esc(G.log) + " · " : "") + '<span class="me-turn">' + (mv.length ? (humans() > 1 ? esc(name(s)) + ", your turn" : "Your turn") : "Nothing fits: paso") + "</span>";
+      } else if (G.cfg.human[s] && humans() > 1) txt = (G.log ? esc(G.log) + " · " : "") + "Pass the phone to <b>" + esc(name(s)) + "</b>";
+      else txt = (G.log ? esc(G.log) + " · " : "") + "<b>" + esc(name(s)) + "</b> is thinking…";
+    }
+    st.innerHTML = txt;
+  }
+  function render() {
+    if (!G) return;
+    renderScores(); renderSeats(); renderRack(); renderStatus(); renderBoard();
+  }
+  function bubble(s, text) {
+    if (s === G.viewer || (G.viewer < 0 && s === lastHuman())) { toast(name(s) + ": " + text); return; }
+    setTimeout(function () {
+      var el = document.querySelector('.seat[data-seat="' + s + '"]'); if (!el) return;
+      var b = document.createElement("div"); b.className = "bubble"; b.textContent = text; el.appendChild(b);
+      setTimeout(function () { b.remove(); }, 1500);
+    }, 30);
+  }
+  var toastT = 0;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("on"); }, 1700); }
+
+  /* ---------- input ---------- */
+  $("rack").addEventListener("click", function (e) {
+    if (e.target.closest("#revealBtn")) { SFX.tap(); G.viewer = G.turn; G.shown = true; sel = -1; render(); schedule(); return; }
+    var b = e.target.closest(".tile"); if (!b || !G) return;
+    var i = +b.dataset.i, mv = myMoves().filter(function (m) { return m.i === i; });
+    if (!mv.length) { if (myMoves().length) { SFX.tap(); toast("That tile doesn't fit an open end"); } return; }
+    if (mv.length === 1) { sel = -1; place(G.turn, i, mv[0].side); return; }
+    SFX.tap(); sel = sel === i ? -1 : i; render();
+  });
+  $("board").addEventListener("click", function (e) {
+    var g = e.target.closest(".ghost"); if (!g || sel < 0) return;
+    var side = g.getAttribute("data-side"), i = sel;
+    if (!myMoves().some(function (m) { return m.i === i && m.side === side; })) return;
+    sel = -1; place(G.turn, i, side);
+  });
+
+  /* ---------- results ---------- */
+  function miniTile(t) { return '<svg viewBox="0 0 2 1">' + DEFS + tileSVG(0, 0, true, t[0], t[1], 1) + "</svg>"; }
+  function teamName(k) { var n = G.cfg.names; return k === 0 ? n[0] + " & " + n[2] : n[1] + " & " + n[3]; }
+  function showResult() {
+    var r = G.result; if (!r) return;
+    var head;
+    if (r.kind === "domino") head = (r.style ? "¡" + r.style + "!" : "¡Dominó!");
+    else head = "¡Tranque!";
+    var sub;
+    if (r.kind === "domino") sub = esc(name(r.seat)) + " played the last tile" + (r.style === "Capicú" ? ", and it fit both ends." : r.style === "Chuchazo" ? " with la chucha, the double blank." : r.style === "Dominau" ? ", a double closing both ends." : ".");
+    else if (r.win < 0) sub = (r.duel ? esc(name(r.duel[0])) + " and " + esc(name(r.duel[1])) + " are tied" : "The teams are tied") + ", so nobody scores. " + (G.leader >= 0 ? esc(name(G.leader)) + ", the last winner, starts again." : "The double six starts again.");
+    else if (r.teamPips) sub = "The game is closed. " + esc(teamName(r.win)) + " hold fewer points (" + r.teamPips[r.win] + " against " + r.teamPips[1 - r.win] + ").";
+    else { var lo = r.seat, hi = r.duel[0] === lo ? r.duel[1] : r.duel[0];
+      sub = esc(name(r.duel[0])) + " closed the game against " + esc(name(r.duel[1])) + ". " + esc(name(lo)) + " holds fewer points (" + r.pips[lo] + " against " + r.pips[hi] + "), so " + esc(teamName(r.win)) + " win the hand."; }
+    var tag = r.win < 0 ? '<span class="tag n">No points</span>' : '<span class="tag ' + (r.win ? "b" : "") + '">+' + r.total + "</span>";
+    var html = '<div class="res-title"><h2>' + head + "</h2>" + tag + "</div><p>" + sub + "</p>";
+    html += '<div class="hands">' + [0, 1, 2, 3].map(function (s) {
+      var h = r.hands[s];
+      return '<div class="hrow' + (h.length ? "" : " out") + '"><div class="nm ' + (team(s) ? "tb" : "ta") + '">' + esc(name(s)) + '</div><div class="ts">' +
+        (h.length ? h.map(miniTile).join("") : '<span style="font-size:12px;font-weight:800;color:var(--ink2)">Out</span>') + '</div><div class="pt">' + r.pips[s] + "</div></div>";
+    }).join("") + "</div>";
+    if (r.win >= 0) {
+      html += '<div class="lines"><div><span>Pips left in all hands</span><b>' + r.base + "</b></div>";
+      r.bonus.forEach(function (b) { html += "<div><span>" + esc(b[0]) + "</span><b>+" + b[1] + "</b></div>"; });
+      html += '<div class="tot"><span>' + esc(teamName(r.win)) + "</span><b>+" + r.total + "</b></div></div>";
+    }
+    html += '<div class="board2"><div class="a"><small>' + esc(teamName(0)) + "</small><b>" + G.score[0] + '</b></div><div class="b"><small>' + esc(teamName(1)) + "</small><b>" + G.score[1] + "</b></div></div>";
+    if (G.over) {
+      var mine = G.cfg.mode === "rival" ? null : G.winner === 0;
+      html = '<div class="res-title"><h2>' + (mine === null ? esc(teamName(G.winner)) + " win!" : mine ? "¡Ganamos! You win" : esc(teamName(G.winner)) + " win") + '</h2></div><p>Game to ' + G.cfg.target + " after " + G.handNo + " hands. Last hand: " + head + "</p>" + html.replace(/^<div class="res-title">.*?<\/div><p>.*?<\/p>/, "");
+      $("resNext").textContent = "New game";
+    } else $("resNext").textContent = "Next hand";
+    $("resBody").innerHTML = html;
+    openSheet("resSheet");
+  }
+  $("resNext").addEventListener("click", function () {
+    SFX.tap(); closeSheets();
+    if (G.over) { openNew(); return; }
+    dealHand(); sel = -1; render(); schedule(400);
+  });
+
+  /* ---------- sheets ---------- */
+  function openSheet(id) { closeSheets(true); $("scrim").classList.add("on"); $(id).classList.add("on"); }
+  function closeSheets(keep) {
+    document.querySelectorAll(".sheet.on").forEach(function (s) { s.classList.remove("on"); });
+    if (keep !== true) $("scrim").classList.remove("on");
+  }
+  $("scrim").addEventListener("click", function () {
+    if ($("resSheet").classList.contains("on")) return;
+    if ($("newSheet").classList.contains("on") && !G) return;
+    closeSheets();
+  });
+  document.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { SFX.tap(); if (!G) return; closeSheets(); }); });
+
+  function openNew() {
+    $("nameMe").value = prefs.me; $("nameFriend").value = prefs.friend;
+    $("newCancel").hidden = !G || G.over;
+    renderNew(); openSheet("newSheet");
+  }
+  function renderNew() {
+    document.querySelectorAll("#modeOpts .opt").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === prefs.mode)); });
+    $("friendField").hidden = prefs.mode === "solo";
+    document.querySelectorAll("#targetSeg button").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.v === prefs.target)); });
+    document.querySelectorAll("#levelSeg button").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.v === prefs.level)); });
+    $("targetNote").textContent = prefs.target === 500 ? "500 adds prizes for capicú, chuchazo and the first four hands. A tranque is decided between the player who closed it and the next player: fewer points wins." : "Plain scoring. A tranque goes to the team with fewer points between both players.";
+  }
+  $("modeOpts").addEventListener("click", function (e) { var b = e.target.closest(".opt"); if (!b) return; SFX.tap(); prefs.mode = b.dataset.v; renderNew(); });
+  $("targetSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; SFX.tap(); prefs.target = +b.dataset.v; renderNew(); });
+  $("levelSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; SFX.tap(); prefs.level = +b.dataset.v; renderNew(); });
+  $("startBtn").addEventListener("click", function () {
+    SFX.unlock(); SFX.tap();
+    prefs.me = cleanName($("nameMe").value, ""); prefs.friend = cleanName($("nameFriend").value, "");
+    if (G && !G.over) logGame("abandoned");
+    newGame({ mode: prefs.mode, target: prefs.target, level: prefs.level });
+    closeSheets(); sel = -1; render(); schedule(500);
+  });
+  $("menuBtn").addEventListener("click", function () { SFX.unlock(); SFX.tap(); renderMenu(); openSheet("menuSheet"); });
+  function renderMenu() {
+    $("swSound").classList.toggle("on", prefs.sound); $("swStats").classList.toggle("on", prefs.stats);
+    $("menuNote").textContent = G ? "Hand " + G.handNo + " · " + (G.cfg.mode === "solo" ? "Just me" : G.cfg.mode === "partner" ? "Partners with a friend" : "Against a friend") + " · to " + G.cfg.target : "";
+  }
+  $("mNew").addEventListener("click", function () { SFX.tap(); openNew(); });
+  $("mRules").addEventListener("click", function () { SFX.tap(); openSheet("rulesSheet"); });
+  $("mSound").addEventListener("click", function () { prefs.sound = !prefs.sound; renderMenu(); save(); SFX.tap(); });
+  $("mStats").addEventListener("click", function () { prefs.stats = !prefs.stats; renderMenu(); save(); statsToggled(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && G && !$("resSheet").classList.contains("on")) closeSheets(); });
+
+  /* ---------- sound ---------- */
+  var SFX = (function () {
+    var ctx = null;
+    function ac() { if (!prefs.sound) return null; try { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === "suspended") ctx.resume(); } catch (e) { return null; } return ctx; }
+    function click(freq, dur, gain, q) {
+      var c = ac(); if (!c) return;
+      var len = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+      var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = buf; f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q || 3; g.gain.value = gain;
+      src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+    }
+    function tone(freq, t0, dur, gain) {
+      var c = ac(); if (!c) return;
+      var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+      o.type = "triangle"; o.frequency.value = freq; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+    }
+    return {
+      unlock: function () { ac(); },
+      tap: function () { click(2400, 0.03, 0.25, 2); },
+      clack: function () { click(1900, 0.06, 0.9, 4); setTimeout(function () { click(1200, 0.05, 0.4, 3); }, 35); },
+      knock: function () { click(380, 0.08, 1.2, 2); setTimeout(function () { click(380, 0.08, 1, 2); }, 140); },
+      win: function (good) { (good ? [523, 659, 784] : [392, 330]).forEach(function (f, k) { tone(f, k * 0.11, 0.35, 0.12); }); }
+    };
+  })();
+
+  /* ---------- play stats ----------
+     Google Analytics and one /logs/sessions record per visit (app "domino"), both off with the
+     menu switch. No names or tiles are sent. */
+  var GA_ID = "G-K2XD82086T", STATS_VER = "domino-2026.11";
+  var FB = "https://arborandarchchessgame-default-rtdb.firebaseio.com";
+  var canLink = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname);
+  function statsOn() { return prefs.stats && canLink; }
+  function randId(n) { var a = new Uint8Array(n), c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", s = ""; crypto.getRandomValues(a); for (var i = 0; i < n; i++) s += c[a[i] % 62]; return s; }
+  var sess = { id: randId(16), start: Date.now(), active: 0, visibleSince: document.hidden ? 0 : Date.now(), games: 0, moves: 0 };
+  function deviceInfo() {
+    var ua = navigator.userAgent || "", s = Math.min(screen.width, screen.height), l = Math.max(screen.width, screen.height);
+    var kind = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "iPad" : /Android/.test(ua) ? "Android" : /Mobi/.test(ua) ? "Phone" : "Desktop";
+    return { kind: kind, w: s, h: l, dpr: window.devicePixelRatio || 1, app: !!(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)), lang: (navigator.language || "").slice(0, 12) };
+  }
+  function activeSecs() { return Math.round((sess.active + (sess.visibleSince ? Date.now() - sess.visibleSince : 0)) / 1000); }
+  function logSession(keep) {
+    if (!statsOn()) return;
+    try { fetch(FB + "/logs/sessions/" + sess.id + ".json", { method: "PUT", keepalive: !!keep, body: JSON.stringify({ start: sess.start, last: { ".sv": "timestamp" }, active: activeSecs(), games: sess.games, moves: sess.moves, ver: STATS_VER, app: "domino", dev: deviceInfo() }) }).catch(noop); } catch (e) {}
+  }
+  function loadGA() {
+    if (!statsOn() || window.gtag) return;
+    window["ga-disable-" + GA_ID] = false;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", GA_ID, { app_name: "La Mesa", app_version: STATS_VER, allow_google_signals: false, allow_ad_personalization_signals: false });
+    var sc = document.createElement("script"); sc.async = true; sc.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID; document.head.appendChild(sc);
+  }
+  function track(n, p) { try { if (window.gtag && statsOn()) window.gtag("event", n, p || {}); } catch (e) {} }
+  function statsToggled() { if (statsOn()) { loadGA(); logSession(); } else window["ga-disable-" + GA_ID] = true; }
+  function logGame(result) { track("game_end", { result: result, mode: G.cfg.mode, target: G.cfg.target, hands: G.handNo, duration_sec: Math.round((Date.now() - (G.t0 || Date.now())) / 1000) }); logSession(); }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { if (sess.visibleSince) { sess.active += Date.now() - sess.visibleSince; sess.visibleSince = 0; } logSession(true); }
+    else { sess.visibleSince = Date.now(); logSession(); }
+  });
+  setInterval(function () { if (!document.hidden) logSession(); }, 120000);
+
+  /* ---------- fit to the screen ----------
+     iOS Home Screen apps can report a viewport shorter than the screen; use the real height there.
+     Then size the rack's tiles from the room available, so the table gets the rest. */
+  function screenFit() {
+    var de = document.documentElement, ih = window.innerHeight, h = Math.max(ih, de.clientHeight);
+    var standalone = navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    if (standalone && window.screen) {
+      var sw = Math.min(screen.width, screen.height), sh = Math.max(screen.width, screen.height);
+      var full = window.innerWidth > ih ? sw : sh;
+      if (full > h && full - h <= 160) h = full;
+    }
+    de.style.setProperty("--appH", h + "px");
+    de.style.setProperty("--gapB", Math.max(0, h - ih) + "px");
+  }
+  function fit() {
+    screenFit();
+    var app = $("app"), cs = getComputedStyle(app);
+    var W = app.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var H = app.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var land = W > H;
+    var gap = Math.max(4, Math.min(8, W / 70));
+    var tw = Math.min((W - 16 - gap * 6) / 7, land ? H * 0.1 : H * 0.075, 64);
+    tw = Math.max(26, Math.floor(tw));
+    app.style.setProperty("--tw", tw + "px");
+    app.style.setProperty("--rg", gap.toFixed(1) + "px");
+    if (G) renderBoard();
+  }
+  var fitT = 0;
+  function refit() { cancelAnimationFrame(fitT); fitT = requestAnimationFrame(fit); }
+  window.addEventListener("resize", refit);
+  window.addEventListener("orientationchange", function () { setTimeout(refit, 250); });
+  if (window.ResizeObserver) new ResizeObserver(function () { if (G) renderBoard(); }).observe($("felt"));
+
+  /* ---------- start ---------- */
+  load();
+  if (canLink && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(noop);
+  fit();
+  loadGA(); logSession();
+  if (G && !G.over) {
+    if (G.viewer === undefined) G.viewer = soloViewer();
+    if (humans() > 1) G.shown = false;
+    render();
+    if (G.result) showResult(); else schedule(600);
+  } else {
+    if (G) render();
+    openNew();
+  }
+})();
+</script>
+</body>
+</html>

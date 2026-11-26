@@ -1,12 +1,13 @@
 # funsies
 
-Three games set in the same stone courtyard garden, built to play on an iPhone. Each game is a single HTML file with no build step and no dependencies, and all share one look: carved stone being slowly taken over by plants, four seasons, frosted panels and synthesized sounds.
+Four games set in the same stone courtyard garden, built to play on an iPhone. Each game is a single HTML file with no build step and no dependencies, and all share one look: carved stone being slowly taken over by plants, four seasons, frosted panels and synthesized sounds.
 
 | Game | What it is | Folder | Play it |
 | ---- | ---------- | ------ | ------- |
 | **Arbor & Arch** | Chess | [`chess/`](chess/) | https://luiserodz93.github.io/funsies/chess/ |
 | **Leaf & Letter** | Hangman | [`hangman/`](hangman/) | https://luiserodz93.github.io/funsies/hangman/ |
 | **Brick & Blueprint** | House designer: facades and floor plans | [`facade/`](facade/) | https://luiserodz93.github.io/funsies/facade/ |
+| **La Mesa** | Puerto Rican dominoes, four players in two teams | [`domino/`](domino/) | https://luiserodz93.github.io/funsies/domino/ |
 
 ## Arbor & Arch (chess)
 
@@ -90,11 +91,37 @@ A quiet drafting studio for designing a house two ways: the **Front** (the facad
 - Save a picture (PNG) or an SVG of either view, finished with a drafting title block (name, view, date and scale bar), or a PNG of the 3D view, or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
 - Works in portrait and landscape on any iPhone size. Turned sideways, the tools move to a rail on the right so the board keeps its height
 
+## La Mesa (Puerto Rican dominoes)
+
+A domino table in the plaza: double-six tiles, four seats and two teams, with partners sitting across. It follows the Puerto Rican rules as Mesa28 plays them ([reglas del dominó boricua](https://www.mesa28.com/reglas-domino-boricua)).
+
+**Who plays**
+
+- **Just me:** you and a computer partner against two computers.
+- **Me and a friend, as partners:** you two against two computers, passing the phone.
+- **Me against a friend:** each of you gets a computer partner, passing the phone.
+
+With two people on one phone, your tiles turn face down after you play, and the next person taps to see theirs.
+
+**Rules**
+
+- Each player gets 7 tiles. Play goes counterclockwise. The double six opens the first hand; after that the winner of the last hand leads with any tile. A player who can play must; a player who can't passes automatically.
+- A hand ends with **dominó** (a player goes out) or **tranque** (nobody can play). Last tiles are called out as **capicú** (not a double, fits either end), **chuchazo** (the double blank) or **dominau** (a double closing both ends).
+- The winning team scores every pip left in all four hands.
+- Tranque: in games to 100 or 200, the team with the fewest points between both players wins; in games to 500, the player who closed the game and the next player after them compare hands, and whoever holds fewer points wins the hand for their team. A tie scores nothing, and the last hand's winner starts again.
+- Games to **500** add prizes: capicú +100, chuchazo +100, and +100, +75, +50 and +25 for winning hands 1 to 4.
+
+**Features**
+
+- Two computer levels: Relaxed and Sharp. Sharp players remember who passed on which numbers, play to their partner's strengths and judge whether closing the game helps them.
+- Tap a tile to play it; when it fits both ends, tap the glowing spot you want. The table snakes the line of tiles to fit the screen.
+- A hand summary shows every hand left, the points and the prizes. The game auto-saves, works offline once installed, and fits any iPhone in portrait or landscape.
+
 ## Put it online with GitHub Pages
 
 1. On GitHub, open the repo, then **Settings → Pages**.
 2. Under **Build and deployment**, set Source to **Deploy from a branch**, pick `main` and `/ (root)`, then click **Save**.
-3. After a minute or two all three games are live at the addresses in the table above.
+3. After a minute or two all four games are live at the addresses in the table above.
 
 GitHub Pages on a free account requires the repository to be public.
 
@@ -123,11 +150,11 @@ The database URL is not a secret. It is meant to appear in public web pages, and
 
 ## Play stats
 
-All three games send anonymous play stats unless the player turns off **Share anonymous play stats** in the menu:
+All four games send anonymous play stats unless the player turns off **Share anonymous play stats** in the menu:
 
 - **Google Analytics** (one property, `G-K2XD82086T`, with each game reporting its own app name): city-level location, device type, sessions and game events. Google signals and ad personalization are off.
 - **Firebase logs**, which the rules make write-only:
-  - `logs/sessions`: one record per visit with device type, active time and counts. Hangman visits carry `app: "hangman"` and house designer visits `app: "facade"` (where `games` counts new designs and `moves` counts parts placed). Brick & Blueprint sends no drawings and writes nothing else to the database, so it needs no rules change.
+  - `logs/sessions`: one record per visit with device type, active time and counts. Hangman visits carry `app: "hangman"`, house designer visits `app: "facade"` (where `games` counts new designs and `moves` counts parts placed) and domino visits `app: "domino"` (where `games` counts games started and `moves` counts tiles played). Brick & Blueprint sends no drawings and writes nothing else to the database, so it needs no rules change.
   - `logs/games`: one record per finished or abandoned chess game.
   - `logs/words`: one record per finished or abandoned hangman round: mode, level, result, word length, guesses, misses, dug-up letters and time. The word itself is recorded only for words the computer picked, never for words friends hide.
   - `logs/errors`: up to five script errors per visit, to diagnose problems on real phones.
