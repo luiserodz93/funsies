@@ -7,7 +7,7 @@ Four games set in the same stone courtyard garden, built to play on an iPhone. E
 | **Arbor & Arch** | Chess | [`chess/`](chess/) | https://luiserodz93.github.io/funsies/chess/ |
 | **Leaf & Letter** | Hangman | [`hangman/`](hangman/) | https://luiserodz93.github.io/funsies/hangman/ |
 | **Brick & Blueprint** | House designer: facades and floor plans | [`facade/`](facade/) | https://luiserodz93.github.io/funsies/facade/ |
-| **Capicú** | Puerto Rican dominoes, four players in two teams | [`domino/`](domino/) | https://luiserodz93.github.io/funsies/domino/ |
+| **La Mesa** | Puerto Rican dominoes, four players in two teams | [`domino/`](domino/) | https://luiserodz93.github.io/funsies/domino/ |
 
 ## Arbor & Arch (chess)
 
@@ -91,7 +91,7 @@ A quiet drafting studio for designing a house two ways: the **Front** (the facad
 - Save a picture (PNG) or an SVG of either view, finished with a drafting title block (name, view, date and scale bar), or a PNG of the 3D view, or share a link that carries the whole design, front and plan, inside it, so nothing is uploaded
 - Works in portrait and landscape on any iPhone size. Turned sideways, the tools move to a rail on the right so the board keeps its height
 
-## Capicú (Puerto Rican dominoes)
+## La Mesa (Puerto Rican dominoes)
 
 A domino table in the plaza: double-six tiles, four seats and two teams, with partners sitting across. It follows the Puerto Rican rules as Mesa28 plays them ([reglas del dominó boricua](https://www.mesa28.com/reglas-domino-boricua)).
 
