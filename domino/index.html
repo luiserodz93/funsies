@@ -583,19 +583,24 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
   /* ---------- board layout ----------
      Units: a tile is 2 × 1. The first tile sits in the centre; the right arm runs right then
      snakes down, the left arm runs left then snakes up. Doubles lie across the line. */
-  function walker(sx, dir) { return { x: sx * dir, y: 0, dx: dir, dy: 0, hd: dir, vd: dir }; }
+  /* Doubles always lie crosswise, centred on the line. The tile played on a double always
+     continues straight and centred; only a plain tile that follows a plain tile may bend. */
+  function walker(sx, dir, pd) { return { x: sx * dir, y: 0, dx: dir, dy: 0, hd: dir, vd: dir, pd: !!pd }; }
   function advance(w, dbl, B) {
-    var o = {}, n = { x: w.x, y: w.y, dx: w.dx, dy: w.dy, hd: w.hd, vd: w.vd };
+    var o = {}, n = { x: w.x, y: w.y, dx: w.dx, dy: w.dy, hd: w.hd, vd: w.vd, pd: dbl };
     if (w.dy === 0) {
-      var len = dbl ? 1 : 2;
-      if ((w.x + w.dx * len) * w.dx > B) {
+      if (dbl) {
+        o = { cx: w.x + w.dx * 0.5, cy: w.y, ox: w.dx, oy: 0, cross: true }; n.x = w.x + w.dx;
+      } else if (!w.pd && (w.x + w.dx * 2) * w.dx > B) {
         o = { cx: w.x + w.dx * 0.5, cy: w.y + w.vd * 0.5, ox: 0, oy: w.vd, cross: false };
         n.x = w.x + w.dx * 0.5; n.y = w.y + w.vd * 1.5; n.dx = 0; n.dy = w.vd; n.hd = w.dx;
-      } else if (dbl) {
-        o = { cx: w.x + w.dx * 0.5, cy: w.y, ox: w.dx, oy: 0, cross: true }; n.x = w.x + w.dx;
       } else {
         o = { cx: w.x + w.dx, cy: w.y, ox: w.dx, oy: 0, cross: false }; n.x = w.x + w.dx * 2;
       }
+    } else if (dbl) {
+      o = { cx: w.x, cy: w.y + w.vd * 0.5, ox: 0, oy: w.vd, cross: true }; n.y = w.y + w.vd;
+    } else if (w.pd) {
+      o = { cx: w.x, cy: w.y + w.vd, ox: 0, oy: w.vd, cross: false }; n.y = w.y + w.vd * 2;
     } else {
       var nd = -w.hd;
       o = { cx: w.x + nd * 0.5, cy: w.y + w.vd * 0.5, ox: nd, oy: 0, cross: false };
@@ -607,7 +612,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     var items = [], wl, wr;
     var sd = isDbl(ch.s);
     items.push({ cx: 0, cy: 0, ox: 1, oy: 0, cross: sd, v: ch.s, spine: true });
-    wl = walker(sd ? 0.5 : 1, -1); wr = walker(sd ? 0.5 : 1, 1);
+    wl = walker(sd ? 0.5 : 1, -1, sd); wr = walker(sd ? 0.5 : 1, 1, sd);
     ch.L.forEach(function (t) { var r = advance(wl, isDbl(t), B); r.o.v = t; items.push(r.o); wl = r.w; });
     ch.R.forEach(function (t) { var r = advance(wr, isDbl(t), B); r.o.v = t; items.push(r.o); wr = r.w; });
     return { items: items, wl: wl, wr: wr };
