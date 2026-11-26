@@ -282,7 +282,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     <li><b>Capicú:</b> the last tile is not a double and fits on either end.</li>
     <li><b>Chuchazo:</b> the last tile is the double blank, la chucha.</li>
     <li><b>Dominau:</b> the last tile is a double that closes both ends.</li>
-    <li><b>Tranque:</b> nobody can play. In games to 100 or 200, the team of the player with the <b>fewest points in hand</b> wins. In games to 500, the team with the <b>fewest points between both players</b> wins. On a tie, nobody scores and the player to the right of whoever closed the game starts the next hand.</li>
+    <li><b>Tranque:</b> nobody can play. In games to 100 or 200, the team with the <b>fewest points between both players</b> wins. In games to 500, only the player who closed the game and the <b>next player after them</b> count: whoever holds fewer points wins the hand for their team. On a tie, nobody scores and the player to the right of whoever closed the game starts the next hand.</li>
   </ul>
   <h3>Scoring</h3>
   <ul>
@@ -467,21 +467,26 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     } else {
       var w;
       if (big) {
+        /* To 500: the player who closed it against the player after them; fewer points wins. */
+        var nx = next(by);
+        r.duel = [by, nx];
+        w = all[by] < all[nx] ? team(by) : all[nx] < all[by] ? team(nx) : -1;
+      } else {
+        /* To 100 or 200: the team with fewer points between both players wins. */
         var ta = all[0] + all[2], tb = all[1] + all[3];
         w = ta < tb ? 0 : tb < ta ? 1 : -1;
         r.teamPips = [ta, tb];
-      } else {
-        var mn = Math.min.apply(null, all), who = [0, 1, 2, 3].filter(function (s) { return all[s] === mn; });
-        var tms = who.map(team);
-        w = tms.every(function (x) { return x === tms[0]; }) ? tms[0] : -1;
       }
       r.win = w;
       if (w < 0) { G.leader = next(by); }
       else {
         /* The winning team's player with fewer points leads; ties go to the first in turn order after the closer. */
+        if (r.duel) { G.leader = r.seat = all[r.duel[0]] < all[r.duel[1]] ? r.duel[0] : r.duel[1]; }
+        else {
         var cand = [0, 1, 2, 3].map(function (k) { return (by + 1 + k) % 4; }).filter(function (s) { return team(s) === w; });
         cand.sort(function (x, y) { return all[x] - all[y]; });
         G.leader = cand[0]; r.seat = cand[0];
+        }
       }
     }
     if (r.win >= 0 && big && G.handNo <= 4) r.bonus.push(["Hand " + G.handNo + " prize", [100, 75, 50, 25][G.handNo - 1]]);
@@ -812,9 +817,10 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     else head = "¡Tranque!";
     var sub;
     if (r.kind === "domino") sub = esc(name(r.seat)) + " played the last tile" + (r.style === "Capicú" ? ", and it fit both ends." : r.style === "Chuchazo" ? " with la chucha, the double blank." : r.style === "Dominau" ? ", a double closing both ends." : ".");
-    else if (r.win < 0) sub = "The game is closed and the points are tied, so nobody scores. " + esc(name(G.leader)) + " starts the next hand.";
+    else if (r.win < 0) sub = (r.duel ? esc(name(r.duel[0])) + " and " + esc(name(r.duel[1])) + " are tied" : "The teams are tied") + ", so nobody scores. " + esc(name(G.leader)) + " starts the next hand.";
     else if (r.teamPips) sub = "The game is closed. " + esc(teamName(r.win)) + " hold fewer points (" + r.teamPips[r.win] + " against " + r.teamPips[1 - r.win] + ").";
-    else sub = "The game is closed. " + esc(name(r.seat)) + " holds the fewest points (" + r.pips[r.seat] + ").";
+    else { var lo = r.seat, hi = r.duel[0] === lo ? r.duel[1] : r.duel[0];
+      sub = esc(name(r.duel[0])) + " closed the game against " + esc(name(r.duel[1])) + ". " + esc(name(lo)) + " holds fewer points (" + r.pips[lo] + " against " + r.pips[hi] + "), so " + esc(teamName(r.win)) + " win the hand."; }
     var tag = r.win < 0 ? '<span class="tag n">No points</span>' : '<span class="tag ' + (r.win ? "b" : "") + '">+' + r.total + "</span>";
     var html = '<div class="res-title"><h2>' + head + "</h2>" + tag + "</div><p>" + sub + "</p>";
     html += '<div class="hands">' + [0, 1, 2, 3].map(function (s) {
@@ -865,7 +871,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     $("friendField").hidden = prefs.mode === "solo";
     document.querySelectorAll("#targetSeg button").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.v === prefs.target)); });
     document.querySelectorAll("#levelSeg button").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.v === prefs.level)); });
-    $("targetNote").textContent = prefs.target === 500 ? "500 adds prizes for capicú, chuchazo and the first four hands. A tranque goes to the team with fewer points." : "Plain scoring. A tranque goes to the team of the player with the fewest points.";
+    $("targetNote").textContent = prefs.target === 500 ? "500 adds prizes for capicú, chuchazo and the first four hands. A tranque is decided between the player who closed it and the next player: fewer points wins." : "Plain scoring. A tranque goes to the team with fewer points between both players.";
   }
   $("modeOpts").addEventListener("click", function (e) { var b = e.target.closest(".opt"); if (!b) return; SFX.tap(); prefs.mode = b.dataset.v; renderNew(); });
   $("targetSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; SFX.tap(); prefs.target = +b.dataset.v; renderNew(); });
