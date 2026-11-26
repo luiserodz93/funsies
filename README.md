@@ -108,7 +108,7 @@ With two people on one phone, your tiles turn face down after you play, and the 
 - Each player gets 7 tiles. Play goes counterclockwise. The double six opens the first hand; after that the winner of the last hand leads with any tile. A player who can play must; a player who can't passes automatically.
 - A hand ends with **dominó** (a player goes out) or **tranque** (nobody can play). Last tiles are called out as **capicú** (not a double, fits either end), **chuchazo** (the double blank) or **dominau** (a double closing both ends).
 - The winning team scores every pip left in all four hands.
-- Tranque: in games to 100 or 200, the team with the fewest points between both players wins; in games to 500, the player who closed the game and the next player after them compare hands, and whoever holds fewer points wins the hand for their team. A tie scores nothing, and the player to the right of whoever closed the game leads next.
+- Tranque: in games to 100 or 200, the team with the fewest points between both players wins; in games to 500, the player who closed the game and the next player after them compare hands, and whoever holds fewer points wins the hand for their team. A tie scores nothing, and the last hand's winner starts again.
 - Games to **500** add prizes: capicú +100, chuchazo +100, and +100, +75, +50 and +25 for winning hands 1 to 4.
 
 **Features**

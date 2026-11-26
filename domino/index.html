@@ -282,7 +282,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     <li><b>Capicú:</b> the last tile is not a double and fits on either end.</li>
     <li><b>Chuchazo:</b> the last tile is the double blank, la chucha.</li>
     <li><b>Dominau:</b> the last tile is a double that closes both ends.</li>
-    <li><b>Tranque:</b> nobody can play. In games to 100 or 200, the team with the <b>fewest points between both players</b> wins. In games to 500, only the player who closed the game and the <b>next player after them</b> count: whoever holds fewer points wins the hand for their team. On a tie, nobody scores and the player to the right of whoever closed the game starts the next hand.</li>
+    <li><b>Tranque:</b> nobody can play. In games to 100 or 200, the team with the <b>fewest points between both players</b> wins. In games to 500, only the player who closed the game and the <b>next player after them</b> count: whoever holds fewer points wins the hand for their team. On a tie, nobody scores and the last hand's winner starts again.</li>
   </ul>
   <h3>Scoring</h3>
   <ul>
@@ -478,7 +478,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
         r.teamPips = [ta, tb];
       }
       r.win = w;
-      if (w < 0) { G.leader = next(by); }
+      if (w < 0) { /* A tie scores nothing; the last hand's winner starts again (the double six again after a tied first hand). */ }
       else {
         /* The winning team's player with fewer points leads; ties go to the first in turn order after the closer. */
         if (r.duel) { G.leader = r.seat = all[r.duel[0]] < all[r.duel[1]] ? r.duel[0] : r.duel[1]; }
@@ -817,7 +817,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     else head = "¡Tranque!";
     var sub;
     if (r.kind === "domino") sub = esc(name(r.seat)) + " played the last tile" + (r.style === "Capicú" ? ", and it fit both ends." : r.style === "Chuchazo" ? " with la chucha, the double blank." : r.style === "Dominau" ? ", a double closing both ends." : ".");
-    else if (r.win < 0) sub = (r.duel ? esc(name(r.duel[0])) + " and " + esc(name(r.duel[1])) + " are tied" : "The teams are tied") + ", so nobody scores. " + esc(name(G.leader)) + " starts the next hand.";
+    else if (r.win < 0) sub = (r.duel ? esc(name(r.duel[0])) + " and " + esc(name(r.duel[1])) + " are tied" : "The teams are tied") + ", so nobody scores. " + (G.leader >= 0 ? esc(name(G.leader)) + ", the last winner, starts again." : "The double six starts again.");
     else if (r.teamPips) sub = "The game is closed. " + esc(teamName(r.win)) + " hold fewer points (" + r.teamPips[r.win] + " against " + r.teamPips[1 - r.win] + ").";
     else { var lo = r.seat, hi = r.duel[0] === lo ? r.duel[1] : r.duel[0];
       sub = esc(name(r.duel[0])) + " closed the game against " + esc(name(r.duel[1])) + ". " + esc(name(lo)) + " holds fewer points (" + r.pips[lo] + " against " + r.pips[hi] + "), so " + esc(teamName(r.win)) + " win the hand."; }
