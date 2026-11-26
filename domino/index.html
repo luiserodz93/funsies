@@ -113,6 +113,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
 .felt .hint{position:absolute; inset:0; display:grid; place-items:center; color:rgba(255,255,255,.55); font-family:var(--font-display); font-size:17px; text-align:center; padding:20px; pointer-events:none}
 .ghost{cursor:pointer}
 .ghost rect{animation:breathe 1.2s ease-in-out infinite alternate}
+.ghost.soft rect{animation:none; opacity:.75}
 @keyframes breathe{from{opacity:.55} to{opacity:1}}
 
 .status{grid-area:status; display:flex; align-items:center; justify-content:center; gap:8px; min-height:22px; text-align:center; font-size:13.5px; font-weight:700; color:var(--ink2)}
@@ -421,6 +422,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
   function humans() { return G.cfg.human.filter(Boolean).length; }
 
   function place(s, i, side) {
+    selEnd = "";
     var hand = G.hands[s], t = hand[i], ch = G.chain;
     var e = ends(ch), fitsBoth = false;
     if (!ch) {
@@ -682,6 +684,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
   }
 
   var sel = -1;   /* index in the viewer's hand of the selected tile */
+  var selEnd = ""; /* an open end picked first ("L" or "R"), before a tile */
   function renderBoard() {
     var svg = $("board"), felt = $("felt"), W = felt.clientWidth || 300, H = felt.clientHeight || 300;
     var hint = $("hint");
@@ -702,7 +705,14 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
       var t = G.hands[me][sel];
       mv.filter(function (m) { return m.i === sel; }).forEach(function (m) {
         var r = advance(m.side === "L" ? L.wl : L.wr, isDbl(t), B);
-        r.o.v = [0, 0]; r.o.side = m.side; ghosts.push(r.o);
+        r.o.v = [0, 0]; r.o.side = m.side; r.o.hot = true; ghosts.push(r.o);
+      });
+    } else if (mv.length) {
+      /* Your turn: mark every open end a tile of yours fits, so you can pick the end first. */
+      ["L", "R"].forEach(function (side) {
+        if (!mv.some(function (m) { return m.side === side; })) return;
+        var r = advance(side === "L" ? L.wl : L.wr, false, B);
+        r.o.v = [0, 0]; r.o.side = side; r.o.hot = selEnd === side; ghosts.push(r.o);
       });
     }
     var bb = bbox(items.concat(ghosts)), pad = 0.7;
@@ -722,8 +732,8 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     }
     ghosts.forEach(function (g) {
       var r = rectOf(g);
-      out += '<g class="ghost" data-side="' + g.side + '"><rect x="' + (r.x + 0.04) + '" y="' + (r.y + 0.04) + '" width="' + (r.w - 0.08) + '" height="' + (r.h - 0.08) + '" rx="0.16" fill="rgba(242,201,76,.28)" stroke="var(--glow)" stroke-width="0.08" stroke-dasharray="0.22 0.14"/>' +
-        '<rect x="' + (r.x - 0.5) + '" y="' + (r.y - 0.5) + '" width="' + (r.w + 1) + '" height="' + (r.h + 1) + '" fill="transparent"/></g>';
+      out += '<g class="ghost' + (g.hot ? "" : " soft") + '" data-side="' + g.side + '"><rect x="' + (r.x + 0.04) + '" y="' + (r.y + 0.04) + '" width="' + (r.w - 0.08) + '" height="' + (r.h - 0.08) + '" rx="0.16" fill="rgba(242,201,76,' + (g.hot ? ".3" : ".1") + ')" stroke="var(--glow)" stroke-width="0.08" stroke-dasharray="0.22 0.14"/>' +
+        '<rect x="' + (r.x - 0.5) + '" y="' + (r.y - 0.5) + '" width="' + (r.w + 1) + '" height="' + (r.h + 1) + '" fill="#000" fill-opacity="0.002"/></g>';
     });
     svg.innerHTML = out;
   }
@@ -759,7 +769,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     var showSeat = v >= 0 ? v : (G.cfg.human[G.turn] ? G.turn : lastHuman());
     var faceUp = v >= 0 && G.shown && v === showSeat;
     var hand = G.hands[showSeat], mv = faceUp ? myMoves() : [];
-    var can = {}; mv.forEach(function (m) { can[m.i] = true; });
+    var can = {}; mv.forEach(function (m) { if (!selEnd || m.side === selEnd) can[m.i] = true; });
     var label = showSeat === 0 && humans() === 1 ? "Your tiles" : name(showSeat) + "'s tiles";
     out += '<div class="lbl ta' + '">' + esc(label) + " · " + handPips(hand) + " pts</div>";
     hand.forEach(function (t, i) {
@@ -814,14 +824,24 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
     var b = e.target.closest(".tile"); if (!b || !G) return;
     var i = +b.dataset.i, mv = myMoves().filter(function (m) { return m.i === i; });
     if (!mv.length) { if (myMoves().length) { SFX.tap(); toast("That tile doesn't fit an open end"); } return; }
-    if (mv.length === 1) { sel = -1; place(G.turn, i, mv[0].side); return; }
-    SFX.tap(); sel = sel === i ? -1 : i; render();
+    var at = selEnd && mv.filter(function (m) { return m.side === selEnd; })[0];
+    if (at) { sel = -1; selEnd = ""; place(G.turn, i, at.side); return; }
+    if (mv.length === 1) { sel = -1; selEnd = ""; place(G.turn, i, mv[0].side); return; }
+    SFX.tap(); selEnd = ""; sel = sel === i ? -1 : i; render();
   });
   $("board").addEventListener("click", function (e) {
-    var g = e.target.closest(".ghost"); if (!g || sel < 0) return;
+    var g = e.target.closest(".ghost"); if (!g) return;
     var side = g.getAttribute("data-side"), i = sel;
-    if (!myMoves().some(function (m) { return m.i === i && m.side === side; })) return;
-    sel = -1; place(G.turn, i, side);
+    if (i >= 0 && myMoves().some(function (m) { return m.i === i && m.side === side; })) { sel = -1; selEnd = ""; place(G.turn, i, side); return; }
+    /* No tile picked yet: choose this end; tiles that fit it light up. Tap again to clear. */
+    if (side === "L" || side === "R") {
+      var fit = myMoves().filter(function (m) { return m.side === side; });
+      if (!fit.length) return;
+      SFX.tap(); sel = -1; selEnd = selEnd === side ? "" : side;
+      var only = fit.filter(function (m, k, a) { return a.findIndex(function (x) { return x.i === m.i; }) === k; });
+      render();
+      if (selEnd && only.length === 1) toast("Tap the lit tile to play it here");
+    }
   });
 
   /* ---------- results ---------- */
