@@ -687,11 +687,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const onFloor = p => D.mode !== "plan" || (p.fl || 0) === (D.lvl || 0);
   const visible = p => !D.layers[p.layer].hide && onFloor(p);
   const editable = p => visible(p) && !D.layers[p.layer].lock;
+  const isRug = p => p.t === "furn" && p.style === "rug";
   function hitPart(w) {
     const tol = 10 / view.s, n = D.parts.length;
-    /* doors, windows and furniture are found before the rooms under them, and paving last of all */
-    const tier = p => D.mode !== "plan" ? 2 : p.t === "pave" ? 0 : p.t === "room" ? 1 : 2;
-    for (let j = 3 * n - 1; j >= 0; j--) {
+    /* doors, windows and furniture are found before the rugs and rooms under them, and paving last of all */
+    const tier = p => D.mode !== "plan" ? 3 : p.t === "pave" ? 0 : p.t === "room" ? 1 : isRug(p) ? 2 : 3;
+    for (let j = 4 * n - 1; j >= 0; j--) {
       const p = D.parts[j % n]; if (!editable(p) || tier(p) !== Math.floor(j / n)) continue;
       const k = kindOf(p);
       if (k === "rect" || k === "label") { const t = 3 / view.s; if (w.x >= p.x - t && w.x <= p.x + p.w + t && w.y >= p.y - t && w.y <= p.y + p.h + t) return p; }
@@ -1910,7 +1911,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     /* paving lies under everything in the plan */
     /* in the plan, paving lies under everything and rooms under their doors, windows and furniture */
     /* open rooms (terrazas, porches, carports) go down before enclosed ones, so a house wall they share stays its full thickness */
-    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(p => p.t !== "pave" && p.t !== "room"));
+    /* rugs lie on the floor, under the furniture standing on them, whatever order they were placed in */
+    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(isRug), parts.filter(p => p.t !== "pave" && p.t !== "room" && !isRug(p)));
     o.all = parts;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
