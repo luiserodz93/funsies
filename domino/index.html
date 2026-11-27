@@ -6,11 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.firebaseio.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#d9cfb4">
+<meta name="theme-color" content="#d9cfb4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1412" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Puerto Rican dominoes for four, in two teams: play with a friend and two computers, or alone with three.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="La Mesa">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
@@ -103,8 +104,9 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
 .bubble{position:absolute; left:50%; top:100%; transform:translate(-50%, 4px); background:var(--ink); color:var(--bg1); font-weight:800; font-size:12px; padding:3px 9px; border-radius:10px; white-space:nowrap; z-index:5; pointer-events:none; animation:pop .25s ease-out}
 @keyframes pop{from{transform:translate(-50%, -2px) scale(.8); opacity:0}}
 
-/* Home Screen app: iOS blurs a band just under the status bar, so the top row starts below it. */
-.ios-app .app{padding-top:calc(env(safe-area-inset-top, 0px) + 30px)}
+/* Home Screen app: the status bar is opaque (content starts below it). Copies installed while it was
+   translucent still draw under it, and iOS blurs a band there, so the top row starts below that band. */
+.ios-app .app{padding-top:calc(env(safe-area-inset-top, 0px) + min(30px, env(safe-area-inset-top, 0px)))}
 @media (orientation: landscape) and (max-height: 560px){ .ios-app .app{padding-top:max(8px, env(safe-area-inset-top, 0px))} }
 .app.capped .table{height:var(--tableH); align-self:center}
 .app.capped{grid-template-rows:auto auto minmax(0,1fr) auto auto}
