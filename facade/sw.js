@@ -1,5 +1,5 @@
 /* Offline support: serve the game's own files (and its fonts) from cache, refresh in the background. */
-const CACHE = "brick-blueprint-v8";
+const CACHE = "brick-blueprint-v9";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
