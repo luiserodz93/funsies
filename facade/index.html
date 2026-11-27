@@ -437,7 +437,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     pdoor: { name: "Door", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 91.4, h: 91.4, color: "#2a2a28", style: "swing", styles: ["swing", "pair", "sliding"] },
     pwindow: { name: "Window", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 121.9, h: 15.2, color: "#5d7b91" },
     stairs: { name: "Stairs", kind: "rect", layer: "structure", mode: "plan", rot: true, w: 100, h: 300, color: "#e4dfd5", style: "straight", styles: ["straight", "spiral"] },
-    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#d6cfc3", style: "sofa", styles: ["sofa", "sectional", "armchair", "chair", "coffee", "sidetbl", "table", "rtable", "bench", "bed", "nightstand", "dresser", "wardrobe", "bookcase", "desk", "tv", "rug", "lounger", "grill", "recliner", "chaise", "ottoman", "stool", "bunk", "crib", "piano", "grand", "fan", "car", "suv", "pickup", "person"] },
+    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#d6cfc3", style: "sofa", styles: ["sofa", "sectional", "armchair", "chair", "coffee", "sidetbl", "table", "rtable", "bench", "bed", "nightstand", "dresser", "wardrobe", "bookcase", "desk", "tv", "tvwall", "rug", "lounger", "grill", "recliner", "chaise", "ottoman", "stool", "bunk", "crib", "piano", "grand", "fan", "car", "suv", "pickup", "person"] },
     fixture: { name: "Fixture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 40, h: 70, color: "#f7f6f2", style: "toilet", styles: ["toilet", "sink", "dsink", "bath", "fsbath", "shower", "stove", "fridge", "counter", "dishwasher", "washer", "dryer", "wheater", "bidet", "cbath"] },
     cabinet: { name: "Cabinet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 91.4, h: 61, color: "#ebe7df", style: "base", styles: ["base", "drawers", "sinkbase", "upper", "tall", "island", "vanity", "shelf", "corner", "hood", "oven", "wine"] },
     closet: { name: "Closet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 121.9, h: 61, color: "#e3d6c2", style: "rod", styles: ["rod", "dblrod", "cshelf", "shoes", "cdrawer", "cisland", "hamper"] },
@@ -477,7 +477,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     shrub: "Shrub", tree: "Tree", palm: "Palm", tank: "Water tank", solar: "Solar water heater", ac: "Mini-split AC", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
     steps: "Steps", stoop: "Stoop",
     swing: "Swing", pair: "Double", sliding: "Sliding", straight: "Straight", spiral: "Spiral",
-    sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console",
+    sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console", tvwall: "Wall TV",
     toilet: "Toilet", sink: "Sink", bath: "Bathtub", shower: "Shower", stove: "Stove", fridge: "Fridge", counter: "Counter", dishwasher: "Dishwasher", washer: "Washer", dryer: "Dryer", pot: "Potted plant",
     sectional: "Sectional", chair: "Chair", coffee: "Coffee table", sidetbl: "Side table", rtable: "Round table", bench: "Bench", nightstand: "Nightstand", dresser: "Dresser", bookcase: "Bookcase", lounger: "Lounge chair", grill: "Grill",
     dsink: "Double sink", fsbath: "Freestanding tub", wheater: "Water heater",
@@ -687,11 +687,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const onFloor = p => D.mode !== "plan" || (p.fl || 0) === (D.lvl || 0);
   const visible = p => !D.layers[p.layer].hide && onFloor(p);
   const editable = p => visible(p) && !D.layers[p.layer].lock;
+  const isRug = p => p.t === "furn" && p.style === "rug", isFan = p => !!p && p.t === "furn" && p.style === "fan";
   function hitPart(w) {
     const tol = 10 / view.s, n = D.parts.length;
-    /* doors, windows and furniture are found before the rooms under them, and paving last of all */
-    const tier = p => D.mode !== "plan" ? 2 : p.t === "pave" ? 0 : p.t === "room" ? 1 : 2;
-    for (let j = 3 * n - 1; j >= 0; j--) {
+    /* ceiling fans are found first, then doors, windows and furniture, then the rugs and rooms under them, and paving last of all */
+    const tier = p => D.mode !== "plan" ? 3 : p.t === "pave" ? 0 : p.t === "room" ? 1 : isRug(p) ? 2 : isFan(p) ? 4 : 3;
+    for (let j = 5 * n - 1; j >= 0; j--) {
       const p = D.parts[j % n]; if (!editable(p) || tier(p) !== Math.floor(j / n)) continue;
       const k = kindOf(p);
       if (k === "rect" || k === "label") { const t = 3 / view.s; if (w.x >= p.x - t && w.x <= p.x + p.w + t && w.y >= p.y - t && w.y <= p.y + p.h + t) return p; }
@@ -1264,7 +1265,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         let fr = ""; for (let y = 3; y < Dp - 2; y += 4) fr += `M0 ${f(y)}h-4M${f(L)} ${f(y)}h4`;
         return s + ln(fr, shade(c, 0.15), 0.8);
       }
-      case "tv": return rr(0, Dp * 0.25, L, Dp * 0.75, 2, c, st) + rr(L * 0.1, Dp * 0.04, L * 0.8, Dp * 0.14, 1, INK) + rr(L * 0.42, Dp * 0.18, L * 0.16, Dp * 0.18, 1, "#4a4b4d") + ln(`M${f(L / 3)} ${f(Dp * 0.25)}V${f(Dp)}M${f(L * 2 / 3)} ${f(Dp * 0.25)}V${f(Dp)}`, dk, 0.7);
+      /* the console fills its footprint; the TV stands on top near the back, its stand in the middle, screen facing the room */
+      case "tv": return rr(0, 0, L, Dp, 2, c, st) + ln(`M${f(L / 3)} ${f(Dp * 0.5)}V${f(Dp)}M${f(L * 2 / 3)} ${f(Dp * 0.5)}V${f(Dp)}`, dk, 0.7) + rr(L * 0.42, Dp * 0.06, L * 0.16, Dp * 0.38, 1, "#4a4b4d") + rr(L * 0.1, Dp * 0.14, L * 0.8, Dp * 0.14, 1, INK);
+      /* a TV hung on the wall: a thin panel against the wall, the screen side toward the room */
+      case "tvwall": return rr(0, 0, L, Dp, 1, INK) + ln(`M${f(L * 0.04)} ${f(Dp * 0.8)}H${f(L * 0.96)}`, "#8f969b", 0.8);
       case "lounger": {
         let s = rr(0, 0, L, Dp, 5, dk, st) + rr(L * 0.06, Dp * 0.04, L * 0.88, Dp * 0.3, 4, lt, stk(e, 0.6)) + rr(L * 0.06, Dp * 0.36, L * 0.88, Dp * 0.6, 4, c, stk(e, 0.6));
         for (let i = 1; i < 6; i++) s += ln(`M${f(L * 0.1)} ${f(Dp * 0.36 + Dp * 0.6 * i / 6)}H${f(L * 0.9)}`, dk, 0.5, 'opacity=".5"');
@@ -1907,7 +1911,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     /* paving lies under everything in the plan */
     /* in the plan, paving lies under everything and rooms under their doors, windows and furniture */
     /* open rooms (terrazas, porches, carports) go down before enclosed ones, so a house wall they share stays its full thickness */
-    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(p => p.t !== "pave" && p.t !== "room"));
+    /* rugs lie on the floor, under the furniture standing on them, and ceiling fans hang over everything, whatever order they were placed in */
+    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(isRug), parts.filter(p => p.t !== "pave" && p.t !== "room" && !isRug(p) && !isFan(p)), parts.filter(isFan));
     o.all = parts;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
@@ -4051,7 +4056,6 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
   /* Keeps things out of the walls: anything that runs into a wall's thickness moves back to its inside face. */
   /* A ceiling fan goes to the middle of the room it is placed or dropped in (a room merged with others: the middle of the whole space). */
-  const isFan = p => p && p.t === "furn" && p.style === "fan";
   function fanRoom(p, cx, cy) {
     const rs = D.plan.filter(q => q.t === "room" && lvOf(q) === lvOf(p) && cx > q.x && cx < q.x + q.w && cy > q.y && cy < q.y + q.h);
     return rs.sort((a, b) => a.w * a.h - b.w * b.h)[0] || null;
@@ -4707,7 +4711,21 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
           box(L * 0.3, L * 0.7, d * 0.12, d * 0.16, 90, 90 + L * 0.22, M(DARK, 0.3)); box(L * 0.48, L * 0.52, d * 0.14, d * 0.3, 75, 90, M("#8d8f92", 0.4, 0.5)); box(L * 0.33, L * 0.67, d * 0.45, d * 0.7, 75, 76.5, M("#4a4b4d", 0.5)); lamp(L * 0.86, d * 0.3, 75);
           chair(L / 2, Dp * 0.86, Math.min(52, L * 0.36), Math.min(52, Dp * 0.6), Math.PI, cl); break;
         }
-        case "tv": { box(0, L, Dp * 0.25, Dp, 8, 52, M(c, 0.6)); box(2, L - 2, Dp * 0.25, Dp, 0, 8, M(cd, 0.6)); seamX(L / 3, 10, 50); seamX(L * 2 / 3, 10, 50); const tw = L * 0.8, th = tw * 0.565; box(L / 2 - tw / 2, L / 2 + tw / 2, Dp * 0.06, Dp * 0.12, 62, 62 + th, M("#16181a", 0.25, 0.3)); box(L * 0.44, L * 0.56, Dp * 0.12, Dp * 0.34, 52, 62, M(DARK, 0.4)); break; }
+        case "tv": {
+          box(0, L, 0, Dp, 8, 52, M(c, 0.6)); box(2, L - 2, 2, Dp, 0, 8, M(cd, 0.6)); seamX(L / 3, 10, 50); seamX(L * 2 / 3, 10, 50);
+          /* on top of the console: a stand in the middle and the TV near the back, its screen facing the front */
+          const tw = Math.min(L * 0.8, 165), th = tw * 0.565, sy0 = Dp * 0.14, sy1 = Dp * 0.28;
+          box(L * 0.4, L * 0.6, Dp * 0.06, Dp * 0.44, 52, 53.5, M(DARK, 0.4)); box(L * 0.47, L * 0.53, sy0 - 3, sy0, 52, 72, M(DARK, 0.4));
+          box(L / 2 - tw / 2, L / 2 + tw / 2, sy0, sy1, 64, 64 + th, M("#16181a", 0.3, 0.3)); box(L / 2 - tw / 2 + 1.2, L / 2 + tw / 2 - 1.2, sy1, sy1 + 0.3, 65.2, 64 + th - 1.2, M("#24313a", 0.08, 0.5));
+          break;
+        }
+        case "tvwall": {
+          /* the screen's bottom edge about 3' 6" off the floor, a slim bracket behind it, the glass facing the room */
+          const tw = L, th = Math.min(tw * 0.565, 140), y0 = 106, sy1 = Math.max(3, Dp);
+          box(L * 0.35, L * 0.65, 0, sy1 * 0.45, y0 + th * 0.3, y0 + th * 0.7, M(DARK, 0.5));
+          box(0, tw, sy1 * 0.45, sy1, y0, y0 + th, M("#16181a", 0.3, 0.3)); box(1.2, tw - 1.2, sy1, sy1 + 0.3, y0 + 1.2, y0 + th - 1.2, M("#24313a", 0.08, 0.5));
+          break;
+        }
         case "rug": box(0, L, 0, Dp, 0, 1.2, M(c, 1)); box(L * 0.07, L * 0.93, Dp * 0.1, Dp * 0.9, 1.2, 1.4, M(cl, 1)); box(L * 0.15, L * 0.85, Dp * 0.23, Dp * 0.77, 1.4, 1.6, M(c, 1)); break;
         case "lounger": {
           const wm = M(cd, 0.6), fm = M(c, 0.95); [[4, 6], [L - 4, 6], [4, Dp - 6], [L - 4, Dp - 6]].forEach(q => box(q[0] - 2.5, q[0] + 2.5, q[1] - 2.5, q[1] + 2.5, 0, 26, wm));
@@ -5354,7 +5372,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       ["Kitchen appliances", [["fixture", "fridge", 36, 30, "Fridge"], ["fixture", "stove", 30, 26, "Range"], ["fixture", "sink", 33, 22, "Kitchen sink"], ["fixture", "dsink", 36, 22, "Double sink"], ["fixture", "dishwasher", 24, 24, "Dishwasher"]]],
       ["Laundry", [["fixture", "washer", 27, 30, "Washer"], ["fixture", "dryer", 27, 30, "Dryer"], ["fixture", "wheater", 24, 24, "Water heater"], ["cabinet", "upper", 54, 13, "Laundry cabinets"], ["fixture", "sink", 24, 22, "Utility sink"]]],
       ["Bathroom", [["fixture", "toilet", 18, 28, "Toilet"], ["fixture", "sink", 24, 18, "Pedestal basin"], ["cabinet", "vanity", 36, 22, "Vanity"], ["cabinet", "vanity", 60, 22, "Double vanity"], ["fixture", "bath", 60, 30, "Bathtub"], ["fixture", "fsbath", 66, 32, "Freestanding tub"], ["fixture", "shower", 36, 36, "Shower"], ["fixture", "shower", 60, 36, "Walk-in shower"], ["fixture", "cbath", 60, 60, "Corner tub"], ["fixture", "bidet", 15, 23, "Bidet"], ["cabinet", "tall", 18, 18, "Linen tower"]]],
-      ["Living and dining", [["furn", "sofa", 84, 36, "Sofa"], ["furn", "sofa", 60, 34, "Loveseat"], ["furn", "sectional", 108, 72, "Sectional", { color: "#a9a49a" }], ["furn", "armchair", 34, 34, "Armchair"], ["furn", "coffee", 48, 24, "Coffee table", { color: "#b98a4e" }], ["furn", "sidetbl", 20, 20, "Side table with lamp", { color: "#b98a4e" }], ["furn", "table", 56, 60, "Dining set, 4 seats", { color: "#b98a4e" }], ["furn", "table", 78, 64, "Dining set, 6 seats", { color: "#b98a4e" }], ["furn", "table", 114, 64, "Dining set, 8 seats", { color: "#b98a4e" }], ["furn", "table", 144, 66, "Dining set, 10 seats", { color: "#b98a4e" }], ["furn", "rtable", 48, 48, "Round table, 4 seats", { color: "#b98a4e" }], ["furn", "rtable", 66, 66, "Round table, 6 seats", { color: "#b98a4e" }], ["furn", "stool", 16, 16, "Bar stool", { color: "#6e5a4c" }], ["furn", "recliner", 36, 38, "Recliner", { color: "#8a6a4e" }], ["furn", "chaise", 30, 65, "Chaise longue"], ["furn", "ottoman", 30, 24, "Ottoman", { color: "#a9a49a" }], ["furn", "piano", 59, 24, "Upright piano"], ["furn", "grand", 59, 72, "Grand piano"], ["furn", "fan", 52, 52, "Ceiling fan", { color: "#b98a4e" }], ["furn", "chair", 18, 20, "Chair", { color: "#c8b8a2" }], ["furn", "rug", 96, 66, "Rug", { color: "#b8466a" }], ["furn", "tv", 72, 18, "TV console", { color: "#6e5a4c" }], ["furn", "bookcase", 36, 13, "Bookcase", { color: "#b98a4e" }], ["furn", "desk", 54, 28, "Desk", { color: "#b98a4e" }], ["furn", "bench", 48, 16, "Bench", { color: "#b98a4e" }]]],
+      ["Living and dining", [["furn", "sofa", 84, 36, "Sofa"], ["furn", "sofa", 60, 34, "Loveseat"], ["furn", "sectional", 108, 72, "Sectional", { color: "#a9a49a" }], ["furn", "armchair", 34, 34, "Armchair"], ["furn", "coffee", 48, 24, "Coffee table", { color: "#b98a4e" }], ["furn", "sidetbl", 20, 20, "Side table with lamp", { color: "#b98a4e" }], ["furn", "table", 56, 60, "Dining set, 4 seats", { color: "#b98a4e" }], ["furn", "table", 78, 64, "Dining set, 6 seats", { color: "#b98a4e" }], ["furn", "table", 114, 64, "Dining set, 8 seats", { color: "#b98a4e" }], ["furn", "table", 144, 66, "Dining set, 10 seats", { color: "#b98a4e" }], ["furn", "rtable", 48, 48, "Round table, 4 seats", { color: "#b98a4e" }], ["furn", "rtable", 66, 66, "Round table, 6 seats", { color: "#b98a4e" }], ["furn", "stool", 16, 16, "Bar stool", { color: "#6e5a4c" }], ["furn", "recliner", 36, 38, "Recliner", { color: "#8a6a4e" }], ["furn", "chaise", 30, 65, "Chaise longue"], ["furn", "ottoman", 30, 24, "Ottoman", { color: "#a9a49a" }], ["furn", "piano", 59, 24, "Upright piano"], ["furn", "grand", 59, 72, "Grand piano"], ["furn", "fan", 52, 52, "Ceiling fan", { color: "#b98a4e" }], ["furn", "chair", 18, 20, "Chair", { color: "#c8b8a2" }], ["furn", "rug", 96, 66, "Rug", { color: "#b8466a" }], ["furn", "tv", 72, 18, "TV console", { color: "#6e5a4c" }], ["furn", "tvwall", 57, 3, "Wall TV", { color: "#16181a" }], ["furn", "bookcase", 36, 13, "Bookcase", { color: "#b98a4e" }], ["furn", "desk", 54, 28, "Desk", { color: "#b98a4e" }], ["furn", "bench", 48, 16, "Bench", { color: "#b98a4e" }]]],
       ["Bedroom", [["furn", "bed", 76, 80, "King bed", { color: "#d8cbb5" }], ["furn", "bed", 60, 80, "Queen bed", { color: "#d8cbb5" }], ["furn", "bed", 54, 75, "Full bed", { color: "#d8cbb5" }], ["furn", "bed", 39, 75, "Twin bed", { color: "#d8cbb5" }], ["furn", "bunk", 43, 80, "Bunk bed", { color: "#8aa0b0" }], ["furn", "crib", 30, 54, "Crib", { color: "#d8cbb5" }], ["furn", "nightstand", 22, 18, "Nightstand", { color: "#b98a4e" }], ["furn", "dresser", 60, 20, "Dresser", { color: "#b98a4e" }], ["furn", "wardrobe", 48, 24, "Wardrobe", { color: "#c8b8a2" }]]],
       ["Closet", [["closet", "rod", 48, 24, "Hanging rod"], ["closet", "rod", 72, 24, "Long hanging rod"], ["closet", "dblrod", 48, 24, "Double rod"], ["closet", "cshelf", 36, 16, "Shelves"], ["closet", "shoes", 36, 14, "Shoe rack"], ["closet", "cdrawer", 30, 20, "Drawers"], ["closet", "cisland", 48, 30, "Closet island"], ["closet", "hamper", 18, 16, "Hamper"]]],
       ["Indoor plants", [["pplant", "pot", 24, 24, "Potted plant"], ["pplant", "monstera", 36, 36, "Monstera"], ["pplant", "fiddle", 30, 30, "Fiddle-leaf fig"], ["pplant", "snake", 16, 16, "Snake plant", { color: "#55704a" }], ["pplant", "fern", 30, 30, "Fern", { color: "#6f8f4f" }], ["pplant", "areca", 36, 36, "Areca palm", { color: "#7a9a5a" }], ["pplant", "orchid", 14, 14, "Orchid"], ["pplant", "succulent", 12, 12, "Succulent", { color: "#8aa38c" }], ["pplant", "cactus", 18, 18, "Cactus", { color: "#6f8a5a" }]]],
