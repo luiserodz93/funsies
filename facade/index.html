@@ -439,11 +439,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     stairs: { name: "Stairs", kind: "rect", layer: "structure", mode: "plan", rot: true, w: 100, h: 300, color: "#e4dfd5", style: "straight", styles: ["straight", "spiral"] },
     furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#d6cfc3", style: "sofa", styles: ["sofa", "sectional", "armchair", "chair", "coffee", "sidetbl", "table", "rtable", "bench", "bed", "nightstand", "dresser", "wardrobe", "bookcase", "desk", "tv", "tvwall", "rug", "lounger", "grill", "recliner", "chaise", "ottoman", "stool", "bunk", "crib", "piano", "grand", "fan", "car", "suv", "pickup", "person"] },
     fixture: { name: "Fixture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 40, h: 70, color: "#f7f6f2", style: "toilet", styles: ["toilet", "sink", "dsink", "bath", "fsbath", "shower", "stove", "fridge", "counter", "dishwasher", "washer", "dryer", "wheater", "bidet", "cbath"] },
-    cabinet: { name: "Cabinet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 91.4, h: 61, color: "#ebe7df", style: "base", styles: ["base", "drawers", "sinkbase", "upper", "tall", "island", "vanity", "shelf", "corner", "hood", "oven", "wine"] },
+    cabinet: { name: "Cabinet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 91.4, h: 61, color: "#ebe7df", style: "base", styles: ["base", "drawers", "sinkbase", "sinkdw", "dwbase", "upper", "tall", "island", "vanity", "shelf", "corner", "hood", "oven", "wine"] },
     closet: { name: "Closet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 121.9, h: 61, color: "#e3d6c2", style: "rod", styles: ["rod", "dblrod", "cshelf", "shoes", "cdrawer", "cisland", "hamper"] },
     pplant: { name: "Plant", kind: "rect", layer: "details", mode: "plan", bare: true, w: 60, h: 60, color: "#7d8f6e", style: "pot", styles: ["pot", "fern", "monstera", "snake", "fiddle", "succulent", "areca", "orchid", "shrub", "hedge", "fbed", "grass", "hibiscus", "bougain", "croton", "banana", "bamboo", "cactus", "planter", "palm", "tree", "flamboyan"] },
     column: { name: "Column", kind: "rect", layer: "structure", mode: "plan", bare: true, w: 20.3, h: 20.3, color: "#f1eee8", style: "square", styles: ["square", "round", "tapered", "classic", "steel", "brick"] },
-    pave: { name: "Paving", kind: "rect", layer: "details", mode: "plan", bare: true, w: 121.9, h: 121.9, color: "#cfcac0", style: "concrete", styles: ["concrete", "pavers", "brick", "flagstone", "stepping", "gravel", "deck", "ptile", "asphalt", "lawn", "mulch", "pool"] },
+    pave: { name: "Paving", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 121.9, h: 121.9, color: "#cfcac0", style: "concrete", styles: ["concrete", "pavers", "brick", "flagstone", "stepping", "gravel", "deck", "ptile", "asphalt", "lawn", "mulch", "pool"] },
     label: { name: "Label", kind: "label", layer: "details", mode: "both", w: 200, h: 30, color: "#2a2a28" },
     line: { name: "Line", kind: "line", layer: "sketch", mode: "both", color: "#2a2a28" },
     pen: { name: "Pen stroke", kind: "pen", layer: "sketch", mode: "both", color: "#2a2a28" },
@@ -460,7 +460,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     stairs: { straight: [91.4, 304.8], spiral: [152.4, 152.4] },
     furn: { sofa: [213.4, 91.4], sectional: [274.3, 182.9], armchair: [86.4, 86.4], chair: [45.7, 50.8], coffee: [121.9, 61], sidetbl: [50.8, 50.8], table: [198.1, 162.6], rtable: [167.6, 167.6], bench: [121.9, 40.6], bed: [152.4, 203.2], nightstand: [55.9, 45.7], dresser: [152.4, 50.8], wardrobe: [121.9, 61], bookcase: [91.4, 33], desk: [137.2, 71.1], tv: [182.9, 45.7], rug: [243.8, 167.6], lounger: [71.1, 198.1], grill: [137.2, 61] , recliner: [91.4, 96.5], chaise: [76.2, 165.1], ottoman: [76.2, 61], stool: [40.6, 40.6], bunk: [99.1, 203.2], crib: [76.2, 137.2], piano: [149.9, 61], grand: [149.9, 182.9], fan: [132, 132], car: [182.9, 457.2], suv: [198.1, 487.7], pickup: [203.2, 584.2], person: [55.9, 30.5] },
     fixture: { toilet: [45.7, 71.1], sink: [61, 45.7], dsink: [91.4, 55.9], bath: [152.4, 76.2], fsbath: [167.6, 81.3], shower: [91.4, 91.4], stove: [76.2, 66], fridge: [91.4, 76.2], counter: [243.8, 63.5], dishwasher: [61, 61], washer: [68.6, 76.2], dryer: [68.6, 76.2], wheater: [61, 61], bidet: [38.1, 58.4], cbath: [152.4, 152.4] },
-    cabinet: { base: [91.4, 61], drawers: [45.7, 61], sinkbase: [91.4, 61], upper: [91.4, 33], tall: [61, 61], island: [182.9, 106.7], vanity: [121.9, 55.9], shelf: [91.4, 25.4], corner: [91.4, 91.4], hood: [76.2, 50.8], oven: [76.2, 61], wine: [61, 61] },
+    cabinet: { base: [91.4, 61], drawers: [45.7, 61], sinkbase: [91.4, 61], sinkdw: [152.4, 61], dwbase: [121.9, 61], upper: [91.4, 33], tall: [61, 61], island: [182.9, 106.7], vanity: [121.9, 55.9], shelf: [91.4, 25.4], corner: [91.4, 91.4], hood: [76.2, 50.8], oven: [76.2, 61], wine: [61, 61] },
     closet: { rod: [121.9, 61], dblrod: [121.9, 61], cshelf: [91.4, 40.6], shoes: [91.4, 35.6], cdrawer: [76.2, 50.8], cisland: [121.9, 76.2], hamper: [45.7, 40.6] },
     pplant: { pot: [61, 61], fern: [76.2, 76.2], monstera: [91.4, 91.4], snake: [40.6, 40.6], fiddle: [76.2, 76.2], succulent: [30.5, 30.5], areca: [91.4, 91.4], orchid: [35.6, 35.6], shrub: [91.4, 91.4], hedge: [243.8, 76.2], fbed: [182.9, 76.2], grass: [76.2, 76.2], hibiscus: [121.9, 121.9], bougain: [152.4, 152.4], croton: [76.2, 76.2], banana: [213.4, 213.4], bamboo: [121.9, 121.9], cactus: [61, 61], planter: [121.9, 45.7], palm: [365.8, 365.8], tree: [304.8, 304.8], flamboyan: [609.6, 609.6] },
     column: { square: [20.3, 20.3], round: [25.4, 25.4], tapered: [30.5, 30.5], classic: [30.5, 30.5], steel: [10.2, 10.2], brick: [40.6, 40.6] },
@@ -481,7 +481,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     toilet: "Toilet", sink: "Sink", bath: "Bathtub", shower: "Shower", stove: "Stove", fridge: "Fridge", counter: "Counter", dishwasher: "Dishwasher", washer: "Washer", dryer: "Dryer", pot: "Potted plant",
     sectional: "Sectional", chair: "Chair", coffee: "Coffee table", sidetbl: "Side table", rtable: "Round table", bench: "Bench", nightstand: "Nightstand", dresser: "Dresser", bookcase: "Bookcase", lounger: "Lounge chair", grill: "Grill",
     dsink: "Double sink", fsbath: "Freestanding tub", wheater: "Water heater",
-    base: "Base cabinet", drawers: "Drawer base", sinkbase: "Sink base", upper: "Wall cabinet", tall: "Pantry", island: "Island", vanity: "Vanity", shelf: "Open shelf",
+    base: "Base cabinet", drawers: "Drawer base", sinkbase: "Sink base", sinkdw: "Sink and dishwasher", dwbase: "Cabinets with dishwasher", upper: "Wall cabinet", tall: "Pantry", island: "Island", vanity: "Vanity", shelf: "Open shelf",
     rod: "Hanging rod", dblrod: "Double rod", cshelf: "Closet shelves", shoes: "Shoe rack", cdrawer: "Closet drawers", cisland: "Closet island", hamper: "Hamper",
     fern: "Fern", monstera: "Monstera", snake: "Snake plant", fiddle: "Fiddle-leaf fig", succulent: "Succulent", areca: "Areca palm", orchid: "Orchid", fbed: "Flower bed", grass: "Ornamental grass", hibiscus: "Hibiscus", bougain: "Bougainvillea", croton: "Croton", banana: "Banana plant", bamboo: "Bamboo", cactus: "Cactus", planter: "Raised planter", flamboyan: "Flamboyán",
     pavers: "Pavers", flagstone: "Flagstone", stepping: "Stepping stones", gravel: "Gravel", deck: "Wood deck", ptile: "Patio tile", asphalt: "Asphalt", lawn: "Lawn", mulch: "Mulch", pool: "Pool",
@@ -559,6 +559,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       if (q.wt && typeof q.wt === "object" && !Array.isArray(q.wt)) { const wt = {}; Object.keys(q.wt).slice(0, 60).forEach(k => { const v = num(q.wt[k]); if (v != null && (SIDES.indexOf(k) >= 0 || /^[1-9]\d{0,6}$/.test(k))) wt[k] = clamp(r1(v), 5, 61); }); if (Object.keys(wt).length) p.wt = wt; } }
     if (q.t === "column") { if (Number.isInteger(q.own) && q.own > 0) p.own = q.own; if (q.mv === true) p.mv = true; }
     if (q.t === "room" && typeof q.csig === "string" && q.csig.length < 4000) p.csig = q.csig;
+    if (q.t === "room" && typeof q.cset === "string" && q.cset.length < 8000) p.cset = q.cset;
+    if (q.t === "room" && q.cman === true) p.cman = true;
     if (q.t === "pwindow" || q.t === "pdoor") {
       if (num(q.sill) != null) p.sill = clamp(num(q.sill), 0, 500);
       if (num(q.oh) != null) p.oh = clamp(num(q.oh), 20, 800);
@@ -1403,11 +1405,15 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       }
       default: {
         /* base, drawer base and sink base */
-        let s = rr(0, 0, L, Dp, 1.5, top, st) + ln(`M0 ${f(Dp - 3)}H${f(L)}`, dk, 0.8) + doors(0, L, Dp - 3);
+        let s = rr(0, 0, L, Dp, 1.5, top, st) + ln(`M0 ${f(Dp - 3)}H${f(L)}`, dk, 0.8) + doors(0, p.style === "sinkdw" || p.style === "dwbase" ? L - Math.min(61, L * 0.5) : L, Dp - 3);
         s += Array.from({ length: Math.max(3, Math.round(L / 25)) }, (_, i) => circ((i + 0.5) * L / Math.max(3, Math.round(L / 25)), Dp * (0.25 + ((i * 37) % 5) * 0.1), 0.7, "#b5aea1")).join("");
         if (p.style === "drawers") for (let i = 1; i < 4; i++) s += ln(`M${f(L * 0.2)} ${f(Dp - 3 + 0)}h${f(L * 0.6)}`, dk, 0.4);
         if (p.style === "drawers") s += circ(L / 2, Dp - 1.5, 1.2, e);
-        if (p.style === "sinkbase") s += rr(L * 0.16, Dp * 0.18, L * 0.68, Dp * 0.62, m * 0.08, "#eceae4", stk(e, 1)) + circ(L / 2, Dp * 0.52, 2, e) + rr(L / 2 - 2, 2, 4, Dp * 0.13, 1.5, "#9a9a96", stk(e, 0.5));
+        /* a dishwasher takes the last 24" of the run: a steel front under the same counter */
+        const dw = p.style === "sinkdw" || p.style === "dwbase" ? Math.min(61, L * 0.5) : 0;
+        if (dw) s += R(L - dw, 0, dw, Dp, top) + R(L - dw + 1.5, Dp - 5, dw - 3, 5, "#c9c9c4", stk(e, 0.6)) + ln(`M${f(L - dw)} 0V${f(Dp)}`, dk, 0.8) + `<text x="${f(L - dw / 2)}" y="${f(Dp * 0.45)}" text-anchor="middle" dominant-baseline="middle" font-size="${f(Math.min(dw, Dp) * 0.24)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="500" fill="${e}">DW</text>`;
+        /* the sink sits in the middle of the cabinets beside the dishwasher, no wider than 30" */
+        if (p.style === "sinkbase" || p.style === "sinkdw") { const sc = (L - dw) / 2, sw = Math.min((L - dw) * 0.68, 76.2); s += rr(sc - sw / 2, Dp * 0.18, sw, Dp * 0.62, m * 0.08, "#eceae4", stk(e, 1)) + circ(sc, Dp * 0.52, 2, e) + rr(sc - 2, 2, 4, Dp * 0.13, 1.5, "#9a9a96", stk(e, 0.5)); }
         return s;
       }
     }
@@ -1506,8 +1512,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       default: return R(X, T, W, H, c, stk(e, 1.4)) + ln(`M${f(X)} ${f(T)}L${f(X + W)} ${f(T + H)}M${f(X + W)} ${f(T)}L${f(X)} ${f(T + H)}`, e, 0.6, 'opacity=".5"');
     }
   }
-  function paveSVG(p, o) {
-    const { X, T, W, H } = bx(p), c = p.color, e = shade(c, -0.4), m = Math.min(W, H), rnd = mulberry(p.id * 53 + 11);
+  /* drawn in its own turned frame (0..L by 0..Dp) when it is rotated, like furniture */
+  function paveSVG(p, o, L, Dp) {
+    const { X, T, W, H } = L == null ? bx(p) : { X: 0, T: 0, W: L, H: Dp }, c = p.color, e = shade(c, -0.4), m = Math.min(W, H), rnd = mulberry(p.id * 53 + 11);
     switch (p.style) {
       case "stepping": {
         const along = H >= W, L = along ? H : W, n = Math.max(1, Math.floor(L / 55)); let s = "";
@@ -1995,7 +2002,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function unb64u(s) { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/")); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
   const strip = list => list.map(p => { const q = Object.assign({}, p); delete q.id; return q; });
-  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: strip(d.front), plan: strip(d.plan) }; if (typeof d.lx === "number") o.lx = d.lx; if (d.lot) o.lot = d.lot; if (d.style) o.style = d.style; return o; }
+  /* plan parts keep their ids, so the links between them (columns to their room, walls taken out between rooms) survive the trip; a plan-first house keeps its walls, height and roof settings */
+  function compactDesign(d) { const o = { name: d.name, sky: d.sky, mode: d.mode, front: d.v2 ? [] : strip(d.front), plan: d.plan.map(p => Object.assign({}, p)) }; if (typeof d.lx === "number") o.lx = d.lx; if (d.lot) o.lot = d.lot; if (d.style) o.style = d.style; if (d.v2) { o.v2 = true; o.bld = d.bld; } return o; }
   async function encodeDesign(d) {
     const bytes = new TextEncoder().encode(JSON.stringify(compactDesign(d)));
     if (window.CompressionStream) {
@@ -2559,7 +2567,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
   /* Across-the-page lines of the other view, drawn below the drawing and used as snap targets. */
   function projXs() {
-    if (!S().link) return [];
+    /* when the plan is the house the front is built from it, so there is nothing to line up and no guide lines are drawn */
+    if (!S().link || D.v2) return [];
     const E = planEdge(), ws = groundWalls(); if (!E || !ws.length) return [];
     const lx = linkOff(E, true), xs = [];
     if (D.mode === "plan") {
@@ -3431,6 +3440,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         if (COL_COLOR[v]) p.color = COL_COLOR[v]; else if (COL_COLOR[p.style] === p.color || p.style === "steel" || p.style === "brick") p.color = TYPES.column.color;
         p.style = v;
       });
+      if (grp === "cstyle") D.plan.forEach(r => { if (r.t === "room" && r.cset != null && !r.cman) r.cset = colPrint(D.plan, r.id); });
     });
     SFX.tap(); houseChanged();
   });
@@ -4010,26 +4020,36 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     });
     return out;
   }
+  /* A fingerprint of a room's columns as last placed; once they differ from it, the columns have been changed by hand. */
+  const colPrint = (plan, rid) => JSON.stringify(plan.filter(p => p.t === "column" && p.own === rid).map(p => [p.x, p.y, p.w, p.h, p.style, p.color]).sort((a, b) => a[0] - b[0] || a[1] - b[1]));
   function syncColumns(d) {
     if (!d || !d.v2 || !d.plan) return;
     const rooms = d.plan.filter(q => q.t === "room"), ground = rooms.filter(q => !lvOf(q)), byId = new Map(rooms.map(q => [q.id, q]));
     d.plan = d.plan.filter(p => p.t !== "column" || p.own == null || (byId.has(p.own) && isOpenRoom(byId.get(p.own)) && !lvOf(byId.get(p.own))));
-    rooms.forEach(r => { if ((!isOpenRoom(r) || lvOf(r)) && r.csig) delete r.csig; });
+    rooms.forEach(r => { if ((!isOpenRoom(r) || lvOf(r)) && (r.csig || r.cman || r.cset)) { delete r.csig; delete r.cman; delete r.cset; } });
     ground.filter(isOpenRoom).forEach(r => {
       const near = ground.filter(q => q !== r && q.x <= r.x + r.w + 2 && q.x + q.w >= r.x - 2 && q.y <= r.y + r.h + 2 && q.y + q.h >= r.y - 2).map(q => [q.x, q.y, q.w, q.h, isOpenRoom(q) ? 1 : 0]);
       const sig = JSON.stringify([r.x, r.y, r.w, r.h, near]);
+      /* columns deleted, added, restyled or moved by hand belong to Luis from then on: they are never put back or replaced */
+      if (!r.cman && r.cset != null && colPrint(d.plan, r.id) !== r.cset) r.cman = true;
+      /* a room placed before fingerprints were kept: its columns count as changed by hand when they no longer match where they'd go */
+      if (r.cset == null && r.csig != null) {
+        const mine = d.plan.filter(p => p.t === "column" && p.own === r.id), sz = mine.length ? (SIZES.column[mine[0].style] || [20.3])[0] : 20.3, spots = colSpots(r, ground, sz);
+        const same = mine.length === spots.length && mine.every(p => p.style === mine[0].style && !p.mv && spots.some(([x, y]) => Math.hypot(p.x + p.w / 2 - x, p.y + p.h / 2 - y) < 3));
+        if (!same) r.cman = true;
+        r.cset = colPrint(d.plan, r.id);
+      }
       if (r.csig === sig) return;
-      const mine = d.plan.filter(p => p.t === "column" && p.own === r.id), kept = mine.filter(p => p.mv && p.x + p.w > r.x - 30 && p.x < r.x + r.w + 30 && p.y + p.h > r.y - 30 && p.y < r.y + r.h + 30);
-      const proto = mine[0] || { style: "square", color: TYPES.column.color }, sz = (SIZES.column[proto.style] || [20.3])[0];
-      d.plan = d.plan.filter(p => mine.indexOf(p) < 0 || kept.indexOf(p) >= 0);
-      if (r.csig != null || !mine.length) colSpots(r, ground, sz).forEach(([x, y]) => {
-        if (kept.some(p => Math.hypot(p.x + p.w / 2 - x, p.y + p.h / 2 - y) < 60)) return;
-        d.plan.push({ id: d.next++, t: "column", layer: "structure", own: r.id, style: proto.style, color: proto.color, x: r1(x - sz / 2), y: r1(y - sz / 2), w: sz, h: sz });
-      });
-      else d.plan = d.plan.concat(mine.filter(p => kept.indexOf(p) < 0));
       r.csig = sig;
+      if (r.cman) { d.plan = d.plan.filter(p => p.t !== "column" || p.own !== r.id || (p.x + p.w > r.x - 30 && p.x < r.x + r.w + 30 && p.y + p.h > r.y - 30 && p.y < r.y + r.h + 30)); return; }
+      const mine = d.plan.filter(p => p.t === "column" && p.own === r.id), proto = mine[0] || { style: "square", color: TYPES.column.color }, sz = (SIZES.column[proto.style] || [20.3])[0];
+      d.plan = d.plan.filter(p => mine.indexOf(p) < 0);
+      colSpots(r, ground, sz).forEach(([x, y]) => d.plan.push({ id: d.next++, t: "column", layer: "structure", own: r.id, style: proto.style, color: proto.color, x: r1(x - sz / 2), y: r1(y - sz / 2), w: sz, h: sz }));
+      r.cset = colPrint(d.plan, r.id);
     });
   }
+  /* Puts a room's columns back where they go on their own, after they were changed by hand. */
+  function resetColumns(r) { D.plan = D.plan.filter(p => p.t !== "column" || p.own !== r.id); delete r.csig; delete r.cman; delete r.cset; }
   /* Things that stand in rooms (furniture, fixtures, cabinets, closet fittings, stairs) and which of them go back to a wall. */
   const ITEM_T = { furn: 1, fixture: 1, cabinet: 1, closet: 1, stairs: 1 };
   const FREE_ST = { table: 1, rtable: 1, coffee: 1, rug: 1, chair: 1, lounger: 1, grill: 1, island: 1, cisland: 1, fsbath: 1, spiral: 1, ottoman: 1, stool: 1, grand: 1, fan: 1, car: 1, suv: 1, pickup: 1, person: 1, chaise: 1 };
@@ -4842,7 +4862,14 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         case "hood": { const sm = M(STEEL, 0.3, 0.6); box(0, L, 0, Dp, 150, 162, sm); const k = mesh(G, new THREE.CylinderGeometry(Math.min(L, Dp) * 0.18, Math.min(L, Dp) * 0.6, 22, 4), sm, 0, 173, -Dp / 2 + Dp * 0.4); k.rotation.y = Math.PI / 4; k.scale.set(L / Math.min(L, Dp), 1, Dp / Math.min(L, Dp) * 0.8); box(L * 0.35, L * 0.65, 0, Dp * 0.55, 184, 240, sm); box(L * 0.1, L * 0.9, Dp - 1, Dp, 150.5, 152, M("#f6efd9", 0.5)); break; }
         case "oven": { box(0, L, 0, 8, 0, 10, M(DARK, 0.9)); box(0, L, 0, Dp - 2.5, 10, 213, M(c, 0.7)); box(0, L, Dp - 2.5, Dp, 10, 212, M(c, 0.7)); seamY(0.5, L - 0.5, 75); seamY(0.5, L - 0.5, 182); [[80, 128], [132, 178]].forEach(([a, b]) => { box(L * 0.06, L * 0.94, Dp, Dp + 1, a, b, M(STEEL, 0.3, 0.6)); box(L * 0.14, L * 0.86, Dp + 1, Dp + 1.4, a + 8, b - 12, M("#16181a", 0.15, 0.3)); rodX(L * 0.15, L * 0.85, Dp + 3.5, b - 4, 0.9, M("#c9c9c4", 0.3, 0.8)); }); pull(L / 2, 40, 14); break; }
         case "wine": { box(0, L, 0, Dp - 2, 4, 86, M(STEEL, 0.3, 0.6)); box(L * 0.06, L * 0.94, Dp - 2, Dp, 8, 82, M("#22262a", 0.05, 0.4)); for (let h = 15; h < 78; h += 13) for (let u = 8; u < L - 6; u += 9) cyl(u, Dp - 12, 3.4, 3.4, h, h + 6, M(["#3d1520", "#5b4a1e", "#24331f"][Math.floor(rnd() * 3)], 0.2), 10); box(0, L, 0, Dp, 87, 91, M(TOP, 0.35)); break; }
-        case "sinkbase": baseRun(0, L, Dp, 87); basin(L / 2, Dp * 0.52, L * 0.34, Dp * 0.3, 91.2); faucet(L / 2, 5, 91); break;
+        case "sinkbase": case "sinkdw": case "dwbase": {
+          /* cabinets with the sink set into the counter and, on the sink-and-dishwasher and dishwasher runs, a built-in dishwasher at the end */
+          const dw = st === "sinkbase" ? 0 : Math.min(61, L * 0.5), cu = L - dw;
+          baseRun(0, cu, Dp, 87);
+          if (dw) { const sm = M(STEEL, 0.3, 0.6); box(cu, L, 0, Dp - 8, 0, 10, M(DARK, 0.9)); box(cu + 0.3, L, 0, Dp - 2.5, 10, 87, sm); box(cu + 1, L - 1, Dp - 2.5, Dp - 1, 12, 85, sm); rodX(cu + dw * 0.15, L - dw * 0.15, Dp + 1, 80, 1, M("#c9c9c4", 0.3, 0.8)); box(cu, L, 0, Dp, 87, 91, M(TOP, 0.35)); }
+          if (st !== "dwbase") { const sc = cu / 2, sw = Math.min(cu * 0.34, 38); basin(sc, Dp * 0.52, sw, Dp * 0.3, 91.2); faucet(sc, 5, 91); }
+          break;
+        }
         default: baseRun(0, L, Dp, 87);
       }
       else if (p.t === "closet") {
@@ -5368,7 +5395,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     ],
     plan: [
       ["Doors and windows", [["pdoor", "swing", 30, 30, "Narrow door"], ["pdoor", "swing", 36, 36, "Door"], ["pdoor", "pair", 60, 30, "Double door"], ["pdoor", "sliding", 72, 6, "Sliding door"], ["pwindow", null, 36, 6, "Small window"], ["pwindow", null, 48, 6, "Window"], ["pwindow", null, 72, 6, "Wide window"], ["pwindow", null, 24, 6, "Bathroom window", { fs: "frosted", sill: 152.4, oh: 61 }], ["pwindow", null, 36, 6, "High frosted window", { fs: "frosted", sill: 167.6, oh: 45.7 }]]],
-      ["Kitchen cabinets", [["cabinet", "base", 36, 24, "Base cabinet"], ["cabinet", "base", 18, 24, "Narrow base"], ["cabinet", "drawers", 18, 24, "Drawer base"], ["cabinet", "sinkbase", 36, 24, "Sink base"], ["cabinet", "upper", 36, 13, "Wall cabinet"], ["cabinet", "upper", 18, 13, "Narrow wall cabinet"], ["cabinet", "upper", 30, 24, "Cabinet over fridge"], ["cabinet", "tall", 24, 24, "Pantry"], ["cabinet", "island", 72, 42, "Island with stools"], ["cabinet", "island", 96, 48, "Large island"], ["cabinet", "shelf", 36, 10, "Open shelf", { color: "#b98a4e" }], ["cabinet", "corner", 36, 36, "Corner cabinet"], ["cabinet", "oven", 30, 24, "Wall oven tower"], ["cabinet", "hood", 30, 20, "Range hood"], ["cabinet", "wine", 24, 24, "Wine fridge"], ["fixture", "counter", 96, 25, "Counter"]]],
+      ["Kitchen cabinets", [["cabinet", "base", 36, 24, "Base cabinet"], ["cabinet", "base", 18, 24, "Narrow base"], ["cabinet", "drawers", 18, 24, "Drawer base"], ["cabinet", "sinkbase", 36, 24, "Sink base"], ["cabinet", "sinkbase", 72, 24, "Sink cabinet run"], ["cabinet", "sinkdw", 60, 24, "Sink and dishwasher"], ["cabinet", "dwbase", 48, 24, "Cabinets with dishwasher"], ["cabinet", "upper", 36, 13, "Wall cabinet"], ["cabinet", "upper", 18, 13, "Narrow wall cabinet"], ["cabinet", "upper", 30, 24, "Cabinet over fridge"], ["cabinet", "tall", 24, 24, "Pantry"], ["cabinet", "island", 72, 42, "Island with stools"], ["cabinet", "island", 96, 48, "Large island"], ["cabinet", "shelf", 36, 10, "Open shelf", { color: "#b98a4e" }], ["cabinet", "corner", 36, 36, "Corner cabinet"], ["cabinet", "oven", 30, 24, "Wall oven tower"], ["cabinet", "hood", 30, 20, "Range hood"], ["cabinet", "wine", 24, 24, "Wine fridge"], ["fixture", "counter", 96, 25, "Counter"]]],
       ["Kitchen appliances", [["fixture", "fridge", 36, 30, "Fridge"], ["fixture", "stove", 30, 26, "Range"], ["fixture", "sink", 33, 22, "Kitchen sink"], ["fixture", "dsink", 36, 22, "Double sink"], ["fixture", "dishwasher", 24, 24, "Dishwasher"]]],
       ["Laundry", [["fixture", "washer", 27, 30, "Washer"], ["fixture", "dryer", 27, 30, "Dryer"], ["fixture", "wheater", 24, 24, "Water heater"], ["cabinet", "upper", 54, 13, "Laundry cabinets"], ["fixture", "sink", 24, 22, "Utility sink"]]],
       ["Bathroom", [["fixture", "toilet", 18, 28, "Toilet"], ["fixture", "sink", 24, 18, "Pedestal basin"], ["cabinet", "vanity", 36, 22, "Vanity"], ["cabinet", "vanity", 60, 22, "Double vanity"], ["fixture", "bath", 60, 30, "Bathtub"], ["fixture", "fsbath", 66, 32, "Freestanding tub"], ["fixture", "shower", 36, 36, "Shower"], ["fixture", "shower", 60, 36, "Walk-in shower"], ["fixture", "cbath", 60, 60, "Corner tub"], ["fixture", "bidet", 15, 23, "Bidet"], ["cabinet", "tall", 18, 18, "Linen tower"]]],
@@ -5486,6 +5513,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const mates = matesOf(p, D.plan);
     if (p.t === "room") {
       h += `<div class="row"><div><label>Open to the outside</label><small>${lvOf(p) ? "A balcony or terrace: no outside walls" : "A porch, marquesina or terrace: no outside walls, with columns to hold up the roof"}</small></div><button class="switch" data-sw="op" role="switch" aria-checked="${isOpenRoom(p)}" aria-label="Open to the outside"></button></div>`;
+      if (isOpenRoom(p) && !lvOf(p) && p.cman) h += `<p class="note">You've changed this room's columns, so they stay as you left them.</p><div class="acts" style="grid-template-columns:1fr"><button data-a="cols">Place columns again</button></div>`;
       if (mates.length) h += `<p class="note">This room is ${mates.length + 1} pieces with no walls between them. Split it to resize a piece, then merge again.</p><div class="acts" style="grid-template-columns:1fr"><button data-a="split">Split into separate rooms</button></div>`;
       else h += `<p class="note">To make one room from two or more, like a hallway or a great room, turn on Multi, tap the rooms, then tap Merge. To take out just one wall, tap that wall in the plan.</p>`;
     }
@@ -5537,6 +5565,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (a === "center") { centerOnWall(); buildProps(p); }
     else if (a === "rot") { rotate(); buildProps(p); }
     else if (a === "split") { selectPart(p); mergeRooms(); closeSheets(); }
+    else if (a === "cols") { withUndo(() => resetColumns(p)); SFX.tap(); buildProps(p); }
     else if (a === "dims") { addDims(); closeSheets(); }
     else if (a === "link") { linkOne(p); buildProps(p); }
     else if (a === "unlink") { withUndo(() => { const o = D[D.mode === "plan" ? "front" : "plan"].find(q => q.lk === p.lk); if (o) delete o.lk; delete p.lk; }); SFX.tap(); buildProps(p); toast("Unlinked. The two views now change separately."); }
@@ -5915,7 +5944,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   if (firstRun) { useStyle(D.style); save(); render(); requestAnimationFrame(() => fit()); }
   if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => toast("Welcome. This is a starter house to explore: drag around, try 3D, or tap a part to change it. The ? button explains everything."), 400); }
   else if (!location.hash && !D.front.length && !D.plan.length) setTimeout(() => toast("This design is empty. Tap here to start from a Puerto Rico or US house.", () => { renderNew(); openSheet("newSheet"); $("toast").hidden = true; }), 500);
-  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG, draw3D, changed, model, get v3() { return v3; } };
+  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG, draw3D, changed, model, encodeDesign, decodeDesign, get v3() { return v3; } };
 
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
     navigator.serviceWorker.register("sw.js").catch(noop);
