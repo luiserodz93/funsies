@@ -111,6 +111,8 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .nudge button{border:1px solid var(--panel-line); background:transparent; border-radius:8px; font-weight:500; font-size:16px; cursor:pointer}
 .nudge .up{grid-column:2} .nudge .lf{grid-column:1; grid-row:2} .nudge .dn{grid-column:2; grid-row:2} .nudge .rt{grid-column:3; grid-row:2}
 .acts.three{grid-template-columns:1fr 1fr 1fr}
+.acts.angs{grid-template-columns:1fr 64px 1fr; align-items:center}
+.acts.angs b{text-align:center; font:600 15px var(--font-ui); font-variant-numeric:tabular-nums}
 .libgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
 .libitem{border:1px solid var(--panel-line); background:transparent; border-radius:8px; padding:6px 6px 8px; display:flex; flex-direction:column; gap:3px; cursor:pointer; min-width:0; text-align:center}
 .libitem img{width:100%; aspect-ratio:1; object-fit:contain; border-radius:4px; background:var(--paper); display:block}
@@ -331,6 +333,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         <button id="cEdit" aria-label="Edit part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
         <button id="cCopy" aria-label="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
         <button id="cRot" aria-label="Rotate 90 degrees" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></button>
+        <button id="cAng" aria-label="Turn 15 degrees" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M4 19 16 6"/><path d="M11.5 19a7.5 7.5 0 0 0-2.4-5.5"/></svg></button>
         <button id="cMerge" class="txt" hidden>Merge</button>
         <button id="cGroup" aria-label="Group" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M15 3h6v6M3 15v6h6" stroke-dasharray="2 2"/></svg></button>
         <button id="cMirror" aria-label="Mirror copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3v18" stroke-dasharray="2 2.5"/><path d="M8 7 3 17h5z"/><path d="m16 7 5 10h-5z"/></svg></button>
@@ -371,7 +374,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     <li><b>Rooms of any shape.</b> With Room, turn on Any shape and tap each corner of the room: an L, a T or any outline with square corners. Tap the first corner to close it. Each side shows its length as you go.</li>
     <li><b>Build in 3D.</b> Drag to turn the house and pinch to zoom. Tap a wall, then Add a window or Add a door, or pick Window or Door below and tap a wall. Tap a window or door to slide it, resize it, change its style or delete it, and tap the roof to change its style.</li>
     <li><b>Place parts.</b> Pick Window, Door or another part, then tap the board to drop one, or drag to draw it at any size. A window or door placed on the house's wall goes into the plan. A wall drawn beside the house adds a room, and a wall drawn on top adds a story.</li>
-    <li><b>Select and adjust.</b> With Select, tap a part, drag it to move, and drag its round handles to resize. Tap a part twice, or the sliders button, to type exact sizes, change its style, texture and color, repeat it, mirror it or add its dimensions.</li>
+    <li><b>Select and adjust.</b> With Select, tap a part, drag it to move, and drag its round handles to resize. The turn button spins furniture and fixtures 90°, and the angle button turns them 15° at a time. Tap a part twice, or the sliders button, to type exact sizes, change its style, texture and color, repeat it, mirror it or add its dimensions.</li>
     <li><b>Select several.</b> With Select, drag across empty board to box-select, or turn on Multi and tap parts to add them. Then move them together, group them, align and distribute them, or copy and paste them into the other view or another design.</li>
     <li><b>Snap.</b> Grid snaps to the grid size, and while you draw in Plan the grid shows over the rooms. Snap lines parts up with the corners, edges and centers of other parts and the ground (dashed guides show it, and a ring marks where a room starts). Ortho keeps lines and dimensions straight.</li>
     <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
@@ -536,6 +539,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       if (T.texs) p.tex = T.texs.indexOf(q.tex) >= 0 ? q.tex : T.tex;
       if (q.fx === true && T.kind === "rect") p.fx = true;
       if (T.rot && [1, 2, 3].indexOf(q.rot) >= 0) p.rot = q.rot;
+      if (T.rot && q.t !== "pdoor" && q.t !== "pwindow" && [15, 30, 45, 60, 75].indexOf(q.ang) >= 0) p.ang = q.ang;
       if (q.t === "room") p.text = cleanText(q.text, 40) || "Room";
       if (T.kind === "label") { p.text = cleanText(q.text, 60) || "Label"; p.w = labelW(p.text, p.h); }
     } else if (T.kind === "line" || T.kind === "dim") {
@@ -666,6 +670,17 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const dx = p.x2 - p.x1, dy = p.y2 - p.y1, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
     return { L, ux, uy, nx, ny, A: { x: p.x1 + nx * p.off, y: p.y1 + ny * p.off }, B: { x: p.x2 + nx * p.off, y: p.y2 + ny * p.off } };
   }
+  /* Turning: rot is quarter turns (w and h are swapped for odd ones), ang the extra 15° steps on top, clockwise in the plan. Doors and windows stay square to their walls. */
+  const canAng = p => !!p && !!TYPES[p.t].rot && p.t !== "pdoor" && p.t !== "pwindow", turnOf = p => (p.rot || 0) * 90 + (p.ang || 0);
+  function rotCW(dx, dy, deg) { const a = deg * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a); return { x: dx * c + dy * sn, y: -dx * sn + dy * c }; }
+  function setTurn(p, deg) {
+    deg = ((Math.round(deg / 15) * 15) % 360 + 360) % 360; if (!canAng(p)) deg = Math.round(deg / 90) * 90 % 360;
+    const nr = Math.floor(deg / 90), na = deg % 90;
+    if (nr % 2 !== (p.rot || 0) % 2) { const cx = p.x + p.w / 2, cy = p.y + p.h / 2, w = p.w; p.w = p.h; p.h = w; p.x = r1(cx - p.w / 2); p.y = r1(cy - p.h / 2); }
+    if (nr) p.rot = nr; else delete p.rot; if (na) p.ang = na; else delete p.ang;
+  }
+  /* the four corners of a turned box, in plan coordinates: top left, top right, bottom right, bottom left */
+  function cornersOf(p) { const cx = p.x + p.w / 2, cy = p.y + p.h / 2, a = p.ang || 0; return [[-1, 1], [1, 1], [1, -1], [-1, -1]].map(([u, v]) => { const q = rotCW(u * p.w / 2, v * p.h / 2, a); return { x: cx + q.x, y: cy + q.y }; }); }
   function box(p) {
     const k = kindOf(p);
     if (k === "rect" || k === "label") return { x: p.x, y: p.y, w: p.w, h: p.h };
@@ -678,7 +693,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
   function bounds(parts) {
     let b = null;
-    parts.forEach(p => { const q = box(p); if (!b) b = { x0: q.x, y0: q.y, x1: q.x + q.w, y1: q.y + q.h }; else { b.x0 = Math.min(b.x0, q.x); b.y0 = Math.min(b.y0, q.y); b.x1 = Math.max(b.x1, q.x + q.w); b.y1 = Math.max(b.y1, q.y + q.h); } });
+    parts.forEach(p => { let q = box(p); if (p.ang && kindOf(p) === "rect") { const c = cornersOf(p), xs = c.map(v => v.x), ys = c.map(v => v.y), x = Math.min(...xs), y = Math.min(...ys); q = { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y }; } if (!b) b = { x0: q.x, y0: q.y, x1: q.x + q.w, y1: q.y + q.h }; else { b.x0 = Math.min(b.x0, q.x); b.y0 = Math.min(b.y0, q.y); b.x1 = Math.max(b.x1, q.x + q.w); b.y1 = Math.max(b.y1, q.y + q.h); } });
     return b;
   }
   function segDist(px, py, ax, ay, bx, by) {
@@ -697,7 +712,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     for (let j = 5 * n - 1; j >= 0; j--) {
       const p = D.parts[j % n]; if (!editable(p) || tier(p) !== Math.floor(j / n)) continue;
       const k = kindOf(p);
-      if (k === "rect" || k === "label") { const t = 3 / view.s; if (w.x >= p.x - t && w.x <= p.x + p.w + t && w.y >= p.y - t && w.y <= p.y + p.h + t) return p; }
+      if (k === "rect" && p.ang) { const t = 3 / view.s, q = rotCW(w.x - p.x - p.w / 2, w.y - p.y - p.h / 2, -p.ang); if (Math.abs(q.x) <= p.w / 2 + t && Math.abs(q.y) <= p.h / 2 + t) return p; }
+      else if (k === "rect" || k === "label") { const t = 3 / view.s; if (w.x >= p.x - t && w.x <= p.x + p.w + t && w.y >= p.y - t && w.y <= p.y + p.h + t) return p; }
       else if (k === "line") { if (segDist(w.x, w.y, p.x1, p.y1, p.x2, p.y2) <= p.lw / 2 + tol) return p; }
       else if (k === "dim") { const g = dimGeom(p); if (segDist(w.x, w.y, g.A.x, g.A.y, g.B.x, g.B.y) <= tol * 1.4) return p; }
       else { for (let j = 0; j + 3 < p.pts.length; j += 2) if (segDist(w.x, w.y, p.pts[j], p.pts[j + 1], p.pts[j + 2], p.pts[j + 3]) <= p.lw / 2 + tol) return p; }
@@ -1941,10 +1957,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       o.wt = mode === "plan" && (p.t === "pdoor" || p.t === "pwindow") ? opWallT(p, parts) : 0;
       if (T.rot) {
         const r = p.rot || 0, L = r % 2 ? p.h : p.w, Dp = r % 2 ? p.w : p.h;
-        s = `<g transform="translate(${f(p.x + p.w / 2)} ${f(-(p.y + p.h / 2))}) rotate(${r * 90})${p.fx ? " scale(-1 1)" : ""} translate(${f(-L / 2)} ${f(-Dp / 2)})">${draw(p, o, L, Dp)}</g>`;
+        s = `<g transform="translate(${f(p.x + p.w / 2)} ${f(-(p.y + p.h / 2))}) rotate(${r * 90 + (p.ang || 0)})${p.fx ? " scale(-1 1)" : ""} translate(${f(-L / 2)} ${f(-Dp / 2)})">${draw(p, o, L, Dp)}</g>`;
       } else s = draw(p, o);
       if (p.fx && !T.rot && kindOf(p) === "rect") s = `<g transform="translate(${f(2 * p.x + p.w)} 0) scale(-1 1)">${s}</g>`;
-      if (mode === "plan" && SHADOWED[p.t] && !NOSHADOW[p.style] && !p._ghost) s = (ROUNDISH[p.style] ? ell(p.x + p.w / 2 + 2.5, -(p.y + p.h / 2) + 3.5, p.w / 2, p.h / 2, "#2a2a28", 'opacity=".1"') : rr(p.x + 2.5, -(p.y + p.h) + 3.5, p.w, p.h, 4, "#2a2a28", 'opacity=".1"')) + s;
+      if (mode === "plan" && SHADOWED[p.t] && !NOSHADOW[p.style] && !p._ghost) s = (p.ang ? sh => `<g transform="rotate(${p.ang} ${f(p.x + p.w / 2 + 2.5)} ${f(-(p.y + p.h / 2) + 3.5)})">${sh}</g>` : sh => sh)(ROUNDISH[p.style] ? ell(p.x + p.w / 2 + 2.5, -(p.y + p.h / 2) + 3.5, p.w / 2, p.h / 2, "#2a2a28", 'opacity=".1"') : rr(p.x + 2.5, -(p.y + p.h) + 3.5, p.w, p.h, 4, "#2a2a28", 'opacity=".1"')) + s;
       if (p._ghost) s = `<g opacity="${p.t === "stairs" ? 0.45 : 0.22}">${s}</g>`;
       if (mode !== "plan" && (p.t === "window" || p.t === "door") && p.style !== "gate") {
         const wl = parts.find(q => q.t === "wall" && q.x <= p.x + 1 && q.x + q.w >= p.x + p.w - 1 && q.y <= p.y + 1 && q.y + q.h >= p.y + p.h - 1);
@@ -2410,8 +2426,16 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (p && visible(p)) {
       const k = kindOf(p), b = box(p), a = toS(b.x, b.y + b.h), z = toS(b.x + b.w, b.y);
       const bw = z.x - a.x, bh = z.y - a.y;
-      s += `<rect x="${f(a.x - 3)}" y="${f(a.y - 3)}" width="${f(bw + 6)}" height="${f(bh + 6)}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" rx="3"/>`;
-      if (k === "rect") {
+      if (k === "rect" && p.ang) {
+        /* a turned item gets a turned outline, with its handles on its own corners and sides */
+        const c = cornersOf(p).map(v => toS(v.x, v.y)), mid = (i, j) => [(c[i].x + c[j].x) / 2, (c[i].y + c[j].y) / 2], cs = toS(p.x + p.w / 2, p.y + p.h / 2);
+        const out = c.map(v => { const dx = v.x - cs.x, dy = v.y - cs.y, l = Math.hypot(dx, dy) || 1; return f(v.x + dx / l * 4) + "," + f(v.y + dy / l * 4); }).join(" ");
+        s += `<polygon points="${out}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
+        handles = c.map((v, i) => [i, v.x, v.y]);
+        if (p.w * view.s > 44) handles.push([4, ...mid(0, 1)], [6, ...mid(2, 3)]);
+        if (p.h * view.s > 44) handles.push([5, ...mid(1, 2)], [7, ...mid(3, 0)]);
+      } else s += `<rect x="${f(a.x - 3)}" y="${f(a.y - 3)}" width="${f(bw + 6)}" height="${f(bh + 6)}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" rx="3"/>`;
+      if (k === "rect" && !p.ang) {
         const mx = (a.x + z.x) / 2, my = (a.y + z.y) / 2;
         handles = [[0, a.x, a.y], [1, z.x, a.y], [2, z.x, z.y], [3, a.x, z.y]];
         if (bw > 44) handles.push([4, mx, a.y], [6, mx, z.y]);
@@ -2450,7 +2474,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const p = selPart(), list = selList(), many = list.length > 1;
     $("ctx").hidden = !p || !!wallPick;
     const rot = !!(p && !many && TYPES[p.t].rot);
-    $("cRot").hidden = !rot; $("cFront").hidden = rot || many; $("cBack").hidden = rot || many;
+    $("cRot").hidden = !rot; $("cAng").hidden = !(rot && canAng(p) && D.mode === "plan"); $("cFront").hidden = rot || many; $("cBack").hidden = rot || many;
     const rsel = roomsSel(), merged = isMerged(rsel);
     $("cGroup").hidden = !many || merged; $("cMerge").hidden = !rsel || D.mode !== "plan";
     $("cMerge").textContent = merged ? "Split" : "Merge"; $("cMerge").setAttribute("aria-label", merged ? "Split into separate rooms" : "Merge into one room");
@@ -3808,14 +3832,17 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       case "handle": {
         const p = selPart(), o = act.orig, k = kindOf(p);
         if (k === "rect") {
-          let L = o.x, Rr = o.x + o.w, Bo = o.y, To = o.y + o.h; const h = act.h;
-          const vx = snap1(w.x, act.tg.xs, "x"), vy = snap1(w.y, act.tg.ys, "y");
+          let L = o.x, Rr = o.x + o.w, Bo = o.y, To = o.y + o.h; const h = act.h, c0 = { x: o.x + o.w / 2, y: o.y + o.h / 2 };
+          /* a turned item is resized in its own frame, so the opposite side stays put */
+          const lw = o.ang ? (q => ({ x: c0.x + q.x, y: c0.y + q.y }))(rotCW(w.x - c0.x, w.y - c0.y, -o.ang)) : null;
+          const vx = lw ? lw.x : snap1(w.x, act.tg.xs, "x"), vy = lw ? lw.y : snap1(w.y, act.tg.ys, "y");
           if (h === 0 || h === 3 || h === 7) L = Math.min(vx, Rr - 5);
           if (h === 1 || h === 2 || h === 5) Rr = Math.max(vx, L + 5);
           if (h === 0 || h === 1 || h === 4) To = Math.max(vy, Bo + 5);
           if (h === 2 || h === 3 || h === 6) Bo = Math.min(vy, To - 5);
           if (h === 4 || h === 6) guides.x = []; if (h === 5 || h === 7) guides.y = [];
           p.x = r1(L); p.w = r1(Rr - L); p.y = r1(Bo); p.h = r1(To - Bo);
+          if (lw) { guides = { x: [], y: [] }; const q = rotCW(p.x + p.w / 2 - c0.x, p.y + p.h / 2 - c0.y, o.ang); p.x = r1(c0.x + q.x - p.w / 2); p.y = r1(c0.y + q.y - p.h / 2); }
           showReadout(sp, fmtLen(p.w) + " × " + fmtLen(p.h));
         } else if (act.h === 2) {
           const g = dimGeom(o); p.off = gsnap((w.x - o.x1) * g.nx + (w.y - o.y1) * g.ny);
@@ -4105,7 +4132,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (!d || !d.plan) return 0;
     let n = 0;
     d.plan.forEach(p => {
-      if (!ITEM_T[p.t] || (only && only.indexOf(p) < 0)) return;
+      if (!ITEM_T[p.t] || p.ang || (only && only.indexOf(p) < 0)) return;
       const rooms = d.plan.filter(q => q.t === "room" && lvOf(q) === lvOf(p) && !isOpenRoom(q)), cx = p.x + p.w / 2, cy = p.y + p.h / 2;
       const r = rooms.find(q => cx > q.x && cx < q.x + q.w && cy > q.y && cy < q.y + q.h); if (!r) return;
       [[true, -1], [true, 1], [false, -1], [false, 1]].forEach(([h, sign]) => {
@@ -4261,8 +4288,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     withUndo(() => {
       if (k === "rect" || k === "label") {
         const nx = r1(2 * c - (p.x + p.w));
-        if (Math.abs(nx - p.x) < 1) { if (k === "rect") p.fx = !p.fx || undefined; return; }
-        const q = clonePart(p); q.x = nx; if (k === "rect") { if (p.fx) delete q.fx; else q.fx = true; } insertAfter(p, q); selectPart(q);
+        if (Math.abs(nx - p.x) < 1) { if (k === "rect") { p.fx = !p.fx || undefined; if (p.ang) setTurn(p, -turnOf(p)); } return; }
+        const q = clonePart(p); q.x = nx; if (k === "rect") { if (p.fx) delete q.fx; else q.fx = true; } if (p.ang) setTurn(q, -turnOf(p)); insertAfter(p, q); selectPart(q);
       } else {
         const q = clonePart(p);
         if (k === "pen") q.pts = q.pts.map((v, i) => i % 2 ? v : r1(2 * c - v));
@@ -4273,11 +4300,13 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     SFX.place();
     if (!(m && m.id !== p.id)) toast(D.mode === "plan" ? "Flipped. Doors now swing the other way." : "Flipped around its own center. With a wall in place, Mirror copies across the main wall.");
   }
-  function rotate() {
+  function rotate(by) {
     const p = selPart(); if (!p || !TYPES[p.t].rot) return;
-    withUndo(() => { const cx = p.x + p.w / 2, cy = p.y + p.h / 2, w = p.w; p.w = p.h; p.h = w; p.x = r1(cx - p.w / 2); p.y = r1(cy - p.h / 2); p.rot = ((p.rot || 0) + 1) % 4; if (!p.rot) delete p.rot; });
-    SFX.tap();
+    by = typeof by === "number" ? by : 90; if (by % 90 && !canAng(p)) return;
+    withUndo(() => setTurn(p, turnOf(p) + by));
+    SFX.tap(); if (by % 90) showAngle(p);
   }
+  function showAngle(p) { const d = turnOf(p); toast(d ? `Turned ${d}°` : "Square again"); }
   function arrange(front) { const list = selList(); if (!list.length) return; withUndo(() => { D.parts = D.parts.filter(q => list.indexOf(q) < 0); if (front) D.parts.push.apply(D.parts, list); else D.parts.unshift.apply(D.parts, list); }); SFX.tap(); }
   function del() {
     let list = selList(); if (!list.length) return;
@@ -4594,7 +4623,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     for (const p of plan) {
       if (!(p.t === "furn" || p.t === "fixture" || p.t === "cabinet" || p.t === "closet" || p.t === "pplant" || p.t === "pave")) continue;
       const r = p.rot || 0, L = r % 2 ? p.h : p.w, Dp = r % 2 ? p.w : p.h, G = new THREE.Group(), y0 = floorY(p), c = p.color, m = Math.min(L, Dp);
-      G.position.set(p.x + p.w / 2, y0, -(p.y + p.h / 2)); G.rotation.y = -r * Math.PI / 2; if (p.fx) G.scale.x = -1; g.add(G);
+      G.position.set(p.x + p.w / 2, y0, -(p.y + p.h / 2)); G.rotation.y = -(r * 90 + (p.ang || 0)) * Math.PI / 180; if (p.fx) G.scale.x = -1; g.add(G);
       /* local helpers: u across 0..L, v deep 0..Dp from the back, h up from the floor */
       const box = (u0, u1, v0, v1, h0, h1, mat) => boxW(G, u0 - L / 2, u1 - L / 2, h0, h1, v0 - Dp / 2, v1 - Dp / 2, typeof mat === "string" ? M(mat) : mat);
       const cyl = (u, v, r0, r1, h0, h1, mat, seg) => mesh(G, new THREE.CylinderGeometry(r1, r0, Math.max(0.3, h1 - h0), seg || 20), typeof mat === "string" ? M(mat) : mat, u - L / 2, (h0 + h1) / 2, v - Dp / 2);
@@ -5573,6 +5602,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     h += `</div><p class="note">Type sizes in ${u}${plan ? ". Positions are measured on the plan grid." : ". Height is measured from the ground line."}</p>`;
     if (k === "line") h += `<div class="row"><label>Dashed</label><button class="switch" data-sw="dash" role="switch" aria-checked="${!!p.dash}" aria-label="Dashed"></button></div>`;
     h += `<h3>Layer</h3><div class="seg" data-k="layer">${LAYERS.map(l => `<button data-v="${l.id}" aria-pressed="${p.layer === l.id}">${l.name}</button>`).join("")}</div>`;
+    if (canAng(p)) h += `<h3>Angle</h3><div class="acts angs"><button data-a="angm" aria-label="Turn 15 degrees counterclockwise">↺ 15°</button><b>${turnOf(p)}°</b><button data-a="angp" aria-label="Turn 15 degrees clockwise">↻ 15°</button></div>`;
     h += `<h3>Arrange</h3><div class="acts">${TYPES[p.t].rot ? '<button data-a="rot">Rotate 90°</button>' : ""}${k === "rect" || k === "label" ? `<button data-a="center">${plan ? "Center in room" : "Center on wall"}</button>` : ""}${k === "rect" ? '<button data-a="dims">Add dimensions</button>' : ""}${linkBtn(p)}<button data-a="copy">Copy</button><button data-a="mirror">Mirror copy</button><button data-a="dup">Duplicate</button><button data-a="front">Bring to front</button><button data-a="back">Send to back</button><button data-a="del" class="danger">Delete</button></div>`;
     h += nudgePad();
     h += `<h3>Repeat</h3><div class="rep">${fld("Copies", "repN", "2").replace('data-f="repN"', 'id="repN" inputmode="numeric"')}${fld("Gap", "repG", fmtIn(gsnap(60))).replace('data-f="repG"', 'id="repG"')}</div>
@@ -5601,7 +5631,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const a = b.dataset.a;
     if (a === "house") { openHouse(); return; }
     if (a === "center") { centerOnWall(); buildProps(p); }
-    else if (a === "rot") { rotate(); buildProps(p); }
+    else if (a === "rot") { rotate(90); buildProps(p); }
+    else if (a === "angp" || a === "angm") { rotate(a === "angp" ? 15 : -15); buildProps(p); }
     else if (a === "split") { selectPart(p); mergeRooms(); closeSheets(); }
     else if (a === "cols") { withUndo(() => resetColumns(p)); SFX.tap(); buildProps(p); }
     else if (a === "dims") { addDims(); closeSheets(); }
@@ -5943,7 +5974,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   $("zoomOut").addEventListener("click", () => { SFX.tap(); zoomAt({ x: stageW / 2, y: stageH / 2 }, view.s / 1.4); });
   $("helpStarter").addEventListener("click", () => { renderNew(); openSheet("newSheet"); });
   $("cMirror").addEventListener("click", mirror);
-  $("cRot").addEventListener("click", rotate);
+  $("cRot").addEventListener("click", () => rotate(90));
+  $("cAng").addEventListener("click", () => rotate(15));
   $("cFront").addEventListener("click", () => arrange(true));
   $("cBack").addEventListener("click", () => arrange(false));
   $("cDel").addEventListener("click", del);
