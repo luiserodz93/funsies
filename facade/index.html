@@ -360,7 +360,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   <ol class="help">
     <li><b>The plan is the house.</b> Rooms in the floor plan set where the walls stand, and their windows and doors are the house's openings. The front view and 3D are built from the plan, so a change in any view shows in the others. Make a room open (a porch, marquesina, terrace or balcony) by tapping it twice in Plan. Tap the house's walls or roof on the front to change their finish, the number of floors or the roof style.</li>
     <li><b>Floors and stairs.</b> In Plan, Floor 1 2 + at the top picks the floor you're drawing. Tap + to start a floor above: the floor below shows faintly so rooms line up, and you can draw its rooms or start with a room over each room below. Put stairs on the lower floor with the Stairs tool; they show on the floor above as the way down, and climb between the floors in 3D.</li>
-    <li><b>Merge rooms.</b> Turn on Multi, tap two or more rooms that touch, then tap Merge. The walls between them go, for a hallway or an open living and dining room. Tap the merged room and Split to put the walls back.</li>
+    <li><b>Merge rooms and take out walls.</b> Turn on Multi, tap two or more rooms that touch, then tap Merge. If there's more than one wall between them, tap the walls to keep or take out, then Merge: they become one room, like a hallway or a great room. To take out a single wall and keep both rooms' names, tap the wall between them in Plan, then Take out this wall. Split, or Put the wall back, undoes it.</li>
     <li><b>Rooms of any shape.</b> With Room, turn on Any shape and tap each corner of the room: an L, a T or any outline with square corners. Tap the first corner to close it. Each side shows its length as you go.</li>
     <li><b>Build in 3D.</b> Drag to turn the house and pinch to zoom. Tap a wall, then Add a window or Add a door, or pick Window or Door below and tap a wall. Tap a window or door to slide it, resize it, change its style or delete it, and tap the roof to change its style.</li>
     <li><b>Place parts.</b> Pick Window, Door or another part, then tap the board to drop one, or drag to draw it at any size. A window or door placed on the house's wall goes into the plan. A wall drawn beside the house adds a room, and a wall drawn on top adds a story.</li>
@@ -493,7 +493,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function newDesign(name, parts, plan) {
     const d = aliasParts({ id: randId(10), name: name, at: Date.now(), sky: "day", mode: "front", layers: newLayers(), front: [], plan: [], next: 1 });
     (parts || []).slice(0, 2000).forEach(q => { if (q && q.src) return; const p = cleanPart(q, d.next, "front"); if (p) { d.front.push(p); d.next++; } });
-    (plan || []).slice(0, 2000).forEach(q => { const p = cleanPart(q, d.next, "plan"); if (p) { d.plan.push(p); d.next++; } });
+    const idm = new Map();
+    (plan || []).slice(0, 2000).forEach(q => { const p = cleanPart(q, d.next, "plan"); if (p) { if (q && Number.isInteger(q.id)) idm.set(q.id, p.id); d.plan.push(p); d.next++; } });
+    remapNw(d.plan, idm);
     return d;
   }
   const num = v => (typeof v === "number" && isFinite(v)) ? clamp(r1(v), -50000, 50000) : null;
@@ -529,7 +531,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (LINKABLE[q.t] && typeof q.lk === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.lk)) p.lk = q.lk;
     if (typeof q.src === "string" && /^[a-z]:\d{1,9}$/.test(q.src)) p.src = q.src;
     if ((mode === "plan" || T.mode === "plan") && (q.fl === 1 || q.fl === 2)) p.fl = q.fl;
-    if (q.t === "room") { if (q.st === 2 || q.st === 3) p.st = q.st; if (typeof q.op === "boolean") p.op = q.op; if (q.one === true && p.g) p.one = true; }
+    if (q.t === "room") { if (q.st === 2 || q.st === 3) p.st = q.st; if (typeof q.op === "boolean") p.op = q.op; if (q.one === true && p.g) p.one = true; if (Array.isArray(q.nw)) { const nw = q.nw.filter(v => Number.isInteger(v) && v > 0).slice(0, 40); if (nw.length) p.nw = nw; } }
     if (q.t === "pwindow" || q.t === "pdoor") {
       if (num(q.sill) != null) p.sill = clamp(num(q.sill), 0, 500);
       if (num(q.oh) != null) p.oh = clamp(num(q.oh), 20, 800);
@@ -1116,20 +1118,22 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.05)}" text-anchor="middle" font-size="${f(fs)}" font-family="Inter Tight, system-ui, sans-serif" font-weight="600" letter-spacing="${f(fs * 0.12)}" fill="${INK}" ${halo}>${esc(name)}</text>` +
         `<text x="${f(cx)}" y="${f(cy + fs * 1.1)}" text-anchor="middle" font-size="${f(fs * 0.78)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="400" fill="#5e5c57" ${halo}>${esc(fmtArea(area))}</text>`;
     }
-    if (!mates.length) return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 15.24));
-    /* walls only where the room meets something other than itself */
-    let d = "";
-    const inMate = (x, y) => mates.some(q => x > q.x && x < q.x + q.w && y > q.y && y < q.y + q.h);
+    const open = (o.all || []).filter(q => q.t === "room" && !!q._ghost === !!p._ghost && noWall(p, q));
+    if (!open.length) return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 15.24));
+    /* walls only where they weren't taken out; between two named rooms a fine dashed line still marks where one ends */
+    let d = "", dd = "";
     const edge = (h, c, a, b, sign) => {
-      const cuts = [a, b].concat(mates.flatMap(q => h ? [q.x, q.x + q.w] : [q.y, q.y + q.h]).filter(v => v > a + 0.5 && v < b - 0.5)).sort((u, v) => u - v);
+      const cuts = [a, b].concat(open.flatMap(q => h ? [q.x, q.x + q.w] : [q.y, q.y + q.h]).filter(v => v > a + 0.5 && v < b - 0.5)).sort((u, v) => u - v);
       for (let i = 0; i < cuts.length - 1; i++) {
         const u = cuts[i], v = cuts[i + 1]; if (v - u < 0.5) continue;
-        if (h ? inMate((u + v) / 2, c + sign * 4) : inMate(c + sign * 4, (u + v) / 2)) continue;
-        d += h ? `M${f(u)} ${f(-c)}H${f(v)}` : `M${f(c)} ${f(-u)}V${f(-v)}`;
+        const x = h ? (u + v) / 2 : c + sign * 4, y = h ? c + sign * 4 : (u + v) / 2, seg = h ? `M${f(u)} ${f(-c)}H${f(v)}` : `M${f(c)} ${f(-u)}V${f(-v)}`;
+        const by = open.filter(q => x > q.x && x < q.x + q.w && y > q.y && y < q.y + q.h);
+        if (by.length) { if (!by.every(q => oneRoom(p, q))) dd += seg; continue; }
+        d += seg;
       }
     };
     edge(true, p.y, p.x, p.x + p.w, -1); edge(true, p.y + p.h, p.x, p.x + p.w, 1); edge(false, p.x, p.y, p.y + p.h, -1); edge(false, p.x + p.w, p.y, p.y + p.h, 1);
-    return R(X, T, W, H, o.pat(p.tex, p.color)) + (d ? `<path d="${d}" fill="none" stroke="${INK}" stroke-width="15.24" stroke-linecap="square"/>` : "");
+    return R(X, T, W, H, o.pat(p.tex, p.color)) + (d ? `<path d="${d}" fill="none" stroke="${INK}" stroke-width="15.24" stroke-linecap="square"/>` : "") + (dd ? `<path d="${dd}" fill="none" stroke="${INK}" stroke-width="1.5" stroke-dasharray="8 6" opacity=".55"/>` : "");
   }
   function pdoorSVG(p, o, L, Dp) {
     const c = p.color, arc = `fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="6 4"`;
@@ -2036,6 +2040,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       P.forEach((q, i) => { s += mark(q, i === 0 && P.length >= 3); });
       if (cur && !cur.close) s += mark(cur);
     }
+    const segS = (q, st) => { const a = q.h ? toS(q.u0, q.c) : toS(q.c, q.u0), b = q.h ? toS(q.u1, q.c) : toS(q.c, q.u1); return `<path d="M${f(a.x)} ${f(a.y)}L${f(b.x)} ${f(b.y)}" ${st} stroke-linecap="round"/>`; };
+    if (wallPick && D.mode === "plan") wallPick.pairs.forEach(q => { s += q.out ? segS(q, 'stroke="#c2453a" stroke-width="11"') + segS(q, 'stroke="#fff" stroke-width="2.5" stroke-dasharray="6 5"') : segS(q, 'stroke="#c2453a" stroke-width="11" fill="none" opacity=".18"'); });
+    const ws = wallSelResolve();
+    if (ws) s += segS(ws, 'stroke="var(--accent)" stroke-width="10" opacity=".8"');
     handles = [];
     if (act && act.k === "box" && act.bx) {
       const a = toS(Math.min(act.bx.a.x, act.bx.b.x), Math.max(act.bx.a.y, act.bx.b.y)), z = toS(Math.max(act.bx.a.x, act.bx.b.x), Math.min(act.bx.a.y, act.bx.b.y));
@@ -2089,7 +2097,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function partName(p) { const T = TYPES[p.t]; if (p.t === "room") return p.text || "Room"; if (T.bare) return NAMES[p.style]; return (p.style && T.styles ? NAMES[p.style] + " " + T.name.toLowerCase() : T.name).replace(/^(\w)/, c => c.toUpperCase()); }
   function renderDock() {
     const p = selPart(), list = selList(), many = list.length > 1;
-    $("ctx").hidden = !p;
+    $("ctx").hidden = !p || !!wallPick;
     const rot = !!(p && !many && TYPES[p.t].rot);
     $("cRot").hidden = !rot; $("cFront").hidden = rot || many; $("cBack").hidden = rot || many;
     const rsel = roomsSel(), merged = isMerged(rsel);
@@ -2270,26 +2278,49 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const onLv = (r, k) => lvOf(r) <= k && k < lvOf(r) + stOf(r);
   /* Rooms merged into one share a group (g) and carry one: no wall stands between them. */
   const oneRoom = (a, b) => a !== b && !!a.one && !!b.one && !!a.g && a.g === b.g && lvOf(a) === lvOf(b);
+  /* A wall taken out between two rooms is kept as each one's nw list (the ids of rooms it has no wall with). */
+  const noWall = (a, b) => a !== b && lvOf(a) === lvOf(b) && ((a.nw && a.nw.indexOf(b.id) >= 0) || (b.nw && b.nw.indexOf(a.id) >= 0));
+  function setWall(a, b, open) {
+    [[a, b], [b, a]].forEach(([p, q]) => { const L = (p.nw || []).filter(id => id !== q.id); if (open) L.push(q.id); if (L.length) p.nw = L; else delete p.nw; });
+  }
+  /* After copying rooms, points their nw at the copies; walls to rooms that weren't copied come back. */
+  function remapNw(list, idm) { list.forEach(p => { if (!p.nw) return; const L = p.nw.map(id => idm.get(id)).filter(Boolean); if (L.length) p.nw = L; else delete p.nw; }); }
+  /* Where two rooms on a floor share a wall, the stretch they share. */
+  function sharedWalls(rooms) {
+    const out = [];
+    for (let i = 0; i < rooms.length; i++) for (let j = i + 1; j < rooms.length; j++) {
+      const a = rooms[i], b = rooms[j]; if (lvOf(a) !== lvOf(b)) continue;
+      const x0 = Math.max(a.x, b.x), x1 = Math.min(a.x + a.w, b.x + b.w), y0 = Math.max(a.y, b.y), y1 = Math.min(a.y + a.h, b.y + b.h);
+      if (x1 - x0 > 5 && Math.abs(y1 - y0) < 1) out.push({ a, b, h: true, c: y0, u0: x0, u1: x1 });
+      else if (y1 - y0 > 5 && Math.abs(x1 - x0) < 1) out.push({ a, b, h: false, c: x0, u0: y0, u1: y1 });
+    }
+    return out;
+  }
   const matesOf = (p, list) => p.t === "room" && p.one && p.g ? list.filter(q => q.t === "room" && oneRoom(p, q)) : [];
   function floorCount(d) { return Math.min(3, d.plan.reduce((m, r) => r.t === "room" ? Math.max(m, lvOf(r) + stOf(r)) : m, 1)); }
   /* Older designs set a room's stories; each story above the first becomes its own room on that floor. */
   function explodeStories(d) {
-    const gm = {}, plain = /^(house|room( \d+)?|upstairs)$/i;
+    const gm = {}, plain = /^(house|room( \d+)?|upstairs)$/i, idm = {}, made = [];
     d.plan.filter(r => r.t === "room" && stOf(r) > 1).forEach(r => {
       for (let k = 1; k < stOf(r) && lvOf(r) + k <= 2; k++) {
         const q = JSON.parse(JSON.stringify(r)), lv = lvOf(r) + k; q.id = d.next++; delete q.st; q.fl = lv;
         if (q.g) q.g = gm[q.g + lv] || (gm[q.g + lv] = randId(6));
         if (!plain.test(r.text || "")) q.text = "Upstairs";
+        (idm[lv] || (idm[lv] = new Map())).set(r.id, q.id); made.push([q, lv]);
         d.plan.push(q);
       }
       delete r.st;
     });
+    made.forEach(([q, lv]) => remapNw([q], idm[lv]));
   }
   /* Adds a floor over the top one: a room above each room under it, ready to be renamed, merged or redrawn. */
   function addFloor(d, lv) {
     const below = d.plan.filter(r => r.t === "room" && lvOf(r) === lv - 1 && !isOpenRoom(r)), gm = {};
     let n = 0;
-    below.forEach(r => { const q = { id: d.next++, t: "room", layer: r.layer, color: r.color, tex: r.tex, x: r.x, y: r.y, w: r.w, h: r.h, fl: lv, text: "Room " + ++n }; if (r.g && r.one) { q.g = gm[r.g] || (gm[r.g] = randId(6)); q.one = true; } d.plan.push(q); });
+    const idm = new Map(), made = [];
+    const gname = {};
+    below.forEach(r => { const q = { id: d.next++, t: "room", layer: r.layer, color: r.color, tex: r.tex, x: r.x, y: r.y, w: r.w, h: r.h, fl: lv, text: r.g && r.one ? gname[r.g] || (gname[r.g] = "Room " + ++n) : "Room " + ++n }; if (r.g && r.one) { q.g = gm[r.g] || (gm[r.g] = randId(6)); q.one = true; } if (r.nw) q.nw = r.nw.slice(); idm.set(r.id, q.id); made.push(q); d.plan.push(q); });
+    remapNw(made, idm);
     return below.length;
   }
   function setFloors(d, n) {
@@ -2339,7 +2370,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         for (let i = 0; i < cuts.length - 1; i++) {
           const u = cuts[i], v = cuts[i + 1]; if (v - u < 0.5) continue;
           const mx = h ? (u + v) / 2 : c + sign * 12, my = h ? c + sign * 12 : (u + v) / 2, ext = !inRoom(mx, my);
-          if (!ext && me && me.one) { const bey = on.filter(r => r !== me && mx > r.x && mx < r.x + r.w && my > r.y && my < r.y + r.h); if (bey.every(r => oneRoom(me, r))) continue; } // no wall inside a merged room
+          if (!ext && me && (me.nw || on.some(r => r.nw && r.nw.indexOf(me.id) >= 0))) { const bey = on.filter(r => r !== me && mx > r.x && mx < r.x + r.w && my > r.y && my < r.y + r.h); if (bey.every(r => noWall(me, r))) continue; } // a wall taken out
           const key = (h ? "h" : "v") + r1(c) + (ext ? "e" + sign : "i");
           if (!groups.has(key)) groups.set(key, { h, c, ext, sign: ext ? sign : -1, iv: [] });
           groups.get(key).iv.push([u, v]);
@@ -2996,34 +3027,87 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
      a hallway made of two rooms, an open living and dining room, or an L-shaped room drawn as an outline. */
   const roomsSel = () => { const L = selList(); return L.length > 1 && L.every(q => q.t === "room") ? L : null; };
   const isMerged = L => !!L && L.length > 1 && L.every(q => q.t === "room" && q.one && q.g && q.g === L[0].g);
+  let wallPick = null, wallSel = null;
+  const touchRooms = (a, b) => { const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y); return (ox > 20 && oy > -1) || (oy > 20 && ox > -1); };
+  /* Merge: with more than one wall between the rooms, you tap the walls to take out first (all are marked to start). */
   function mergeRooms() {
     const L = roomsSel(); if (!L) return;
-    if (isMerged(L)) { withUndo(() => L.forEach(q => { delete q.g; delete q.one; })); selectIds(L.map(q => q.id)); SFX.tap(); renderDock(); toast("Split back into " + L.length + " rooms, with walls between them."); return; }
-    const touch = (a, b) => { const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y); return (ox > 20 && oy > -1) || (oy > 20 && ox > -1); };
-    const seen = [L[0]]; for (let i = 0; i < seen.length; i++) L.forEach(q => { if (seen.indexOf(q) < 0 && touch(seen[i], q)) seen.push(q); });
+    if (isMerged(L)) {
+      withUndo(() => L.forEach(q => { delete q.g; delete q.one; L.forEach(r => { if (r !== q) setWall(q, r, false); }); }));
+      selectIds(L.map(q => q.id)); SFX.tap(); renderDock(); toast("Split back into " + L.length + " rooms, with walls between them."); return;
+    }
+    const seen = [L[0]]; for (let i = 0; i < seen.length; i++) L.forEach(q => { if (seen.indexOf(q) < 0 && touchRooms(seen[i], q)) seen.push(q); });
     if (seen.length < L.length) { toast("Those rooms don't touch. Pick rooms that share a wall."); return; }
-    const lead = L.slice().sort((a, b) => b.w * b.h - a.w * a.h)[0], rest = L.filter(q => q !== lead), rs = rectsOf(L);
+    const pairs = sharedWalls(L).filter(w => !noWall(w.a, w.b));
+    if (pairs.length <= 1) { applyMerge(L, pairs); return; }
+    wallPick = { L, pairs: pairs.map(w => Object.assign(w, { out: true })) };
+    SFX.tap(); renderDock(); renderPlanBar(); queue(false);
+    toast("Tap a wall to keep it or take it out. Walls marked in red come out.");
+  }
+  function applyMerge(L, pairs) {
+    const out = pairs.filter(w => w.out !== false);
+    const linked = (a, b) => noWall(a, b) || out.some(w => (w.a === a && w.b === b) || (w.a === b && w.b === a)) || (touchRooms(a, b) && !sharedWalls([a, b]).length);
+    const left = L.slice(), comps = [];
+    while (left.length) { const C = [left.shift()]; for (let i = 0; i < C.length; i++) for (let j = left.length - 1; j >= 0; j--) if (linked(C[i], left[j])) C.push(left.splice(j, 1)[0]); comps.push(C); }
+    const big = comps.filter(C => C.length > 1);
+    if (!big.length) { toast("Pick at least one wall to take out."); return; }
     const inner = new Set(model(D).ops.filter(o => o.seg && !o.seg.ext).map(o => o.p));
     let keep = [], gone = [];
     withUndo(() => {
-      const gid = rs.length > 1 ? randId(6) : null;
-      rs.forEach((q, i) => {
-        let p = i ? rest[i - 1] : lead;
-        if (!p) { p = JSON.parse(JSON.stringify(lead)); p.id = D.next++; D.plan.push(p); }
-        Object.assign(p, { x: r1(q.x0), y: r1(q.y0), w: r1(q.x1 - q.x0), h: r1(q.y1 - q.y0), text: lead.text, tex: lead.tex, color: lead.color });
-        if (typeof lead.op === "boolean") p.op = lead.op; else delete p.op;
-        if (gid) { p.g = gid; p.one = true; } else { delete p.g; delete p.one; }
-        keep.push(p);
+      out.forEach(w => setWall(w.a, w.b, true));
+      big.forEach(C => {
+        const lead = C.slice().sort((a, b) => b.w * b.h - a.w * a.h)[0], rs = rectsOf(C), ids = new Set(C.map(q => q.id));
+        const whole = sharedWalls(C).every(w => noWall(w.a, w.b)) && rs.length === 1 && Math.abs((rs[0].x1 - rs[0].x0) * (rs[0].y1 - rs[0].y0) - C.reduce((t, q) => t + q.w * q.h, 0)) < 2;
+        if (whole) {
+          /* the rooms make one rectangle with nothing standing between them: they become one room */
+          const q = rs[0], nw = Array.from(new Set(C.flatMap(r => r.nw || []))).filter(id => !ids.has(id));
+          Object.assign(lead, { x: r1(q.x0), y: r1(q.y0), w: r1(q.x1 - q.x0), h: r1(q.y1 - q.y0) }); delete lead.g; delete lead.one;
+          if (nw.length) lead.nw = nw; else delete lead.nw;
+          D.plan = D.plan.filter(r => r === lead || !ids.has(r.id));
+          D.plan.forEach(r => { if (r.nw && r !== lead) { const L2 = Array.from(new Set(r.nw.map(id => ids.has(id) ? lead.id : id))); r.nw = L2; } });
+          keep.push(lead);
+        } else {
+          const g = randId(6);
+          C.forEach(p => { Object.assign(p, { g, one: true, text: lead.text, tex: lead.tex, color: lead.color }); if (typeof lead.op === "boolean") p.op = lead.op; else delete p.op; keep.push(p); });
+        }
       });
-      D.plan = D.plan.filter(q => q.t !== "room" || L.indexOf(q) < 0 || keep.indexOf(q) >= 0);
       /* a door or window on a wall that is gone goes with it */
       gone = model(D).ops.filter(o => !o.seg && inner.has(o.p)).map(o => o.p);
       D.plan = D.plan.filter(q => gone.indexOf(q) < 0);
       selectIds(keep.map(q => q.id));
     });
-    SFX.place(); renderDock();
-    toast("Merged into one room" + (gone.length ? ", and took out the " + (gone.length === 1 ? "door" : "openings") + " between them" : "") + ". Double-tap it to rename it, like Hallway or Great room.");
+    wallPick = null; SFX.place(); renderDock(); renderPlanBar();
+    toast("Merged into one room" + (gone.length ? ", and took out the " + (gone.length === 1 ? "door" : "openings") + " on those walls" : "") + ". Double-tap it to rename it, like Hallway or Great room.");
   }
+  /* A single wall between two rooms, tapped in the plan: take it out or put it back. */
+  function wallNear(sp) {
+    const rooms = D.plan.filter(q => q.t === "room" && visible(q));
+    let best = null, bd = 11;
+    sharedWalls(rooms).forEach(w => {
+      const a = w.h ? toS(w.u0, w.c) : toS(w.c, w.u0), b = w.h ? toS(w.u1, w.c) : toS(w.c, w.u1);
+      if (Math.hypot(b.x - a.x, b.y - a.y) < 14) return;
+      const d = segDist(sp.x, sp.y, a.x, a.y, b.x, b.y); if (d < bd) { bd = d; best = w; }
+    });
+    return best;
+  }
+  function wallSelResolve() {
+    if (!wallSel) return null;
+    const a = D.plan.find(q => q.id === wallSel.a), b = D.plan.find(q => q.id === wallSel.b);
+    const w = a && b ? sharedWalls([a, b])[0] : null;
+    if (!w || D.mode !== "plan") { wallSel = null; return null; }
+    return w;
+  }
+  function wallAct(k) {
+    const w = wallSelResolve(); if (!w) return;
+    if (k === "out" || k === "back") {
+      const inner = new Set(model(D).ops.filter(o => o.seg && !o.seg.ext).map(o => o.p)); let gone = [];
+      withUndo(() => { setWall(w.a, w.b, k === "out"); if (k === "out") { gone = model(D).ops.filter(o => !o.seg && inner.has(o.p)).map(o => o.p); D.plan = D.plan.filter(q => gone.indexOf(q) < 0); } });
+      SFX.tap(); toast(k === "out" ? "Wall taken out" + (gone.length ? ", with the door on it" : "") + ". " + w.a.text + " and " + w.b.text + " keep their names; Merge makes them one room." : "Wall put back.");
+    } else if (k === "merge") { wallSel = null; selectIds([w.a.id, w.b.id]); w.out = true; applyMerge([w.a, w.b], [w]); return; }
+    else wallSel = null;
+    renderPlanBar(); queue(false);
+  }
+
   const polyOn = () => !!(store.mem.room && store.mem.room.poly);
   /* A corner of an outline: snapped to the grid or a room corner, square to the last corner, or closing on the first. */
   function polySnap(w) {
@@ -3056,6 +3140,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     withUndo(() => {
       const g = rs.length > 1 ? randId(6) : null, name = mk("room", {}, true).text;
       rs.forEach(q => { const p = mk("room", { x: r1(q.x0), y: r1(q.y0), w: r1(q.x1 - q.x0), h: r1(q.y1 - q.y0), text: name }); if (g) { p.g = g; p.one = true; } D.parts.push(p); ids.push(p.id); });
+      const made = D.parts.filter(q => ids.indexOf(q.id) >= 0); sharedWalls(made).forEach(w => setWall(w.a, w.b, true));
       selectIds(ids);
     });
     const L = D.parts.filter(q => ids.indexOf(q.id) >= 0);
@@ -3123,6 +3208,18 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const h = p && editable(p) && !fixedGen(p) && !(multiMode && tool === "select") && (tool === "select" || p.t === curType()) ? hitHandle(sp) : null;
     if (h != null) { act.k = "handle"; act.h = h; act.orig = JSON.parse(JSON.stringify(p)); act.tg = snapTargets(p); return; }
     const hit = hitPart(w);
+    if (wallSel) { wallSel = null; renderPlanBar(); queue(false); }
+    if (wallPick && D.mode === "plan") {
+      /* picking walls for a merge: a tap toggles the nearest one, a drag pans */
+      let best = null, bd = 24;
+      wallPick.pairs.forEach(q => { const a = q.h ? toS(q.u0, q.c) : toS(q.c, q.u0), b = q.h ? toS(q.u1, q.c) : toS(q.c, q.u1), d = segDist(sp.x, sp.y, a.x, a.y, b.x, b.y); if (d < bd) { bd = d; best = q; } });
+      if (best) { best.out = !best.out; SFX.tap(); renderPlanBar(); queue(false); act.k = "none"; return; }
+      act.k = "pan"; act.v0 = Object.assign({}, view); return;
+    }
+    if (tool === "select" && !multiMode && D.mode === "plan" && D.v2 && (!hit || hit.t === "room")) {
+      const wn = wallNear(sp);
+      if (wn) { wallSel = { a: wn.a.id, b: wn.b.id }; selectPart(null); SFX.tap(); renderDock(); renderPlanBar(); queue(false); act.k = "none"; return; }
+    }
     if (tool === "select") {
       if (hit && multiMode) {
         const ids = selList().map(q => q.id), add = withGroups([hit.id]);
@@ -3383,7 +3480,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
 
   /* ---------- part actions ---------- */
-  function clonePart(p) { const q = JSON.parse(JSON.stringify(p)); q.id = D.next++; delete q.lk; return q; }
+  function clonePart(p) { const q = JSON.parse(JSON.stringify(p)); q.id = D.next++; delete q.lk; delete q.nw; return q; }
   function shiftPart(q, dx, dy) {
     const k = kindOf(q);
     if (k === "rect" || k === "label") { q.x = r1(q.x + dx); q.y = r1(q.y + dy); }
@@ -3393,7 +3490,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function insertAfter(p, q) { const i = D.parts.indexOf(p); D.parts.splice(i + 1, 0, q); }
   function cloneList(list, dx, dy) {
     const gmap = {}, ids = [];
-    list.forEach(p => { const q = clonePart(p); if (q.g) q.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(q, dx, dy); D.parts.push(q); ids.push(q.id); });
+    const idm = new Map(), made = [];
+    list.forEach(p => { const q = clonePart(p); if (q.g) q.g = gmap[q.g] || (gmap[q.g] = randId(6)); if (p.nw) q.nw = p.nw.slice(); idm.set(p.id, q.id); made.push(q); shiftPart(q, dx, dy); D.parts.push(q); ids.push(q.id); });
+    remapNw(made, idm);
     return ids;
   }
   function duplicate() {
@@ -3414,9 +3513,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const U = unionBox(ok), c = toW(stageW / 2, stageH / 2);
     const dx = gsnap(c.x - (U.x + U.w / 2)), dy = gsnap(c.y - (U.y + U.h / 2));
     withUndo(() => {
-      const gmap = {}, ids = [];
-      ok.forEach(q => { const p = cleanPart(q, D.next, D.mode); if (!p) return; D.next++; delete p.lk; if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(p, dx, dy); if (D.mode === "plan") { if (D.lvl) p.fl = D.lvl; else delete p.fl; } D.parts.push(p); ids.push(p.id); });
-      tool = "select"; selectIds(ids);
+      const gmap = {}, ids = [], idm = new Map(), made = [];
+      ok.forEach(q => { const p = cleanPart(q, D.next, D.mode); if (!p) return; D.next++; idm.set(q.id, p.id); made.push(p); delete p.lk; if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(p, dx, dy); if (D.mode === "plan") { if (D.lvl) p.fl = D.lvl; else delete p.fl; } D.parts.push(p); ids.push(p.id); });
+      remapNw(made, idm); tool = "select"; selectIds(ids);
     });
     SFX.place(); if (ok.length < clip.parts.length) toast("Pasted the parts that fit this view.");
   }
@@ -3576,7 +3675,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       else if (TYPES[t] && (TYPES[t].styles || TYPES[t].texs || TYPES[t].kind !== "label")) { renderToolSheet(t); openSheet("toolSheet"); }
       return;
     }
-    tool = t; if (t !== "room") outline = null; SFX.tap(); renderDock(); renderGrid(); queue(false);
+    tool = t; if (t !== "room") outline = null; wallPick = null; wallSel = null; SFX.tap(); renderDock(); renderGrid(); queue(false);
     if (!store.hinted[t]) { store.hinted[t] = true; save(); toast(HINTS[t]); }
   }
   $("tools").addEventListener("click", e => {
@@ -3597,7 +3696,15 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const pb = $("planBar"); if (!pb) return;
     const lv = D.lvl || 0, drawing = D.mode === "plan" && !view3d && tool === "room" && polyOn(), show = D.v2 && D.mode === "plan" && !view3d && lv > 0 && !D.plan.some(q => q.t === "room" && lvOf(q) === lv) && !drawing;
     let h = "";
-    if (show) {
+    const ws = wallSelResolve();
+    if (wallPick && D.mode === "plan" && !view3d) {
+      const n = wallPick.pairs.filter(q => q.out).length;
+      h = `<div class="pline"><b>Tap walls · ${n} of ${wallPick.pairs.length} in red come out</b><div class="b3row"><button data-pb="domerge">Merge</button><button data-pb="nomerge">Cancel</button></div></div>`;
+    } else if (ws) {
+      const open = noWall(ws.a, ws.b), names = esc(ws.a.text || "Room") + " and " + esc(ws.b.text || "Room");
+      const inside = matesOf(ws.a, D.plan).indexOf(ws.b) >= 0;
+      h = `<div class="pline"><b>${open ? "Opening" : "Wall"} ${inside ? "inside " + esc(ws.a.text || "Room") : "between " + names}</b><div class="b3row">${open ? '<button data-pb="wback">Put the wall back</button>' : '<button data-pb="wout">Take out this wall</button>'}${matesOf(ws.a, D.plan).indexOf(ws.b) < 0 ? '<button data-pb="wmerge">Merge rooms</button>' : ""}<button data-pb="wdone">Done</button></div></div>`;
+    } else if (show) {
       const stairs = D.plan.some(q => q.t === "stairs" && lvOf(q) === lv - 1);
       h = `<b>Floor ${lv + 1} is empty</b><p>Floor ${lv} shows faintly underneath so rooms line up. Draw rooms with the Room tool, or start with a room over each room below.${stairs ? " Stairs from below show here as the way down." : " Add stairs on Floor " + lv + " with the Stairs tool to connect the floors."}</p><div class="b3row"><button data-pb="copy">Rooms over Floor ${lv}</button><button data-pb="room">Draw rooms</button></div>`;
     } else if (drawing) {
@@ -3613,6 +3720,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (k === "close") { closePoly(); return; }
     if (k === "back") { if (outline) outline.pts.pop(); SFX.tap(); renderPlanBar(); queue(true); return; }
     if (k === "rect") { $("shapeChip").click(); return; }
+    if (k === "domerge") { const W = wallPick; if (W) applyMerge(W.L, W.pairs); return; }
+    if (k === "nomerge") { wallPick = null; SFX.tap(); renderPlanBar(); queue(false); return; }
+    if (k === "wout") { wallAct("out"); return; }
+    if (k === "wback") { wallAct("back"); return; }
+    if (k === "wmerge") { wallAct("merge"); return; }
+    if (k === "wdone") { wallAct("done"); return; }
     if (k === "cancel") { outline = null; SFX.tap(); renderPlanBar(); queue(true); }
   });
   function setMode(m) {
@@ -4332,7 +4445,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (p.t === "room") {
       h += `<div class="row"><div><label>Open to the outside</label><small>${lvOf(p) ? "A balcony or terrace: no outside walls" : "A porch, marquesina or terrace: roofed, with no outside walls"}</small></div><button class="switch" data-sw="op" role="switch" aria-checked="${isOpenRoom(p)}" aria-label="Open to the outside"></button></div>`;
       if (mates.length) h += `<p class="note">This room is ${mates.length + 1} pieces with no walls between them. Split it to resize a piece, then merge again.</p><div class="acts" style="grid-template-columns:1fr"><button data-a="split">Split into separate rooms</button></div>`;
-      else h += `<p class="note">To make one room from two or more, like a hallway or an open living and dining room, turn on Multi, tap the rooms, then tap Merge.</p>`;
+      else h += `<p class="note">To make one room from two or more, like a hallway or a great room, turn on Multi, tap the rooms, then tap Merge. To take out just one wall, tap that wall in the plan.</p>`;
     }
     if (isOpening(p) && D.v2) {
       const S0 = opSpec(p, bldOf(D)), lv = model(D).levels;
