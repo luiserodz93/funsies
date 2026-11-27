@@ -3261,7 +3261,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function changed() {
     D.at = Date.now();
     const sp = selPart(); if (sp && sp.t === "room") matesOf(sp, D.plan).forEach(q => { q.text = sp.text; q.tex = sp.tex; q.color = sp.color; if (typeof sp.op === "boolean") q.op = sp.op; else delete q.op; });
-    if (D.v2) syncModel(); else syncLinks();
+    if (D.v2) { try { seatItems(D); } catch (e) { } syncModel(); } else syncLinks();
     if (multi.length) { multi = multi.filter(id => D.parts.some(p => p.id === id)); if (multi.length < 2) multi = []; }
     if (sel != null && !selPart()) sel = multi.length ? multi[0] : null;
     save(); render();
@@ -3673,6 +3673,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     }
     let drop = null;
     if ((a.k === "move" || a.k === "handle") && selList().length === 1) drop = settle(selPart());
+    if (a.k === "handle" && selPart() && ITEM_T[selPart().t]) seatItems(D, [selPart()], true);
     if (a.k === "draw" || a.k === "line" || a.k === "pen") {
       const p = preview; preview = null;
       if (p) {
@@ -3809,7 +3810,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     return { x: r1(back), y: r1(a), w: Dp, h: L, rot: sign > 0 ? 1 : 3 };
   }
   /* Keeps things out of the walls: anything that runs into a wall's thickness moves back to its inside face. */
-  function seatItems(d, only) {
+  function seatItems(d, only, trim) {
     if (!d || !d.plan) return 0;
     let n = 0;
     d.plan.forEach(p => {
@@ -3821,7 +3822,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         const t = wallTOf(r, h, sign, (lo + hi) / 2, rooms), c = h ? (sign < 0 ? r.y : r.y + r.h) : (sign < 0 ? r.x : r.x + r.w), F = c - sign * t / 2;
         if (noWallAt(r, h, sign, (lo + hi) / 2, rooms)) return;
         const e = h ? (sign < 0 ? p.y : p.y + p.h) : (sign < 0 ? p.x : p.x + p.w), over = sign * (e - F);
-        if (over > 0.3 && over < t + 2) { if (h) p.y = r1(p.y - sign * over); else p.x = r1(p.x - sign * over); n++; }
+        if (!(over > 0.3 && over < (h ? p.h : p.w) / 2 + 1)) return;
+        /* a resized item stops at the wall face; a moved one slides back out of the wall */
+        if (trim && (h ? p.h : p.w) - over >= 10) { if (h) { if (sign < 0) p.y = r1(p.y + over); p.h = r1(p.h - over); } else { if (sign < 0) p.x = r1(p.x + over); p.w = r1(p.w - over); } }
+        else if (h) p.y = r1(p.y - sign * over); else p.x = r1(p.x - sign * over);
+        n++;
       });
     });
     return n;
