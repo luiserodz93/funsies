@@ -2805,9 +2805,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     }
     const ops = d.plan.filter(p => isOpening(p) && !hid(p)).map(p => {
       const S = opSpec(p, B), vert = opVert(p), line = opLine(p), u0 = vert ? p.y : p.x, u1 = vert ? p.y + p.h : p.x + p.w, mid = (u0 + u1) / 2;
-      const seg = segs.find(s => s.lv === S.fl && s.h === !vert && Math.abs(s.c - line) < 12 && mid > s.a && mid < s.b) || null;
+      /* the opening belongs to the nearest wall it sits on; when two rooms are a few inches apart there are two walls side by side, and it goes through both */
+      const near = segs.filter(s => s.lv === S.fl && s.h === !vert && mid > s.a && mid < s.b && Math.abs(s.c - line) < Math.max(12, s.t / 2 + 8)).sort((a, b) => Math.abs(a.c - line) - Math.abs(b.c - line));
+      const seg = near[0] || null, thru = near.slice(1);
       const y0 = B.base + S.fl * B.fh + S.sill;
-      return { p, seg, vert, line, u0, u1, y0, y1: Math.min(y0 + S.oh, B.base + (S.fl + 1) * B.fh - 8), fs: S.fs, fc: S.fc, fl: S.fl, door: p.t === "pdoor" };
+      return { p, seg, thru, vert, line, u0, u1, y0, y1: Math.min(y0 + S.oh, B.base + (S.fl + 1) * B.fh - 8), fs: S.fs, fc: S.fc, fl: S.fl, door: p.t === "pdoor" };
     });
     /* Roofs: each part of the house is roofed at its own top, over a few rectangles that together cover its rooms. */
     const R = B.roof, roofs = [], cover = R.on ? encl.concat(open) : [], topOf = r => lvOf(r) + (isOpenRoom(r) ? 1 : stOf(r));
@@ -3857,13 +3859,14 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if ((a.k === "move" || a.k === "handle") && selList().length === 1) drop = settle(selPart());
     if (a.k === "move" || a.k === "handle") selList().forEach(q => { if (q.t === "column" && q.own != null) q.mv = true; });
     if (a.k === "handle" && selPart() && ITEM_T[selPart().t]) seatItems(D, [selPart()], true);
+    if (a.k === "move" && selList().length === 1 && isFan(selPart()) && a.orig) { const q = selPart(), o = a.orig; if (fanRoom(q, q.x + q.w / 2, q.y + q.h / 2) !== fanRoom(o, o.x + o.w / 2, o.y + o.h / 2)) centerFan(q); }
     if (a.k === "draw" || a.k === "line" || a.k === "pen") {
       const p = preview; preview = null;
       if (p) {
         if (a.k === "pen") p.pts = simplify(p.pts);
         if (a.k === "line" && Math.hypot(p.x2 - p.x1, p.y2 - p.y1) < 1) { renderArt(); renderUI(); return; }
         p.id = D.next++; D.parts.push(p); selectPart(p); sess.moves++;
-        unhideFor(p); remember(p); drop = settle(p); linkNew(p); abutRoom(p);
+        unhideFor(p); remember(p); drop = settle(p); linkNew(p); abutRoom(p); centerFan(p);
         SFX.place();
         if (p.t === "label") { pushUndo(a.before); changed(); openProps(true); return; }
       }
@@ -3939,7 +3942,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (!fixed || type === "trim") { if (!(type === "door" || ((type === "steps" || type === "plant" || type === "wall" || type === "trim") && y === 0))) y = snapEdge(y, hh, tg.ys, "y"); }
     act = null; guides = { x: [], y: [] };
     const props = type === "label" ? { x: r1(w.x), y: r1(w.y) } : { x: r1(x), y: r1(y), w: r1(ww), h: r1(hh) };
-    let drop = null; withUndo(() => { const p = mk(type, props); D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); drop = settle(p); linkNew(p); abutRoom(p); });
+    let drop = null; withUndo(() => { const p = mk(type, props); D.parts.push(p); selectPart(p); sess.moves++; unhideFor(p); drop = settle(p); linkNew(p); abutRoom(p); centerFan(p); });
     SFX.place(); dropAnim(drop);
     if (type === "label") openProps(true);
   }
@@ -4047,6 +4050,19 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     return { x: r1(back), y: r1(a), w: Dp, h: L, rot: sign > 0 ? 1 : 3 };
   }
   /* Keeps things out of the walls: anything that runs into a wall's thickness moves back to its inside face. */
+  /* A ceiling fan goes to the middle of the room it is placed or dropped in (a room merged with others: the middle of the whole space). */
+  const isFan = p => p && p.t === "furn" && p.style === "fan";
+  function fanRoom(p, cx, cy) {
+    const rs = D.plan.filter(q => q.t === "room" && lvOf(q) === lvOf(p) && cx > q.x && cx < q.x + q.w && cy > q.y && cy < q.y + q.h);
+    return rs.sort((a, b) => a.w * a.h - b.w * b.h)[0] || null;
+  }
+  function centerFan(p) {
+    if (!isFan(p) || D.mode !== "plan") return;
+    const r = fanRoom(p, p.x + p.w / 2, p.y + p.h / 2); if (!r) return;
+    const grp = r.g && r.one ? D.plan.filter(q => q.t === "room" && q.g === r.g && lvOf(q) === lvOf(r)) : [r];
+    const x0 = Math.min(...grp.map(q => q.x)), x1 = Math.max(...grp.map(q => q.x + q.w)), y0 = Math.min(...grp.map(q => q.y)), y1 = Math.max(...grp.map(q => q.y + q.h));
+    p.x = r1((x0 + x1) / 2 - p.w / 2); p.y = r1((y0 + y1) / 2 - p.h / 2);
+  }
   function seatItems(d, only, trim) {
     if (!d || !d.plan) return 0;
     let n = 0;
@@ -4843,9 +4859,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const grilleQ = [];
     for (let si = 0; si < M.segs.length; si++) {
       const s = Object.assign({}, M.segs[si], { mat: M.segs[si].ext ? facade : plaster });
-      let ops = M.ops.filter(o => o.seg === M.segs[si]).map(o => ({ u0: o.u0, u1: o.u1, y0: clamp(o.y0, s.y0, s.y1), y1: clamp(o.y1, s.y0, s.y1), src: { t: o.door ? "door" : "window", style: o.fs, color: o.fc, id: o.p.id } })).filter(o => o.y1 - o.y0 > 5);
+      /* holes for the openings on this wall and for any that pass through it from a wall right beside it; fittings only on the opening's own wall */
+      const cutAll = M.ops.filter(o => o.seg === M.segs[si] || o.thru.indexOf(M.segs[si]) >= 0).map(o => ({ u0: o.u0, u1: o.u1, y0: clamp(o.y0, s.y0, s.y1), y1: clamp(o.y1, s.y0, s.y1), own: o.seg === M.segs[si], src: { t: o.door ? "door" : "window", style: o.fs, color: o.fc, id: o.p.id, own: hexOk(o.p.fc) } })).filter(o => o.y1 - o.y0 > 5);
+      const ops = cutAll.filter(o => o.own);
       const ext = s.ext ? s.t / 2 : 0, A = s.a - ext, Bq = s.b + ext, cuts = [A, Bq];
-      ops.forEach(o => cuts.push(clamp(o.u0, A, Bq), clamp(o.u1, A, Bq)));
+      cutAll.forEach(o => cuts.push(clamp(o.u0, A, Bq), clamp(o.u1, A, Bq)));
       cuts.sort((a, b) => a - b);
       const wz = s.h ? -s.sign : 0, wx = s.h ? 0 : s.sign, outIdx = s.h ? (wz > 0 ? 4 : 5) : (wx > 0 ? 0 : 1);
       const inIdx = outIdx ^ 1, mats = s.ext ? [0, 1, 2, 3, 4, 5].map(i => i === inIdx ? plaster : s.mat) : plaster, tile = s.ext ? s.mat.userData.tile : null;
@@ -4853,7 +4871,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       TAG3 = { seg: si };
       for (let i = 0; i < cuts.length - 1; i++) {
         const ua = cuts[i], ub = cuts[i + 1], m = (ua + ub) / 2; if (ub - ua < 0.3) continue;
-        const holes = ops.filter(o => o.u0 < m && o.u1 > m).map(o => [o.y0, o.y1]).sort((a, b) => a[0] - b[0]);
+        const holes = cutAll.filter(o => o.u0 < m && o.u1 > m).map(o => [o.y0, o.y1]).sort((a, b) => a[0] - b[0]);
         let y = s.y0; holes.forEach(hh => { if (hh[0] > y) piece(ua, ub, y, hh[0]); y = Math.max(y, hh[1]); }); if (y < s.y1) piece(ua, ub, y, s.y1);
       }
       /* Fittings, placed by depth d measured inward from the outer face: frames and glass sit back in the wall. */
@@ -4865,7 +4883,22 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         TAG3 = { op: p.id };
         let u0 = o.u0, u1 = o.u1;
         if (p.t === "window" && p.style === "shutters") { const sw = W * 0.22, sm = solid("#3e4a4f", 0.7); put(u0, u0 + sw, o.y0, o.y1, -3, 0, sm); put(u1 - sw, u1, o.y0, o.y1, -3, 0, sm); }
-        if (!s.ext && isDoor) { put(u0, u1, o.y0, o.y0 + 1.5, 0, s.t, solid("#b9b2a5", 0.8)); return; } // inside doorways stay open
+        if (!s.ext && isDoor) {
+          /* an inside door: a painted leaf in the middle of the wall, casings on both faces, a knob each side */
+          const st = p.style, col = p.own ? p.color : "#e9e2d4", dm = doorMat["i" + col] || (doorMat["i" + col] = solid(col, 0.5)), mid = s.t / 2, Hd = o.y1 - o.y0;
+          const pm = doorMat["ip" + col] || (doorMat["ip" + col] = solid(shade(col, -0.08), 0.55));
+          put(u0, u1, o.y0, o.y0 + 1.5, 0, s.t, solid("#b9b2a5", 0.8));
+          const leaves = st === "double" || st === "french" ? [[u0, (u0 + u1) / 2], [(u0 + u1) / 2, u1]] : [[u0, u1]];
+          leaves.forEach(([a, b]) => {
+            put(a + 0.4, b - 0.4, o.y0 + 1, o.y1, mid - 2, mid + 2, dm);
+            if (st === "glass" || st === "french") put(a + (b - a) * 0.2, b - (b - a) * 0.2, o.y0 + Hd * 0.35, o.y1 - Hd * 0.08, mid - 2.3, mid + 2.3, glassMat);
+            else [[0.12, 0.45], [0.55, 0.9]].forEach(([f0, f1]) => { put(a + (b - a) * 0.18, b - (b - a) * 0.18, o.y0 + Hd * f0, o.y0 + Hd * f1, mid - 2.4, mid + 2.4, pm); });
+          });
+          [-1.5, s.t].forEach(d0 => { put(u0 - 7, u0, o.y0, o.y1 + 7, d0, d0 + 1.5, frameMat); put(u1, u1 + 7, o.y0, o.y1 + 7, d0, d0 + 1.5, frameMat); put(u0, u1, o.y1, o.y1 + 7, d0, d0 + 1.5, frameMat); });
+          const ku = leaves.length > 1 ? (u0 + u1) / 2 - 8 : u1 - 9, ky = o.y0 + 92, km = solid("#b8954f", 0.3, 0.9);
+          [mid - 5, mid + 5].forEach(dk => { const k = new THREE.Mesh(new THREE.SphereGeometry(2.6, 12, 8), km); if (s.h) k.position.set(ku, ky, Zo - dz * dk); else k.position.set(Xo - wx * dk, ky, -ku); k.userData.tag = TAG3; g.add(k); });
+          return;
+        }
         if (isDoor) {
           const st = p.style, col = st === "gate" ? "#6e5038" : p.color, dm = doorMat[col] || (doorMat[col] = solid(col, 0.55)), Hd = o.y1 - o.y0;
           if (st === "criollo") {
@@ -5864,7 +5897,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   if (firstRun) { useStyle(D.style); save(); render(); requestAnimationFrame(() => fit()); }
   if (!store.helped && !location.hash) { store.helped = true; save(); setTimeout(() => toast("Welcome. This is a starter house to explore: drag around, try 3D, or tap a part to change it. The ? button explains everything."), 400); }
   else if (!location.hash && !D.front.length && !D.plan.length) setTimeout(() => toast("This design is empty. Tap here to start from a Puerto Rico or US house.", () => { renderNew(); openSheet("newSheet"); $("toast").hidden = true; }), 500);
-  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG, draw3D, changed, get v3() { return v3; } };
+  window.__bb = { get D() { return D; }, get store() { return store; }, view, fit, toS, exportSVG, draw3D, changed, model, get v3() { return v3; } };
 
   if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude|claudeusercontent/.test(location.hostname)) {
     navigator.serviceWorker.register("sw.js").catch(noop);
