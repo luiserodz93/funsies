@@ -705,11 +705,13 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const visible = p => !D.layers[p.layer].hide && onFloor(p);
   const editable = p => visible(p) && !D.layers[p.layer].lock;
   const isRug = p => p.t === "furn" && p.style === "rug", isFan = p => !!p && p.t === "furn" && (p.style === "fan" || p.style === "chand");
+  /* wall cabinets, range hoods and wall shelves hang above the counters: in the plan they show over the base cabinets under them */
+  const isHung = p => !!p && ((p.t === "cabinet" && (p.style === "upper" || p.style === "hood" || p.style === "shelf")) || (p.t === "furn" && p.style === "tvwall"));
   function hitPart(w) {
     const tol = 10 / view.s, n = D.parts.length;
-    /* ceiling fans are found first, then doors, windows and furniture, then the rugs and rooms under them, and paving last of all */
-    const tier = p => D.mode !== "plan" ? 3 : p.t === "pave" ? 0 : p.t === "room" ? 1 : isRug(p) ? 2 : isFan(p) ? 4 : 3;
-    for (let j = 5 * n - 1; j >= 0; j--) {
+    /* ceiling fans are found first, then wall cabinets, then doors, windows and furniture, then the rugs and rooms under them, and paving last of all */
+    const tier = p => D.mode !== "plan" ? 3 : p.t === "pave" ? 0 : p.t === "room" ? 1 : isRug(p) ? 2 : isFan(p) ? 5 : isHung(p) ? 4 : 3;
+    for (let j = 6 * n - 1; j >= 0; j--) {
       const p = D.parts[j % n]; if (!editable(p) || tier(p) !== Math.floor(j / n)) continue;
       const k = kindOf(p);
       if (k === "rect" && p.ang) { const t = 3 / view.s, q = rotCW(w.x - p.x - p.w / 2, w.y - p.y - p.h / 2, -p.ang); if (Math.abs(q.x) <= p.w / 2 + t && Math.abs(q.y) <= p.h / 2 + t) return p; }
@@ -1957,8 +1959,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     /* paving lies under everything in the plan */
     /* in the plan, paving lies under everything and rooms under their doors, windows and furniture */
     /* open rooms (terrazas, porches, carports) go down before enclosed ones, so a house wall they share stays its full thickness */
-    /* rugs lie on the floor, under the furniture standing on them, and ceiling fans hang over everything, whatever order they were placed in */
-    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(isRug), parts.filter(p => p.t !== "pave" && p.t !== "room" && !isRug(p) && !isFan(p)), parts.filter(isFan));
+    /* rugs lie on the floor, under the furniture standing on them, wall cabinets show over the base cabinets below them, and ceiling fans hang over everything, whatever order they were placed in */
+    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(isRug), parts.filter(p => p.t !== "pave" && p.t !== "room" && !isRug(p) && !isFan(p) && !isHung(p)), parts.filter(isHung), parts.filter(isFan));
     o.all = parts;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
