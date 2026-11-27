@@ -103,6 +103,9 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
 .bubble{position:absolute; left:50%; top:100%; transform:translate(-50%, 4px); background:var(--ink); color:var(--bg1); font-weight:800; font-size:12px; padding:3px 9px; border-radius:10px; white-space:nowrap; z-index:5; pointer-events:none; animation:pop .25s ease-out}
 @keyframes pop{from{transform:translate(-50%, -2px) scale(.8); opacity:0}}
 
+/* Home Screen app: iOS blurs a band just under the status bar, so the top row starts below it. */
+.ios-app .app{padding-top:calc(env(safe-area-inset-top, 0px) + 30px)}
+@media (orientation: landscape) and (max-height: 560px){ .ios-app .app{padding-top:max(8px, env(safe-area-inset-top, 0px))} }
 .app.capped .table{height:var(--tableH); align-self:center}
 .app.capped{grid-template-rows:auto auto minmax(0,1fr) auto auto}
 .table{grid-area:table; position:relative; min-height:0; border-radius:20px; padding:8px;
@@ -527,7 +530,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
       if (!mv.length) return pass(s);
       var m = choose(s, mv);
       place(s, m.i, m.side);
-    }, (delay || 0) + 650 + Math.random() * 450);
+    }, (delay || 0) + 2400 + Math.random() * 1200);
   }
 
   /* ---------- computer players ---------- */
@@ -1040,6 +1043,7 @@ header.top{grid-area:top; display:flex; align-items:center; gap:10px; min-width:
   /* ---------- start ---------- */
   load();
   if (canLink && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(noop);
+  if (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)) document.documentElement.classList.add("ios-app");
   fit();
   loadGA(); logSession();
   if (G && !G.over) {
