@@ -1158,8 +1158,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         `<text x="${f(cx)}" y="${f(cy + fs * 1.1)}" text-anchor="middle" font-size="${f(fs * 0.78)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="400" fill="#5e5c57" ${halo}>${esc(fmtArea(area))}</text>`;
     }
     const same = (o.all || []).filter(q => q.t === "room" && q !== p && !!q._ghost === !!p._ghost && lvOf(q) === lvOf(p)), open = same.filter(q => noWall(p, q));
-    /* an open room (carport, porch, terraza, balcony) has no walls of its own: the slab's edge is a fine dashed line */
-    if (isOpenRoom(p)) return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 1.6) + ' stroke-dasharray="12 7" opacity=".7"');
+    /* an open room (carport, porch, terraza, balcony) has no walls of its own: the slab's edge is a fine line, drawn under the house walls it meets */
+    if (isOpenRoom(p)) return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 2.5));
     if (!open.length && !p.wt && !same.some(q => q.wt && q.wt[p.id])) return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, WT0));
     /* walls only where they weren't taken out, each at its own thickness; between two named rooms a fine dashed line still marks where one ends */
     const d = {}; let dd = "";
@@ -1906,7 +1906,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (parts.some(deckOf)) { parts = parts.slice(); parts.filter(deckOf).forEach(p => { const q = deckOf(p); parts.splice(parts.indexOf(p), 1); parts.splice(parts.indexOf(q), 0, p); }); }
     /* paving lies under everything in the plan */
     /* in the plan, paving lies under everything and rooms under their doors, windows and furniture */
-    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room"), parts.filter(p => p.t !== "pave" && p.t !== "room"));
+    /* open rooms (terrazas, porches, carports) go down before enclosed ones, so a house wall they share stays its full thickness */
+    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(p => p.t !== "pave" && p.t !== "room"));
     o.all = parts;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
