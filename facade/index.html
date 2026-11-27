@@ -429,7 +429,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     wall: { name: "Wall", kind: "rect", layer: "structure", w: 731.5, h: 274.3, color: "#c8b8a2", tex: "brick", texs: ["brick", "stone", "siding", "board", "stucco", "block", "concrete", "shingle", "plain"] },
     roof: { name: "Roof", kind: "rect", layer: "structure", w: 900, h: 260, color: "#4a4b4d", tex: "shingle", style: "gable", styles: ["gable", "side", "hip", "flat", "parapet", "shed", "mansard", "gambrel"], texs: ["shingle", "tile", "slate", "metal", "zinc", "concrete", "plain"] },
     window: { name: "Window", kind: "rect", layer: "openings", w: 91.4, h: 152.4, color: "#f1efe9", style: "double", styles: ["double", "single", "casement", "arched", "round", "shutters", "jalousie", "louver", "frosted"] },
-    door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3e4a4f", style: "panel", styles: ["panel", "glass", "double", "french", "arched", "garage", "criollo", "gate"] },
+    door: { name: "Door", kind: "rect", layer: "openings", w: 91.4, h: 203.2, color: "#3e4a4f", style: "panel", styles: ["panel", "glass", "double", "french", "slider", "arched", "garage", "criollo", "gate"] },
     trim: { name: "Trim", kind: "rect", layer: "details", w: 800, h: 20, color: "#ece8df", style: "band", styles: ["band", "cornice", "column", "pilaster", "quoins", "frame", "post", "tapered", "railing", "reja"] },
     plant: { name: "Plant", kind: "rect", layer: "details", w: 150, h: 90, color: "#7d8f6e", style: "shrub", styles: ["shrub", "tree", "palm", "hedge", "flowers", "ivy"] },
     steps: { name: "Steps", kind: "rect", layer: "structure", w: 160, h: 51, color: "#bdb7ad", style: "steps", styles: ["steps", "stoop"] },
@@ -456,7 +456,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     plant: { shrub: [150, 90], tree: [260, 480], palm: [300, 640], hedge: [300, 100], flowers: [110, 45], ivy: [120, 300] },
     trim: { band: [800, 20], cornice: [840, 40], column: [40, 300], pilaster: [35, 300], quoins: [40, 300], frame: [150, 180], post: [22, 260], tapered: [50, 236], railing: [300, 100], reja: [136, 166] },
     equip: { tank: [110, 140], solar: [210, 110], ac: [85, 60] },
-    door: { garage: [260, 220], double: [160, 220], french: [160, 220], criollo: [130, 270], gate: [91.4, 213] },
+    door: { garage: [260, 220], double: [160, 220], french: [160, 220], slider: [182.9, 203.2], criollo: [130, 270], gate: [91.4, 213] },
     window: { round: [80, 80], arched: [100, 170], jalousie: [120, 120], louver: [110, 150], frosted: [61, 61] },
     roof: { flat: [840, 25], parapet: [840, 60] },
     pdoor: { swing: [91.4, 91.4], pair: [152.4, 76.2], sliding: [182.9, 15.2] },
@@ -475,7 +475,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     corner: "Corner cabinet", hood: "Range hood", oven: "Wall oven", wine: "Wine fridge", bidet: "Bidet", cbath: "Corner tub",
     gable: "Gable", side: "Side gable", parapet: "Flat with parapet", hip: "Hip", flat: "Flat", shed: "Shed", mansard: "Mansard", gambrel: "Gambrel",
     double: "Double hung", single: "Picture", casement: "Casement", arched: "Arched", round: "Round", shutters: "Shuttered", jalousie: "Jalousie", louver: "Louvered", frosted: "Frosted",
-    panel: "Panel", glass: "Glass top", french: "French", garage: "Garage", criollo: "Criollo", gate: "Reja",
+    panel: "Panel", glass: "Glass top", french: "French", slider: "Sliding glass", garage: "Garage", criollo: "Criollo", gate: "Reja",
     band: "Band", cornice: "Cornice", column: "Column", pilaster: "Pilaster", quoins: "Quoins", frame: "Surround", post: "Post", tapered: "Tapered column", railing: "Railing", reja: "Reja grille",
     shrub: "Shrub", tree: "Tree", palm: "Palm", tank: "Water tank", solar: "Solar water heater", ac: "Mini-split AC", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
     steps: "Steps", stoop: "Stoop",
@@ -705,11 +705,13 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const visible = p => !D.layers[p.layer].hide && onFloor(p);
   const editable = p => visible(p) && !D.layers[p.layer].lock;
   const isRug = p => p.t === "furn" && p.style === "rug", isFan = p => !!p && p.t === "furn" && (p.style === "fan" || p.style === "chand");
+  /* wall cabinets, range hoods and wall shelves hang above the counters: in the plan they show over the base cabinets under them */
+  const isHung = p => !!p && ((p.t === "cabinet" && (p.style === "upper" || p.style === "hood" || p.style === "shelf")) || (p.t === "furn" && p.style === "tvwall"));
   function hitPart(w) {
     const tol = 10 / view.s, n = D.parts.length;
-    /* ceiling fans are found first, then doors, windows and furniture, then the rugs and rooms under them, and paving last of all */
-    const tier = p => D.mode !== "plan" ? 3 : p.t === "pave" ? 0 : p.t === "room" ? 1 : isRug(p) ? 2 : isFan(p) ? 4 : 3;
-    for (let j = 5 * n - 1; j >= 0; j--) {
+    /* ceiling fans are found first, then wall cabinets, then doors, windows and furniture, then the rugs and rooms under them, and paving last of all */
+    const tier = p => D.mode !== "plan" ? 3 : p.t === "pave" ? 0 : p.t === "room" ? 1 : isRug(p) ? 2 : isFan(p) ? 5 : isHung(p) ? 4 : 3;
+    for (let j = 6 * n - 1; j >= 0; j--) {
       const p = D.parts[j % n]; if (!editable(p) || tier(p) !== Math.floor(j / n)) continue;
       const k = kindOf(p);
       if (k === "rect" && p.ang) { const t = 3 / view.s, q = rotCW(w.x - p.x - p.w / 2, w.y - p.y - p.h / 2, -p.ang); if (Math.abs(q.x) <= p.w / 2 + t && Math.abs(q.y) <= p.h / 2 + t) return p; }
@@ -846,6 +848,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       const n = Math.max(2, Math.round(W / 70)), gw = W / n;
       for (let i = 0; i < n; i++) out += gl(X + i * gw + gw * 0.12, T + H * 0.06, gw * 0.76, H * 0.13);
       return out;
+    }
+    if (p.style === "slider") {
+      /* two glass panels in a slim frame, one sliding behind the other */
+      const fw = clamp(W * 0.035, 3, 6), m = X + W / 2;
+      [[X, m + fw / 2], [m - fw / 2, X + W]].forEach(([a, b]) => { out += R(a, T, b - a, H, c, st) + gl(a + fw, T + fw, b - a - 2 * fw, H - fw * 2.6); });
+      return out + R(X + W - fw * 2.2, T + H * 0.42, fw * 0.7, H * 0.16, e);
     }
     if (p.style === "double" || p.style === "french") {
       const lw = W / 2;
@@ -1800,6 +1808,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       for (let i = 0; i < n; i++) { const y = T + H * i / n; leaf += R(X, y + H / n - 2.5, W, 2.5, "#000", 'opacity=".3"') + R(X, y, W, 1.2, "#fff", 'opacity=".18"'); }
       const k = Math.max(2, Math.round(W / 70)), gw = W / k;
       for (let i = 0; i < k; i++) leaf += glass(X + i * gw + gw * 0.12, T + H * 0.05, gw * 0.76, H * 0.14);
+    } else if (p.style === "slider") {
+      const fw = clamp(W * 0.035, 3, 6), m = X + W / 2;
+      leaf += glass(X + fw, T + fw, W / 2 - fw * 1.5, H - fw * 2.6) + glass(m + fw / 2, T + fw, W / 2 - fw * 1.5, H - fw * 2.6) + R(m - fw * 0.5, T, fw, H, "#000", 'opacity=".25"') + R(X + W - fw * 2.2, T + H * 0.42, fw * 0.7, H * 0.16, "#1e1e1c");
     } else if (p.style === "double" || p.style === "french") {
       const lw = W / 2;
       [0, 1].forEach(i => {
@@ -1948,8 +1959,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     /* paving lies under everything in the plan */
     /* in the plan, paving lies under everything and rooms under their doors, windows and furniture */
     /* open rooms (terrazas, porches, carports) go down before enclosed ones, so a house wall they share stays its full thickness */
-    /* rugs lie on the floor, under the furniture standing on them, and ceiling fans hang over everything, whatever order they were placed in */
-    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(isRug), parts.filter(p => p.t !== "pave" && p.t !== "room" && !isRug(p) && !isFan(p)), parts.filter(isFan));
+    /* rugs lie on the floor, under the furniture standing on them, wall cabinets show over the base cabinets below them, and ceiling fans hang over everything, whatever order they were placed in */
+    if (mode === "plan") parts = parts.filter(p => p.t === "pave").concat(parts.filter(p => p.t === "room" && isOpenRoom(p)), parts.filter(p => p.t === "room" && !isOpenRoom(p)), parts.filter(isRug), parts.filter(p => p.t !== "pave" && p.t !== "room" && !isRug(p) && !isFan(p) && !isHung(p)), parts.filter(isHung), parts.filter(isFan));
     o.all = parts;
     parts.forEach(p => {
       if (layers && layers[p.layer] && layers[p.layer].hide) return;
@@ -2536,13 +2547,13 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const lx = linkOff(E);
     if (p.t === "window") return { t: "pwindow", x: r1(p.x - lx), y: r1(E.y - 7.6), w: p.w, h: 15.2 };
     if (p.t === "door") {
-      const st = p.style === "garage" ? "sliding" : p.style === "double" || p.style === "french" ? "pair" : "swing", x = r1(p.x - lx);
+      const st = p.style === "garage" || p.style === "slider" ? "sliding" : p.style === "double" || p.style === "french" ? "pair" : "swing", x = r1(p.x - lx);
       return st === "sliding" ? { t: "pdoor", style: st, x, y: r1(E.y - 7.6), w: p.w, h: 15.2 } : { t: "pdoor", style: st, x, y: E.y, w: p.w, h: r1(st === "pair" ? p.w / 2 : p.w) };
     }
     const x = r1(p.x + lx), wall = groundWalls().find(w => inWallX(x + p.w / 2, w));
     if (!wall) return null;
     if (p.t === "pwindow") { const y = r1(wall.y + Math.min(91.4, wall.h * 0.3)); return { t: "window", x, y, w: p.w, h: r1(clamp(wall.h - (y - wall.y) - 45, 30, 152.4)) }; }
-    return { t: "door", style: p.style === "pair" ? "double" : p.style === "sliding" ? "french" : "panel", x, y: wall.y, w: p.w, h: r1(clamp(wall.h - 20, 60, 203.2)) };
+    return { t: "door", style: p.style === "pair" ? "double" : p.style === "sliding" ? "slider" : "panel", x, y: wall.y, w: p.w, h: r1(clamp(wall.h - 20, 60, 203.2)) };
   }
   const overlapX = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
   function syncTwin(p, q) {
@@ -2762,7 +2773,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   /* How a plan opening looks from outside: its facade style and color, which floor, and how high it sits. */
   function opSpec(p, B) {
     const door = p.t === "pdoor", styles = door ? TYPES.door.styles : TYPES.window.styles;
-    const fs = styles.indexOf(p.fs) >= 0 ? p.fs : door ? (p.style === "pair" ? "double" : p.style === "sliding" ? "french" : "panel") : "double";
+    const fs = styles.indexOf(p.fs) >= 0 ? p.fs : door ? (p.style === "pair" ? "double" : p.style === "sliding" ? "slider" : "panel") : "double";
     const sill = num(p.sill) != null ? clamp(p.sill, 0, B.fh) : door ? 0 : 91.4;
     const dh = door ? (SIZES.door[fs] ? SIZES.door[fs][1] : 203.2) : 152.4;
     const oh = num(p.oh) != null ? p.oh : door ? Math.min(dh, B.fh - 30) : Math.min(dh, B.fh - sill - 35);
@@ -2891,6 +2902,23 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const cols = d.plan.filter(p => p.t === "column" && !hid(p));
     return { B, rooms, encl, open, levels, segs, ops, roofs, cols };
   }
+  /* The outline of a roof made of several rectangles (plan coordinates x0..x1, y0..y1): the edge pieces with nothing of the same roof beyond them.
+     h: runs across (at y = c), n: which way is outside, ca/cb: the end turns an inside corner. */
+  function parapetEdges(rs) {
+    const inside = (x, y) => rs.some(r => x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1), out = [];
+    rs.forEach(r => [[true, r.y0, -1], [true, r.y1, 1], [false, r.x0, -1], [false, r.x1, 1]].forEach(([h, c, n]) => {
+      const a = h ? r.x0 : r.y0, b = h ? r.x1 : r.y1, cuts = new Set([a, b]);
+      rs.forEach(o => (h ? [o.x0, o.x1] : [o.y0, o.y1]).forEach(v => { if (v > a && v < b) cuts.add(v); }));
+      const cs = Array.from(cuts).sort((p, q) => p - q), pt = u => h ? [u, c + n * 0.5] : [c + n * 0.5, u];
+      for (let i = 0; i < cs.length - 1; i++) {
+        if (inside(...pt((cs[i] + cs[i + 1]) / 2))) continue;
+        const last = out[out.length - 1];
+        if (last && last.h === h && last.c === c && last.n === n && Math.abs(last.b - cs[i]) < 0.01) last.b = cs[i + 1]; else out.push({ h, c, n, a: cs[i], b: cs[i + 1] });
+      }
+    }));
+    out.forEach(e => { const pt = u => e.h ? [u, e.c + e.n * 0.5] : [e.c + e.n * 0.5, u]; e.ca = inside(...pt(e.a - 0.5)); e.cb = inside(...pt(e.b + 0.5)); });
+    return out;
+  }
   const streetSegs = (M, fl) => M.segs.filter(s => s.ext && s.h && s.sign < 0 && (fl == null || s.lv === fl));
   /* The street-facing wall on a floor at a point across, nearest the street, the one seen in the front view there. */
   function streetSeg(M, fl, cx) { return streetSegs(M, fl).filter(s => cx > s.a - 1 && cx < s.b + 1).sort((a, b) => a.c - b.c)[0] || null; }
@@ -2909,7 +2937,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       else { q.w = r1(deep); if (s.sign > 0 && s.ext) { q.x = r1(s.c - q.w); q.rot = 3; } else { q.x = r1(s.c); q.rot = 1; } }
     }
   }
-  const planStyleFor = fs => fs === "garage" ? "sliding" : fs === "double" || fs === "french" ? "pair" : "swing";
+  const planStyleFor = fs => fs === "garage" || fs === "slider" ? "sliding" : fs === "double" || fs === "french" ? "pair" : "swing";
   function newOpening(d, door, fs) {
     const q = { id: d.next++, t: door ? "pdoor" : "pwindow", layer: "openings", color: door ? "#3e4a4f" : TYPES.pwindow.color, x: 0, y: 0, w: 91.4, h: 15.2 };
     if (door) q.style = planStyleFor(fs);
@@ -4513,6 +4541,21 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     }
     const m = new THREE.Mesh(g, mats); m.position.set(cx, cy, cz); m.castShadow = true; m.receiveShadow = true; if (TAG3) m.userData.tag = TAG3; group.add(m); return m;
   }
+  /* A flat slab over several plan rectangles (x0..x1, y0..y1) as one surface on a shared grid, so no hairline seams show where they meet. */
+  function gridSlab(group, rs, y0, y1, mat, tile) {
+    const xs = Array.from(new Set(rs.flatMap(r => [r.x0, r.x1]))).sort((a, b) => a - b), ys = Array.from(new Set(rs.flatMap(r => [r.y0, r.y1]))).sort((a, b) => a - b);
+    const pos = [], nor = [], uv = [], tl = tile || [100, 100];
+    const quad = (xa, xb, za, zb, y, up) => { const v = up ? [[xa, za], [xa, zb], [xb, zb], [xa, za], [xb, zb], [xb, za]] : [[xa, za], [xb, zb], [xa, zb], [xa, za], [xb, za], [xb, zb]];
+      v.forEach(([x, z]) => { pos.push(x, y, z); nor.push(0, up ? 1 : -1, 0); uv.push(x / tl[0], z / tl[1]); }); };
+    for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ys.length - 1; j++) {
+      const cx = (xs[i] + xs[i + 1]) / 2, cy = (ys[j] + ys[j + 1]) / 2;
+      if (!rs.some(r => cx > r.x0 && cx < r.x1 && cy > r.y0 && cy < r.y1)) continue;
+      quad(xs[i], xs[i + 1], -ys[j + 1], -ys[j], y1, true); quad(xs[i], xs[i + 1], -ys[j + 1], -ys[j], y0, false);
+    }
+    if (!pos.length) return null;
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    const m = new THREE.Mesh(g, mat); m.castShadow = m.receiveShadow = true; if (TAG3) m.userData.tag = TAG3; group.add(m); return m;
+  }
   function ringRoof(group, X0, X1, Z0, Z1, rings, mat, tile) {
     /* Hip and mansard roofs: rings of (inset across, inset deep, height); each ring joins the next with four sloped faces. */
     const pos = [], uv = [], R4 = r => [[X0 + r[0], Z1 - r[1]], [X1 - r[0], Z1 - r[1]], [X1 - r[0], Z0 + r[1]], [X0 + r[0], Z0 + r[1]]];
@@ -4995,6 +5038,90 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         TAG3 = { op: p.id };
         let u0 = o.u0, u1 = o.u1;
         if (p.t === "window" && p.style === "shutters") { const sw = W * 0.22, sm = solid("#3e4a4f", 0.7); put(u0, u0 + sw, o.y0, o.y1, -3, 0, sm); put(u1 - sw, u1, o.y0, o.y1, -3, 0, sm); }
+        if (isDoor && p.style !== "criollo" && p.style !== "gate") {
+          /* Doors built like real ones: jambs lining the opening, casings on both faces, a threshold outside, and leaves made of stiles and
+             rails around raised panels or glass, with a handleset outside and levers inside. Depths are measured in from the outer face. */
+          const st = p.style, T = s.t, inside = !s.ext, col = inside && !p.own ? "#e9e2d4" : p.color, Hd = o.y1 - o.y0;
+          const mk = (k, c, r, m) => doorMat[k + c] || (doorMat[k + c] = solid(c, r, m));
+          const dm = mk("d", col, 0.5), core = mk("c", shade(col, -0.07), 0.55), field = mk("e", shade(col, 0.05), 0.5);
+          const hw = inside ? mk("h", "#b9b8b2", 0.3, 0.9) : mk("h", "#8a7350", 0.35, 0.85), dark = mk("k", "#2a2a28", 0.6, 0.4);
+          const jm = inside ? frameMat : mk("j", "#f4f2ec", 0.55);
+          /* jambs and head jamb line the opening; casings frame it on both faces */
+          put(u0, u0 + 2, o.y0, o.y1, 0, T, jm); put(u1 - 2, u1, o.y0, o.y1, 0, T, jm); put(u0, u1, o.y1 - 2, o.y1, 0, T, jm);
+          const cw = inside ? 7 : 9;
+          [[-2.2, 0.4], [T - 0.4, T + 1.6]].forEach(([c0, c1], i) => { if (i === 0 && inside) { c0 = -1.6; c1 = 0.4; }
+            put(u0 - cw, u0, o.y0, o.y1 + cw, c0, c1, frameMat); put(u1, u1 + cw, o.y0, o.y1 + cw, c0, c1, frameMat); put(u0, u1, o.y1, o.y1 + cw, c0, c1, frameMat); put(u0 - cw - 1, u1 + cw + 1, o.y1 + cw, o.y1 + cw + 2, c0 - 0.4, c1, frameMat); });
+          if (!inside) put(u0 - 1, u1 + 1, o.y0, o.y0 + 2.2, -3, T, mk("t", "#b8b4aa", 0.5, 0.3));
+          const a = u0 + 2, b = u1 - 2, y0 = o.y0 + (inside ? 1 : 2.2), y1 = o.y1 - 2;
+          /* one leaf from a to b: lay = { sw, top, bot, rail, rows: [[share of height, "p" raised | "s" flat | "g" glass, columns, muntins across, muntins up]] } */
+          const leaf = (la, lb, d0, d1, lay) => {
+            const W = lb - la, sw = Math.min(lay.sw || 11, W * 0.17), tr = lay.top || 11, br = lay.bot || 20, rr = lay.rail || 10, mid = (d0 + d1) / 2;
+            put(la, la + sw, y0, y1, d0, d1, dm); put(lb - sw, lb, y0, y1, d0, d1, dm); put(la + sw, lb - sw, y1 - tr, y1, d0, d1, dm); put(la + sw, lb - sw, y0, y0 + br, d0, d1, dm);
+            const ih = (y1 - tr) - (y0 + br) - rr * (lay.rows.length - 1); let y = y1 - tr;
+            lay.rows.forEach((r, i) => {
+              const h = ih * r[0], ya = y - h, n = r[2] || 1, mw = n > 1 ? 10 : 0, cwid = (W - 2 * sw - mw * (n - 1)) / n;
+              if (i < lay.rows.length - 1) put(la + sw, lb - sw, ya - rr, ya, d0, d1, dm);
+              for (let c = 0; c < n; c++) {
+                const ca = la + sw + c * (cwid + mw), cb = ca + cwid;
+                if (c) put(ca - mw, ca, ya, y, d0, d1, dm);
+                if (r[1] === "g") {
+                  put(ca, cb, ya, y, mid - 0.3, mid + 0.3, glassMat);
+                  [[d0 + 0.4, d0 + 1.4], [d1 - 1.4, d1 - 0.4]].forEach(([e0, e1]) => { put(ca, cb, y - 1.4, y, e0, e1, dm); put(ca, cb, ya, ya + 1.4, e0, e1, dm); put(ca, ca + 1.4, ya, y, e0, e1, dm); put(cb - 1.4, cb, ya, y, e0, e1, dm); });
+                  const mx = r[3] || 1, my = r[4] || 1;
+                  for (let k = 1; k < mx; k++) { const u = ca + (cb - ca) * k / mx; put(u - 0.9, u + 0.9, ya, y, d0 + 0.8, d1 - 0.8, dm); }
+                  for (let k = 1; k < my; k++) { const v = ya + (y - ya) * k / my; put(ca, cb, v - 0.9, v + 0.9, d0 + 0.8, d1 - 0.8, dm); }
+                } else {
+                  put(ca, cb, ya, y, d0 + 1.3, d1 - 1.3, core);
+                  if (r[1] === "p") { const k = clamp(Math.min(cwid, h) * 0.16, 2.5, 5.5); put(ca + k * 0.45, cb - k * 0.45, ya + k * 0.45, y - k * 0.45, d0 + 0.95, d1 - 0.95, core); put(ca + k, cb - k, ya + k, y - k, d0 + 0.45, d1 - 0.45, field); }
+                }
+              }
+              y = ya - rr;
+            });
+          };
+          /* hardware: a handleset with a deadbolt outside, levers inside (for an inside door, levers on both faces); dir points from the latch edge into the leaf */
+          const lever = (ku, ky, dface, out, dir) => { const s1 = out ? -1 : 1, D = q => dface + s1 * q, R = (x0, x1, h0, h1, q0, q1) => put(Math.min(x0, x1), Math.max(x0, x1), h0, h1, Math.min(D(q0), D(q1)), Math.max(D(q0), D(q1)), hw);
+            R(ku - 3.2, ku + 3.2, ky - 3.2, ky + 3.2, 0, 1.1); R(ku - 1, ku + 1, ky - 1, ky + 1, 1.1, 4.2); R(ku, ku + dir * 12, ky - 1, ky + 1.3, 3.2, 5.2); };
+          const handleset = (ku, ky, d0) => { put(ku - 3, ku + 3, ky - 14, ky + 14, d0 - 0.8, d0, hw); put(ku - 1.1, ku + 1.1, ky - 11, ky + 9, d0 - 4.6, d0 - 2.8, hw);
+            put(ku - 1.1, ku + 1.1, ky - 11, ky - 8.5, d0 - 2.8, d0 - 0.8, hw); put(ku - 1.1, ku + 1.1, ky + 6.5, ky + 9, d0 - 2.8, d0 - 0.8, hw); put(ku - 2.7, ku + 2.7, ky + 22, ky + 27.4, d0 - 1.4, d0, hw); };
+          const ky = o.y0 + 92, d0 = inside ? T / 2 - 2.2 : Math.max(3, T * 0.3), d1 = d0 + 4.4;
+          const hard = (latch, dir) => { if (inside) { lever(latch, ky, d0, true, dir); lever(latch, ky, d1, false, dir); } else { handleset(latch, ky, d0); lever(latch, ky, d1, false, dir); } };
+          if (st === "slider") {
+            /* a sliding glass door: the fixed panel in the outer track, the sliding one in the inner track, overlapping where they meet */
+            const fm = mk("s", col, 0.45, 0.25), mid = (a + b) / 2, ta = d0 - 1, tb = d0 + 9;
+            put(a, b, y1 - 5, y1, ta, tb, fm); put(a, b, y0, y0 + 3, ta, tb, fm);
+            const sash = (sa, sb, e0, e1) => { const sw = 6.5; put(sa, sa + sw, y0 + 3, y1 - 5, e0, e1, fm); put(sb - sw, sb, y0 + 3, y1 - 5, e0, e1, fm); put(sa + sw, sb - sw, y1 - 11.5, y1 - 5, e0, e1, fm); put(sa + sw, sb - sw, y0 + 3, y0 + 13, e0, e1, fm); put(sa + sw, sb - sw, y0 + 13, y1 - 11.5, (e0 + e1) / 2 - 0.3, (e0 + e1) / 2 + 0.3, glassMat); };
+            sash(a, mid + 3, d0, d0 + 3.6); sash(mid - 3, b, d0 + 4.4, d0 + 8);
+            put(b - 4.8, b - 2.2, ky - 16, ky + 16, d0 + 3.2, d0 + 4.4, dark); put(b - 4.8, b - 2.2, ky - 16, ky + 16, d0 + 8, d0 + 9.4, dark);
+            return;
+          }
+          if (st === "garage") {
+            /* a sectional door: four sections, each with a row of raised panels, the top one glazed */
+            const n = Math.max(2, Math.round((b - a) / 75)), sh = (y1 - y0) / 4;
+            put(a, b, y0, y1, d0 + 1, d1, core);
+            for (let k = 0; k < 4; k++) { const sa = y0 + k * sh + 0.6, sb = y0 + (k + 1) * sh - 0.6, pw = (b - a) / n;
+              put(a, b, sa, sb, d0 + 0.4, d1, dm);
+              for (let i = 0; i < n; i++) { const pa = a + i * pw + 5, pb = a + (i + 1) * pw - 5; if (k === 3) put(pa, pb, sa + 6, sb - 6, d0, d0 + 0.6, glassMat); else { put(pa, pb, sa + 6, sb - 6, d0 - 0.1, d0 + 0.4, field); } } }
+            return;
+          }
+          if (st === "arched") {
+            /* plank door: boards, iron straps and a ring pull */
+            put(a, b, y0, y1, d0, d1, dm); const n = Math.max(4, Math.round((b - a) / 14));
+            for (let k = 1; k < n; k++) { const u = a + (b - a) * k / n; put(u - 0.4, u + 0.4, y0, y1, d0 - 0.15, d0, dark); put(u - 0.4, u + 0.4, y0, y1, d1, d1 + 0.15, dark); }
+            [0.18, 0.82].forEach(t => { const v = y0 + (y1 - y0) * t; put(a + 2, b - (b - a) * 0.25, v - 3, v + 3, d0 - 0.7, d0, dark); });
+            hard(b - 9, -1); return;
+          }
+          const L6 = { sw: 12, top: 12, bot: 22, rail: 12, rows: inside ? [[0.3, "s"], [0.32, "s"], [0.38, "s"]] : [[0.22, "p", 2], [0.42, "p", 2], [0.36, "p", 2]] };
+          if (st === "panel") { leaf(a, b, d0, d1, L6); hard(b - 7, -1); return; }
+          if (st === "glass") { leaf(a, b, d0, d1, { sw: 12, top: 12, bot: 22, rail: 14, rows: [[0.5, "g", 1, 3, 2], [0.5, inside ? "s" : "p", 2]] }); hard(b - 7, -1); return; }
+          const m = (a + b) / 2;
+          if (st === "double" || st === "french") {
+            const lay = st === "french" ? { sw: 10, top: 10, bot: 24, rail: 10, rows: [[1, "g", 1, 2, 5]] } : { sw: 12, top: 12, bot: 22, rail: 12, rows: inside ? [[0.3, "s"], [0.32, "s"], [0.38, "s"]] : [[0.3, "p"], [0.32, "p"], [0.38, "p"]] };
+            leaf(a, m - 0.3, d0, d1, lay); leaf(m + 0.3, b, d0, d1, lay);
+            put(m - 2.2, m + 2.2, y0, y1, d0 - 0.8, d0, dm); // astragal over the meeting stiles
+            hard(m - 7, -1); hard(m + 7, 1); return;
+          }
+          leaf(a, b, d0, d1, L6); hard(b - 7, -1); return;
+        }
         if (!s.ext && isDoor) {
           /* an inside door: a painted leaf in the middle of the wall, casings on both faces, a knob each side */
           const st = p.style, col = p.own ? p.color : "#e9e2d4", dm = doorMat["i" + col] || (doorMat["i" + col] = solid(col, 0.5)), mid = s.t / 2, Hd = o.y1 - o.y0;
@@ -5061,17 +5188,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const RF = B.roof, rm = await matFor(RF.tex, RF.color, { side: THREE.DoubleSide, rough: 0.8, metal: RF.tex === "metal" ? 0.5 : 0 }), rtile = rm.userData.tile;
     for (const q of M.roofs) {
       const yb = q.top, H = q.rise, yt = yb + H, ov = q.ov, X0 = q.x0, X1 = q.x1, Z0 = -q.y1, Z1 = -q.y0, X = X0 - ov, W = X1 - X0 + 2 * ov, st = RF.style;
-      if (st === "flat") { boxW(rg, X, X + W, yb, yt, Z0 - ov, Z1 + ov, rm, rtile); continue; }
-      if (st === "parapet") {
-        const za = Z0 - 8, zb = Z1 + 8, xa = X0 - 8, xb = X1 + 8, t = 15, slab = Math.min(20, H * 0.4), cop = solid(shade(RF.color, 0.08), 0.85), Wp = xb - xa;
-        boxW(rg, xa, xb, yb, yb + slab, za, zb, rm, rtile);
-        boxW(rg, xa, xb, yb, yt, zb - t, zb, rm, rtile); boxW(rg, xa, xb, yb, yt, za, za + t, rm, rtile);
-        boxW(rg, xa, xa + t, yb, yt, za + t, zb - t, rm, rtile); boxW(rg, xb - t, xb, yb, yt, za + t, zb - t, rm, rtile);
-        boxW(rg, xa - 3, xb + 3, yt, yt + 5, zb - t - 2, zb + 3, cop); boxW(rg, xa - 3, xb + 3, yt, yt + 5, za - 3, za + t + 2, cop);
-        boxW(rg, xa - 3, xa + t + 2, yt, yt + 5, za + t + 2, zb - t - 2, cop); boxW(rg, xb - t - 2, xb + 3, yt, yt + 5, za + t + 2, zb - t - 2, cop);
-        [xa + Wp * 0.06, xa + Wp * 0.94 - 8].forEach(sx => boxW(rg, sx, sx + 8, yb + slab - 2, yb + slab + 5, zb, zb + 25, solid("#8e8a82", 0.9)));
-        continue;
-      }
+      if (st === "flat" || st === "parapet") continue; // one slab over the whole level, with the overhang or parapet round its outline, below
       if (st === "hip" || st === "mansard") {
         const D2 = (Z1 - Z0 + 2 * ov) / 2, half = Math.min(W / 2, D2) - 1;
         const rings = st === "hip" ? [[0, 0, yb], [Math.min(half, W / 2 - 1), Math.min(half, D2 - 1), yt]] : [[0, 0, yb], [half * 0.25, half * 0.25, yb + H * 0.7], [half * 0.62, half * 0.62, yt]];
@@ -5093,6 +5210,30 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         top.forEach(p => { if (p[0] > wx0 && p[0] < wx1) fill.push([p[0], p[1] - thick]); }); fill.push([wx1, yAt(wx1) - thick], [wx1, yb]);
         extrudeW(rg, fill, Z0 - 7.6, Z1 + 7.6, [facade, plaster], facade.userData.tile);
       }
+    }
+    /* across-running strips take the corners, so no two pieces overlap */
+    if (RF.style === "flat") Array.from(new Set(M.roofs.map(q => q.lv))).forEach(lv => {
+      const rs = M.roofs.filter(q => q.lv === lv), yb = rs[0].top, yt = yb + rs[0].rise, ov = rs[0].ov;
+      gridSlab(rg, rs, yb, yt, rm, rtile);
+      parapetEdges(rs).forEach(e => { const x = c => e.h ? (c ? 0 : ov) : (c ? -ov : 0), a = e.a - x(e.ca), b = e.b + x(e.cb), p0 = e.c, p1 = e.c + e.n * ov;
+        if (e.h) boxW(rg, a, b, yb, yt, -Math.max(p0, p1), -Math.min(p0, p1), rm, rtile); else boxW(rg, Math.min(p0, p1), Math.max(p0, p1), yb, yt, -b, -a, rm, rtile); });
+    });
+    if (RF.style === "parapet") {
+      const cop = solid(shade(RF.color, 0.08), 0.85), scM = solid("#8e8a82", 0.9);
+      Array.from(new Set(M.roofs.map(q => q.lv))).forEach(lv => {
+        const rs = M.roofs.filter(q => q.lv === lv), yb = rs[0].top, H = rs[0].rise, yt = yb + H, slab = Math.min(20, H * 0.4);
+        gridSlab(rg, rs, yb, yb + slab, rm, rtile);
+        parapetEdges(rs).forEach(e => {
+          /* the wall stands 8 cm outside the house wall line and 7 cm inside it; at an outside corner it runs on to meet the next one */
+          const strip = (o, i, ea, eb, y0, y1, m, tl) => { const a = e.a - (e.ca ? i : o), b = e.b + (e.cb ? i : o), p0 = e.c + e.n * o, p1 = e.c - e.n * i;
+            if (e.h) boxW(rg, a, b, y0, y1, -Math.max(p0, p1), -Math.min(p0, p1), m, tl); else boxW(rg, Math.min(p0, p1), Math.max(p0, p1), y0, y1, -b, -a, m, tl); };
+          strip(8, 7, 0, 0, yb, yt, rm, rtile); strip(11, 9, 0, 0, yt, yt + 5, cop);
+          /* scuppers (gárgolas) through the parapet at slab level */
+          const L = e.b - e.a; if (L < 200) return;
+          (L > 900 ? [0.2, 0.8] : [0.5]).forEach(t => { const u = e.a + L * t, p0 = e.c + e.n * 8, p1 = e.c + e.n * 30;
+            if (e.h) boxW(rg, u - 4, u + 4, yb + slab - 2, yb + slab + 5, -Math.max(p0, p1), -Math.min(p0, p1), scM); else boxW(rg, Math.min(p0, p1), Math.max(p0, p1), yb + slab - 2, yb + slab + 5, -u - 4, -u + 4, scM); });
+        });
+      });
     }
     TAG3 = null;
     /* Columns from the floor to the roof, and the beams they carry along the open sides of a carport, porch or terraza. */
@@ -5453,7 +5594,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const LIB = {
     front: [
       ["Windows", [["window", "double", 36, 60, "Double hung"], ["window", "single", 72, 54, "Picture"], ["window", "casement", 36, 54, "Casement"], ["window", "arched", 36, 66, "Arched"], ["window", "round", 30, 30, "Round"], ["window", "shutters", 60, 54, "Shuttered"], ["window", "double", 24, 36, "Small"], ["window", "single", 96, 24, "Clerestory"], ["window", "frosted", 24, 24, "Bathroom window"]]],
-      ["Doors", [["door", "panel", 36, 80, "Panel"], ["door", "glass", 36, 80, "Glass top"], ["door", "double", 60, 80, "Double"], ["door", "french", 72, 80, "French"], ["door", "arched", 42, 90, "Arched"], ["door", "garage", 108, 84, "Garage"], ["door", "garage", 192, 84, "Double garage"]]],
+      ["Doors", [["door", "panel", 36, 80, "Panel"], ["door", "glass", 36, 80, "Glass top"], ["door", "double", 60, 80, "Double"], ["door", "french", 72, 80, "French"], ["door", "slider", 72, 80, "Sliding glass"], ["door", "arched", 42, 90, "Arched"], ["door", "garage", 108, 84, "Garage"], ["door", "garage", 192, 84, "Double garage"]]],
       ["Roofs and structure", [["roof", "gable", 360, 108, "Gable roof"], ["roof", "hip", 360, 96, "Hip roof"], ["roof", "mansard", 360, 102, "Mansard roof"], ["roof", "gambrel", 360, 120, "Gambrel roof"], ["roof", "flat", 336, 10, "Flat roof"], ["chimney", null, 24, 72, "Brick chimney", { tex: "brick" }], ["chimney", null, 28, 72, "Stone chimney", { tex: "stone", color: "#9c968a" }], ["steps", "steps", 64, 21, "Steps"], ["steps", "stoop", 80, 28, "Stoop"]]],
       ["Trim", [["trim", "cornice", 336, 16, "Cornice"], ["trim", "band", 312, 8, "Band"], ["trim", "column", 16, 120, "Column"], ["trim", "pilaster", 14, 120, "Pilaster"], ["trim", "quoins", 16, 120, "Quoins"], ["trim", "frame", 60, 72, "Surround"]]],
       ["Garden", [["plant", "shrub", 60, 36, "Shrub"], ["plant", "tree", 102, 190, "Tree"], ["plant", "palm", 118, 252, "Palm"], ["plant", "hedge", 120, 40, "Hedge"], ["plant", "flowers", 42, 18, "Flower box"], ["plant", "ivy", 48, 120, "Ivy"], ["plant", "ivy", 60, 108, "Bougainvillea", { color: "#b8466a" }]]],
