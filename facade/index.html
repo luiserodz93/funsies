@@ -93,7 +93,16 @@ header.top{display:flex; align-items:center; justify-content:space-between; gap:
 .viewseg{position:absolute; left:8px; top:8px; z-index:2; display:flex; gap:0; padding:2px; border-radius:8px; background:var(--panel); border:1px solid var(--panel-line); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
 .viewseg button{border:0; background:transparent; padding:9px 11px; border-radius:6px; font-family:var(--font-mono); font-weight:500; font-size:10px; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; color:var(--ink2)}
 .viewseg button[aria-pressed="true"]{background:var(--ink); color:var(--panel-solid)}
-.lvlseg{left:auto; right:56px}
+.lvlseg{left:auto; right:56px; align-items:center}
+.lvlseg span{font-family:var(--font-mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); padding:0 4px 0 7px}
+.lvlseg button{padding:9px 10px; min-width:30px}
+.pbar{position:absolute; left:10px; right:10px; bottom:50px; z-index:3; max-width:560px; margin:0 auto; padding:10px 12px; border-radius:10px; background:var(--panel-solid); border:1px solid var(--panel-line); box-shadow:0 10px 28px -16px var(--shadow)}
+.pbar[hidden]{display:none}
+#stage:has(#ctx:not([hidden])) .pbar{bottom:108px}
+.pbar b{display:block; font-size:13px; font-weight:600}
+.pbar p{margin:3px 0 8px; font-size:12px; line-height:1.4; color:var(--ink2)}
+.pbar .pline{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.pbar:has(.pline){padding:6px 6px 6px 12px}
 .lvlseg[hidden], body.is3d .lvlseg{display:none}
 .apill{position:absolute; left:8px; top:52px; z-index:2; cursor:pointer; text-align:left; border:1px solid var(--panel-line); background:var(--panel); border-radius:6px; padding:8px 10px; font-family:var(--font-mono); font-size:10.5px; font-weight:500; letter-spacing:.04em; color:var(--ink2); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); font-variant-numeric:tabular-nums}
 .nudge{display:grid; grid-template-columns:repeat(3, 48px); grid-template-rows:repeat(2, 40px); gap:6px; justify-content:center}
@@ -141,6 +150,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
 .ctxinfo span{display:block; font-family:var(--font-mono); font-size:11px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
 .ctxbtns{display:flex; gap:0; flex:none}
 .ctxbtns button{width:38px; height:38px; border-radius:8px; border:0; background:transparent; display:grid; place-items:center; cursor:pointer; padding:0}
+.ctxbtns button.txt{width:auto; padding:0 12px; font:600 12.5px var(--font-ui); color:var(--panel-solid); background:var(--accent)}
+.ctxbtns button[hidden]{display:none}
 .ctxbtns button:active{background:var(--hover)}
 .ctxbtns svg{width:19px; height:19px; stroke-width:1.6}
 .ctxbtns .danger{color:var(--check)}
@@ -285,6 +296,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       </defs>
       <g id="grid"></g>
       <g id="art"><defs id="defs"></defs><g id="artBody"></g></g>
+      <g id="gridTop" pointer-events="none"></g>
       <g id="ui"></g>
     </svg>
         <div class="viewseg" id="viewSeg" role="group" aria-label="View"><button data-v="front" aria-pressed="true">Front</button><button data-v="plan" aria-pressed="false">Plan</button><button data-v="3d" aria-pressed="false">3D</button></div><div class="viewseg lvlseg" id="lvlSeg" role="group" aria-label="Floor" hidden></div>
@@ -303,14 +315,17 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       <button class="chip" id="orthoChip" aria-pressed="true">Ortho</button>
       <button class="chip" id="multiChip" aria-pressed="false">Multi</button>
       <button class="chip" id="gravChip" aria-pressed="true">Gravity</button>
+      <button class="chip" id="shapeChip" aria-pressed="false" hidden>Any shape</button>
     </div>
     <div id="readout" class="readout" hidden></div>
+    <div id="planBar" class="pbar" hidden></div>
     <div class="ctx" id="ctx" hidden>
       <div class="ctxinfo"><b id="ctxName"></b><span id="ctxSize"></span></div>
       <div class="ctxbtns">
         <button id="cEdit" aria-label="Edit part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
         <button id="cCopy" aria-label="Duplicate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
         <button id="cRot" aria-label="Rotate 90 degrees" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></button>
+        <button id="cMerge" class="txt" hidden>Merge</button>
         <button id="cGroup" aria-label="Group" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M15 3h6v6M3 15v6h6" stroke-dasharray="2 2"/></svg></button>
         <button id="cMirror" aria-label="Mirror copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3v18" stroke-dasharray="2 2.5"/><path d="M8 7 3 17h5z"/><path d="m16 7 5 10h-5z"/></svg></button>
         <button id="cFront" aria-label="Bring to front"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="11" height="11" rx="1.5" opacity=".5"/><rect x="10" y="10" width="11" height="11" rx="1.5" fill="currentColor"/></svg></button>
@@ -343,14 +358,17 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   <h2>How to draw</h2>
   <p class="lede">Every part snaps to real sizes, so the facade you draw is a measured drawing. Sizes are in feet and inches (metres are in the menu).</p>
   <ol class="help">
-    <li><b>The plan is the house.</b> Rooms in the floor plan set where the walls stand, and their windows and doors are the house's openings. The front view and 3D are built from the plan, so a change in any view shows in the others. Set a room's stories, or make it open (a porch, marquesina or terrace), by tapping it in Plan. Tap the house's walls or roof on the front to change their finish, the number of stories or the roof style.</li>
+    <li><b>The plan is the house.</b> Rooms in the floor plan set where the walls stand, and their windows and doors are the house's openings. The front view and 3D are built from the plan, so a change in any view shows in the others. Make a room open (a porch, marquesina, terrace or balcony) by tapping it twice in Plan. Tap the house's walls or roof on the front to change their finish, the number of floors or the roof style.</li>
+    <li><b>Floors and stairs.</b> In Plan, Floor 1 2 + at the top picks the floor you're drawing. Tap + to start a floor above: the floor below shows faintly so rooms line up, and you can draw its rooms or start with a room over each room below. Put stairs on the lower floor with the Stairs tool; they show on the floor above as the way down, and climb between the floors in 3D.</li>
+    <li><b>Merge rooms.</b> Turn on Multi, tap two or more rooms that touch, then tap Merge. The walls between them go, for a hallway or an open living and dining room. Tap the merged room and Split to put the walls back.</li>
+    <li><b>Rooms of any shape.</b> With Room, turn on Any shape and tap each corner of the room: an L, a T or any outline with square corners. Tap the first corner to close it. Each side shows its length as you go.</li>
     <li><b>Build in 3D.</b> Drag to turn the house and pinch to zoom. Tap a wall, then Add a window or Add a door, or pick Window or Door below and tap a wall. Tap a window or door to slide it, resize it, change its style or delete it, and tap the roof to change its style.</li>
     <li><b>Place parts.</b> Pick Window, Door or another part, then tap the board to drop one, or drag to draw it at any size. A window or door placed on the house's wall goes into the plan. A wall drawn beside the house adds a room, and a wall drawn on top adds a story.</li>
     <li><b>Select and adjust.</b> With Select, tap a part, drag it to move, and drag its round handles to resize. Tap a part twice, or the sliders button, to type exact sizes, change its style, texture and color, repeat it, mirror it or add its dimensions.</li>
     <li><b>Select several.</b> With Select, drag across empty board to box-select, or turn on Multi and tap parts to add them. Then move them together, group them, align and distribute them, or copy and paste them into the other view or another design.</li>
-    <li><b>Snap.</b> Grid snaps to the grid size. Snap lines parts up with the edges and centers of other parts and the ground (dashed guides show it). Ortho keeps lines and dimensions straight.</li>
+    <li><b>Snap.</b> Grid snaps to the grid size, and while you draw in Plan the grid shows over the rooms. Snap lines parts up with the corners, edges and centers of other parts and the ground (dashed guides show it, and a ring marks where a room starts). Ortho keeps lines and dimensions straight.</li>
     <li><b>Sketch and paint.</b> Line and Pen draw freely in the current color. Paint recolors any part you tap. Tap Paint or Pen again to pick a color, texture or pen size.</li>
-    <li><b>Front, Plan and 3D.</b> The switch at the top left flips between the front of the house, its floor plan and 3D. Each has its own tools, and rooms show their floor area as you size them. In a house of more than one story, Floor 1 and Floor 2 at the top of the plan pick which floor's windows and doors you see and add.</li>
+    <li><b>Front, Plan and 3D.</b> The switch at the top left flips between the front of the house, its floor plan and 3D. Each has its own tools, and rooms show their floor area as you size them. Each floor of the plan has its own rooms, windows, doors and furniture.</li>
     <li><b>Building style.</b> Menu, then Building style, picks how the house is built: in Puerto Rico a concrete house (stucco, flat roof with a parapet, jalousies, rejas, a marquesina), a criollo house or a wood casa de campo on posts; on the US mainland Craftsman, Colonial, Ranch, Modern farmhouse or Modern. New parts start in that style, Restyle this house changes what's drawn, and the Library and New design have parts and starter houses for each. Rooms named Marquesina, Balcón, Terraza, Porch or Carport start open, with a roof and no outside walls.</li>
     <li><b>Lot.</b> Menu, then Lot, sets the property: a common US lot or a Puerto Rico urbanización or your own width and depth, with setbacks. The plan shows property lines, setbacks, the sidewalk and street; the front shows the property lines; 3D shows the yard. The badge at the top left shows the lot area and how much of it the house covers.</li>
     <li><b>Library.</b> Ready-made windows, doors, roofs, trim and plants for the front, and doors, windows, appliances, bathroom fixtures and furniture for the plan. Pick one, then tap the board to place it.</li>
@@ -458,7 +476,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   /* ---------- state ---------- */
   const STORE = "brick-blueprint-v1";
   const DEF_SETTINGS = { units: "ft", grid: 15.24, snap: true, osnap: true, ortho: true, sizes: true, sound: true, stats: true, link: true, render: "real", gravity: true, figure: false, figv: 2 };
-  let store = null, D = null, sel = null, tool = "select", multi = [], clip = null, pickColor = false, multiMode = false;
+  let store = null, D = null, sel = null, tool = "select", outline = null, multi = [], clip = null, pickColor = false, multiMode = false;
   let undoStack = [], redoStack = [];
   const view = { s: 0.4, tx: 0, ty: 0 };
   let guides = { x: [], y: [] };
@@ -510,9 +528,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = q.g;
     if (LINKABLE[q.t] && typeof q.lk === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.lk)) p.lk = q.lk;
     if (typeof q.src === "string" && /^[a-z]:\d{1,9}$/.test(q.src)) p.src = q.src;
-    if (q.t === "room") { if (q.st === 2 || q.st === 3) p.st = q.st; if (typeof q.op === "boolean") p.op = q.op; }
+    if ((mode === "plan" || T.mode === "plan") && (q.fl === 1 || q.fl === 2)) p.fl = q.fl;
+    if (q.t === "room") { if (q.st === 2 || q.st === 3) p.st = q.st; if (typeof q.op === "boolean") p.op = q.op; if (q.one === true && p.g) p.one = true; }
     if (q.t === "pwindow" || q.t === "pdoor") {
-      if (q.fl === 1 || q.fl === 2) p.fl = q.fl;
       if (num(q.sill) != null) p.sill = clamp(num(q.sill), 0, 500);
       if (num(q.oh) != null) p.oh = clamp(num(q.oh), 20, 800);
       const fst = q.t === "pdoor" ? TYPES.door.styles : TYPES.window.styles; if (fst.indexOf(q.fs) >= 0) p.fs = q.fs;
@@ -533,7 +551,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const lot = cleanLot(o.lot); if (lot) d.lot = lot;
     if (typeof o.style === "string" && Object.prototype.hasOwnProperty.call(STYLES, o.style)) d.style = o.style;
     if (o.layers && typeof o.layers === "object") LAYER_IDS.forEach(id => { const l = o.layers[id]; if (l && typeof l === "object") d.layers[id] = { hide: l.hide === true, lock: l.lock === true }; });
-    if (o.v2 === true) { d.v2 = true; d.bld = cleanBld(o.bld); d.lx = 0; regenFront(d); } else convertDesign(d);
+    if (o.v2 === true) { d.v2 = true; d.bld = cleanBld(o.bld); d.lx = 0; } else convertDesign(d);
+    explodeStories(d); regenFront(d);
     return d;
   }
   let firstRun = false;
@@ -635,7 +654,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const t = l2 ? clamp(((px - ax) * dx + (py - ay) * dy) / l2, 0, 1) : 0;
     return Math.hypot(px - ax - t * dx, py - ay - t * dy);
   }
-  const visible = p => !D.layers[p.layer].hide && !(D.mode === "plan" && (p.t === "pwindow" || p.t === "pdoor") && (p.fl || 0) !== (D.lvl || 0));
+  const onFloor = p => D.mode !== "plan" || (p.fl || 0) === (D.lvl || 0);
+  const visible = p => !D.layers[p.layer].hide && onFloor(p);
   const editable = p => visible(p) && !D.layers[p.layer].lock;
   function hitPart(w) {
     const tol = 10 / view.s;
@@ -1088,10 +1108,28 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const PAPER = "#f7f6f2", INK = "#2a2a28";
   function fmtArea(cm2) { return S().units === "ft" ? Math.round(cm2 / 929.0304).toLocaleString("en-US") + " ft²" : (cm2 / 10000).toLocaleString("en-US", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " m²"; }
   function roomSVG(p, o) {
-    const { X, T, W, H } = bx(p), name = (p.text || "Room").toUpperCase(), fs = clamp(Math.min(W / (name.length * 0.78 + 2), H / 6), 9, 30), cx = X + W / 2, cy = T + H / 2, halo = `stroke="${shade(p.color, 0.55)}" stroke-width="${f(fs * 0.3)}" paint-order="stroke" stroke-linejoin="round"`;
-    o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.05)}" text-anchor="middle" font-size="${f(fs)}" font-family="Inter Tight, system-ui, sans-serif" font-weight="600" letter-spacing="${f(fs * 0.12)}" fill="${INK}" ${halo}>${esc(name)}</text>` +
-      `<text x="${f(cx)}" y="${f(cy + fs * 1.1)}" text-anchor="middle" font-size="${f(fs * 0.78)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="400" fill="#5e5c57" ${halo}>${esc(fmtArea(p.w * p.h))}</text>`;
-    return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 15.24));
+    const { X, T, W, H } = bx(p), mates = matesOf(p, o.all || []), all = mates.concat([p]);
+    /* a merged room is labeled once, on its biggest piece, with the area of the whole room */
+    const lead = all.slice().sort((a, b) => b.w * b.h - a.w * a.h || a.id - b.id)[0], area = all.reduce((t, q) => t + q.w * q.h, 0);
+    if (lead === p && !p._ghost) {
+      const name = (p.text || "Room").toUpperCase(), fs = clamp(Math.min(W / (name.length * 0.78 + 2), H / 6), 9, 30), cx = X + W / 2, cy = T + H / 2, halo = `stroke="${shade(p.color, 0.55)}" stroke-width="${f(fs * 0.3)}" paint-order="stroke" stroke-linejoin="round"`;
+      o.top += `<text x="${f(cx)}" y="${f(cy - fs * 0.05)}" text-anchor="middle" font-size="${f(fs)}" font-family="Inter Tight, system-ui, sans-serif" font-weight="600" letter-spacing="${f(fs * 0.12)}" fill="${INK}" ${halo}>${esc(name)}</text>` +
+        `<text x="${f(cx)}" y="${f(cy + fs * 1.1)}" text-anchor="middle" font-size="${f(fs * 0.78)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="400" fill="#5e5c57" ${halo}>${esc(fmtArea(area))}</text>`;
+    }
+    if (!mates.length) return R(X, T, W, H, o.pat(p.tex, p.color)) + R(X, T, W, H, "none", stk(INK, 15.24));
+    /* walls only where the room meets something other than itself */
+    let d = "";
+    const inMate = (x, y) => mates.some(q => x > q.x && x < q.x + q.w && y > q.y && y < q.y + q.h);
+    const edge = (h, c, a, b, sign) => {
+      const cuts = [a, b].concat(mates.flatMap(q => h ? [q.x, q.x + q.w] : [q.y, q.y + q.h]).filter(v => v > a + 0.5 && v < b - 0.5)).sort((u, v) => u - v);
+      for (let i = 0; i < cuts.length - 1; i++) {
+        const u = cuts[i], v = cuts[i + 1]; if (v - u < 0.5) continue;
+        if (h ? inMate((u + v) / 2, c + sign * 4) : inMate(c + sign * 4, (u + v) / 2)) continue;
+        d += h ? `M${f(u)} ${f(-c)}H${f(v)}` : `M${f(c)} ${f(-u)}V${f(-v)}`;
+      }
+    };
+    edge(true, p.y, p.x, p.x + p.w, -1); edge(true, p.y + p.h, p.x, p.x + p.w, 1); edge(false, p.x, p.y, p.y + p.h, -1); edge(false, p.x + p.w, p.y, p.y + p.h, 1);
+    return R(X, T, W, H, o.pat(p.tex, p.color)) + (d ? `<path d="${d}" fill="none" stroke="${INK}" stroke-width="15.24" stroke-linecap="square"/>` : "");
   }
   function pdoorSVG(p, o, L, Dp) {
     const c = p.color, arc = `fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="6 4"`;
@@ -1553,6 +1591,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         s = `<g transform="translate(${f(p.x + p.w / 2)} ${f(-(p.y + p.h / 2))}) rotate(${r * 90})${p.fx ? " scale(-1 1)" : ""} translate(${f(-L / 2)} ${f(-Dp / 2)})">${draw(p, o, L, Dp)}</g>`;
       } else s = draw(p, o);
       if (p.fx && !T.rot && kindOf(p) === "rect") s = `<g transform="translate(${f(2 * p.x + p.w)} 0) scale(-1 1)">${s}</g>`;
+      if (p._ghost) s = `<g opacity="${p.t === "stairs" ? 0.45 : 0.22}">${s}</g>`;
       if (mode !== "plan" && (p.t === "window" || p.t === "door") && p.style !== "gate") {
         const wl = parts.find(q => q.t === "wall" && q.x <= p.x + 1 && q.x + q.w >= p.x + p.w - 1 && q.y <= p.y + 1 && q.y + q.h >= p.y + p.h - 1);
         if (wl) s = revealSVG(p, wl.color) + s + R(p.x, -(p.y + p.h), p.w, Math.min(p.h * 0.12, 14), "#000", 'opacity=".16"');
@@ -1570,7 +1609,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const STATIC_DEFS = `<linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe5e8"/><stop offset="1" stop-color="#9aabb7"/></linearGradient><linearGradient id="gDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6cdb6"/><stop offset="1" stop-color="#77748a"/></linearGradient><linearGradient id="gNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2dfae"/><stop offset="1" stop-color="#cf9a58"/></linearGradient>`;
   function exportSVG(d, pad, mode, titled) {
     mode = mode || d.mode;
-    const plan = mode === "plan", parts = (plan ? d.plan : d.front).filter(p => !d.layers[p.layer].hide);
+    const plan = mode === "plan", parts = (plan ? d.plan.filter(p => lvOf(p) === (d.lvl || 0)) : d.front).filter(p => !d.layers[p.layer].hide);
     const b = lotBounds(d, mode, bounds(parts)) || { x0: 0, y0: 0, x1: 800, y1: 400 };
     pad = pad == null ? Math.max(60, (b.x1 - b.x0) * 0.06) : pad;
     const x0 = b.x0 - pad, x1 = b.x1 + pad, top = b.y1 + pad; let bot = plan ? b.y0 - pad : Math.min(b.y0, 0) - Math.max(40, pad * 0.6);
@@ -1949,7 +1988,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   /* ---------- rendering ---------- */
   let preview = null; // a part being drawn
   function renderArt() {
-    const parts = (preview ? D.parts.concat([preview]) : D.parts).filter(p => !(D.mode === "plan" && (p.t === "pwindow" || p.t === "pdoor") && (p.fl || 0) !== (D.lvl || 0)));
+    const lv = D.mode === "plan" ? D.lvl || 0 : 0;
+    let parts = (preview ? D.parts.concat([preview]) : D.parts).filter(p => D.mode !== "plan" || lvOf(p) === lv);
+    /* an upper floor shows the floor below faintly, with its stairs, so rooms and stairs line up */
+    if (lv) parts = D.plan.filter(p => lvOf(p) === lv - 1 && (p.t === "room" || p.t === "stairs" || p.t === "pwall")).map(p => Object.assign({}, p, { _ghost: true })).concat(parts);
     const a = artSVG(parts, D.sky, D.layers, D.mode, false, undefined, siteOf(D));
     $("defs").innerHTML = a.defs; $("artBody").innerHTML = a.body;
     stage.dataset.sky = D.mode === "plan" ? "plan" : D.sky + (S().render === "real" ? "-r" : "");
@@ -1966,7 +2008,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     for (let x = Math.ceil(tl.x / step) * step; x <= br.x; x += step) { const sx = f(toS(x, 0).x); const isM = Math.abs(x / major - Math.round(x / major)) < 1e-6; (isM ? (s => { maj += s; }) : (s => { minor += s; }))(`M${sx} 0V${f(yMax)}`); }
     for (let y = plan ? Math.floor(br.y / step) * step : Math.max(0, Math.floor(br.y / step) * step); y <= tl.y; y += step) { const sy = toS(0, y).y; if (sy > yMax) continue; const isM = Math.abs(y / major - Math.round(y / major)) < 1e-6; const s = `M0 ${f(sy)}H${f(stageW)}`; if (isM) maj += s; else minor += s; }
     const real = !plan && S().render === "real", c = plan ? "47,93,124" : sky || real ? "255,255,255" : "40,60,80", a1 = real ? 0.1 : sky ? 0.06 : 0.08, a2 = real ? 0.2 : sky ? 0.13 : 0.16;
-    g.innerHTML = `<path d="${minor}" stroke="rgba(${c},${a1})" stroke-width="1"/><path d="${maj}" stroke="rgba(${c},${a2})" stroke-width="1"/>`;
+    /* while drawing in the plan the grid shows over the rooms too, so corners can be lined up with it */
+    const onTop = plan && ["select", "paint", "lib"].indexOf(tool) < 0, html = `<path d="${minor}" stroke="rgba(${c},${a1})" stroke-width="1"/><path d="${maj}" stroke="rgba(${c},${onTop ? a2 + 0.04 : a2})" stroke-width="1"/>`;
+    g.innerHTML = onTop ? "" : html; $("gridTop").innerHTML = onTop ? html : "";
   }
   let handles = [];
   function renderUI() {
@@ -1978,6 +2022,20 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     }
     guides.x.forEach(x => { const sx = f(toS(x, 0).x); s += `<path d="M${sx} 0V${f(stageH)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`; });
     guides.y.forEach(y => { const sy = f(toS(0, y).y); s += `<path d="M0 ${sy}H${f(stageW)}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4"/>`; });
+    /* snap markers: where a drawing starts and ends, and the corners of a room outline */
+    const mark = (q, big) => { const c = toS(q.x, q.y); return `<circle cx="${f(c.x)}" cy="${f(c.y)}" r="${big ? 10 : 6.5}" fill="var(--panel-solid)" fill-opacity=".8" stroke="var(--accent)" stroke-width="2"/><circle cx="${f(c.x)}" cy="${f(c.y)}" r="2" fill="var(--accent)"/>`; };
+    if (act && (act.k === "draw" || act.k === "line") && act.a && curType() !== "label") { s += mark(act.a, act.snapA); if (act.moved && act.cur) s += mark(act.cur); }
+    if (D.mode === "plan" && (outline || (act && act.k === "outline"))) {
+      const P = outline ? outline.pts : [], cur = act && act.k === "outline" ? act.cur : null, L = cur && !cur.close ? P.concat([cur]) : P.slice();
+      if (cur && cur.close) L.push(P[0]);
+      if (L.length > 1) {
+        const d = L.map((q, i) => { const c = toS(q.x, q.y); return (i ? "L" : "M") + f(c.x) + " " + f(c.y); }).join("");
+        s += `<path d="${d}" fill="rgba(184,70,106,.08)" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>`;
+        for (let i = 0; i + 1 < L.length; i++) { const a = L[i], b = L[i + 1], len = Math.hypot(b.x - a.x, b.y - a.y); if (len * view.s < 40) continue; const m = toS((a.x + b.x) / 2, (a.y + b.y) / 2), v = Math.abs(a.x - b.x) < 0.5; s += `<text x="${f(m.x + (v ? 8 : 0))}" y="${f(m.y + (v ? 4 : -8))}" text-anchor="${v ? "start" : "middle"}" class="szt">${esc(fmtLen(len))}</text>`; }
+      }
+      P.forEach((q, i) => { s += mark(q, i === 0 && P.length >= 3); });
+      if (cur && !cur.close) s += mark(cur);
+    }
     handles = [];
     if (act && act.k === "box" && act.bx) {
       const a = toS(Math.min(act.bx.a.x, act.bx.b.x), Math.max(act.bx.a.y, act.bx.b.y)), z = toS(Math.max(act.bx.a.x, act.bx.b.x), Math.min(act.bx.a.y, act.bx.b.y));
@@ -1985,7 +2043,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     }
     const list = selList();
     if (list.length > 1) {
-      list.forEach(q => { const b = box(q), a = toS(b.x, b.y + b.h), z = toS(b.x + b.w, b.y); s += `<rect x="${f(a.x - 2)}" y="${f(a.y - 2)}" width="${f(z.x - a.x + 4)}" height="${f(z.y - a.y + 4)}" fill="rgba(184,70,106,.06)" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>`; });
+      if (!isMerged(list)) list.forEach(q => { const b = box(q), a = toS(b.x, b.y + b.h), z = toS(b.x + b.w, b.y); s += `<rect x="${f(a.x - 2)}" y="${f(a.y - 2)}" width="${f(z.x - a.x + 4)}" height="${f(z.y - a.y + 4)}" fill="rgba(184,70,106,.06)" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>`; });
       const U = unionBox(list), a = toS(U.x, U.y + U.h), z = toS(U.x + U.w, U.y);
       s += `<rect x="${f(a.x - 5)}" y="${f(a.y - 5)}" width="${f(z.x - a.x + 10)}" height="${f(z.y - a.y + 10)}" fill="none" stroke="var(--accent)" stroke-width="2" rx="4"/>`;
     }
@@ -2021,6 +2079,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
   function sizeText(p) {
     const k = kindOf(p);
+    if (p.t === "room" && D.mode === "plan" && matesOf(p, D.plan).length) { const all = matesOf(p, D.plan).concat([p]), U = unionBox(all); return fmtLen(U.w) + " × " + fmtLen(U.h) + " overall · " + fmtArea(all.reduce((t, q) => t + q.w * q.h, 0)); }
     if (k === "rect" && D.mode === "plan") return fmtLen(p.w) + " × " + fmtLen(p.h) + (p.t === "room" ? " · " + fmtArea(p.w * p.h) : "");
     if (k === "rect") return fmtLen(p.w) + " × " + fmtLen(p.h) + (p.y > 0.5 ? " · " + fmtLen(p.y) + " up" : "");
     if (k === "label") return "“" + p.text + "”";
@@ -2033,18 +2092,29 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     $("ctx").hidden = !p;
     const rot = !!(p && !many && TYPES[p.t].rot);
     $("cRot").hidden = !rot; $("cFront").hidden = rot || many; $("cBack").hidden = rot || many;
-    $("cGroup").hidden = !many;
+    const rsel = roomsSel(), merged = isMerged(rsel);
+    $("cGroup").hidden = !many || merged; $("cMerge").hidden = !rsel || D.mode !== "plan";
+    $("cMerge").textContent = merged ? "Split" : "Merge"; $("cMerge").setAttribute("aria-label", merged ? "Split into separate rooms" : "Merge into one room");
+    if (rsel) { $("cMirror").hidden = true; } else $("cMirror").hidden = false;
+    $("shapeChip").hidden = !(D.mode === "plan" && tool === "room" && !view3d); $("multiChip").hidden = tool !== "select" && !multiMode; $("shapeChip").setAttribute("aria-pressed", polyOn());
     const grouped = many && list.every(q => q.g && q.g === list[0].g);
     $("cGroup").setAttribute("aria-label", grouped ? "Ungroup" : "Group"); $("cGroup").style.color = grouped ? "var(--accent)" : "";
     $("multiChip").setAttribute("aria-pressed", multiMode); $("gravChip").setAttribute("aria-pressed", S().gravity); $("gravChip").hidden = D.mode === "plan";
     $("pasteBtn").hidden = !clip;
-    const lvls = D.v2 && D.mode === "plan" && !view3d ? model(D).levels : 0, ls = $("lvlSeg");
-    if (lvls < 2) { ls.hidden = true; D.lvl = 0; } else { D.lvl = Math.min(D.lvl || 0, lvls - 1); ls.hidden = false; ls.innerHTML = Array.from({ length: lvls }, (_, i) => `<button data-l="${i}" aria-pressed="${D.lvl === i}">Floor ${i + 1}</button>`).join(""); }
+    const fc = D.v2 && D.mode === "plan" && !view3d ? floorCount(D) : 0, ls = $("lvlSeg");
+    if (!fc) ls.hidden = true;
+    else {
+      const n = Math.min(3, Math.max(fc, (D.lvl || 0) + 1)); D.lvl = Math.min(D.lvl || 0, n - 1); ls.hidden = false;
+      ls.innerHTML = `<span>Floor</span>` + Array.from({ length: n }, (_, i) => `<button data-l="${i}" aria-pressed="${D.lvl === i}" aria-label="Floor ${i + 1}">${i + 1}</button>`).join("") + (n < 3 && n === fc ? `<button data-l="add" aria-label="Add a floor">+</button>` : "");
+    }
+    renderPlanBar();
     const ap = $("areaPill"), pt = pillText();
     ap.hidden = !pt; ap.textContent = pt;
     document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === (view3d ? "3d" : D.mode)));
     const lb = document.querySelector('.tool[data-t="lib"] span'); if (lb) lb.textContent = tool === "lib" && libItem ? libItem.n : "Library";
-    if (many) { const U = unionBox(list); $("ctxName").textContent = (grouped ? "Group of " : "") + list.length + " parts"; $("ctxSize").textContent = fmtLen(U.w) + " × " + fmtLen(U.h); }
+    if (merged) { $("ctxName").textContent = partName(list[0]); $("ctxSize").textContent = sizeText(list[0]); }
+    else if (rsel) { $("ctxName").textContent = list.length + " rooms"; $("ctxSize").textContent = fmtArea(list.reduce((t, q) => t + q.w * q.h, 0)); }
+    else if (many) { const U = unionBox(list); $("ctxName").textContent = (grouped ? "Group of " : "") + list.length + " parts"; $("ctxSize").textContent = fmtLen(U.w) + " × " + fmtLen(U.h); }
     else if (p) { $("ctxName").textContent = partName(p) + (p.tex && p.tex !== "plain" ? " · " + NAMES[p.tex] : "") + (p.lk && S().link ? " · linked" : ""); $("ctxSize").textContent = sizeText(p); }
     $("undoBtn").disabled = !undoStack.length; $("redoBtn").disabled = !redoStack.length;
     $("gridChip").textContent = "Grid " + GRID_NAMES[S().units][GRIDS[S().units].indexOf(S().grid)];
@@ -2195,6 +2265,38 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
   function bldOf(d) { if (!d.bld) d.bld = cleanBld(null); return d.bld; }
   const stOf = r => r.st === 2 || r.st === 3 ? r.st : 1;
+  /* Floors: a plan part's fl is the floor it is on (0 is the ground floor, 1 the second, 2 the third). */
+  const lvOf = r => r.fl === 1 || r.fl === 2 ? r.fl : 0;
+  const onLv = (r, k) => lvOf(r) <= k && k < lvOf(r) + stOf(r);
+  /* Rooms merged into one share a group (g) and carry one: no wall stands between them. */
+  const oneRoom = (a, b) => a !== b && !!a.one && !!b.one && !!a.g && a.g === b.g && lvOf(a) === lvOf(b);
+  const matesOf = (p, list) => p.t === "room" && p.one && p.g ? list.filter(q => q.t === "room" && oneRoom(p, q)) : [];
+  function floorCount(d) { return Math.min(3, d.plan.reduce((m, r) => r.t === "room" ? Math.max(m, lvOf(r) + stOf(r)) : m, 1)); }
+  /* Older designs set a room's stories; each story above the first becomes its own room on that floor. */
+  function explodeStories(d) {
+    const gm = {}, plain = /^(house|room( \d+)?|upstairs)$/i;
+    d.plan.filter(r => r.t === "room" && stOf(r) > 1).forEach(r => {
+      for (let k = 1; k < stOf(r) && lvOf(r) + k <= 2; k++) {
+        const q = JSON.parse(JSON.stringify(r)), lv = lvOf(r) + k; q.id = d.next++; delete q.st; q.fl = lv;
+        if (q.g) q.g = gm[q.g + lv] || (gm[q.g + lv] = randId(6));
+        if (!plain.test(r.text || "")) q.text = "Upstairs";
+        d.plan.push(q);
+      }
+      delete r.st;
+    });
+  }
+  /* Adds a floor over the top one: a room above each room under it, ready to be renamed, merged or redrawn. */
+  function addFloor(d, lv) {
+    const below = d.plan.filter(r => r.t === "room" && lvOf(r) === lv - 1 && !isOpenRoom(r)), gm = {};
+    let n = 0;
+    below.forEach(r => { const q = { id: d.next++, t: "room", layer: r.layer, color: r.color, tex: r.tex, x: r.x, y: r.y, w: r.w, h: r.h, fl: lv, text: "Room " + ++n }; if (r.g && r.one) { q.g = gm[r.g] || (gm[r.g] = randId(6)); q.one = true; } d.plan.push(q); });
+    return below.length;
+  }
+  function setFloors(d, n) {
+    let have = floorCount(d);
+    while (have < n && addFloor(d, have)) have++;
+    if (n < have) d.plan = d.plan.filter(q => lvOf(q) < n);
+  }
   const isOpening = p => p.t === "pwindow" || p.t === "pdoor";
   const opVert = p => p.rot === 1 || p.rot === 3;
   function opLine(p) { return opVert(p) ? (p.t === "pwindow" || p.style === "sliding" ? p.x + p.w / 2 : p.rot === 1 ? p.x : p.x + p.w) : wallLineY(p); }
@@ -2227,23 +2329,24 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function model(d) {
     const B = bldOf(d), hid = p => d.layers && d.layers[p.layer] && d.layers[p.layer].hide;
     const rooms = d.plan.filter(p => p.t === "room" && !hid(p)), encl = rooms.filter(r => !isOpenRoom(r)), open = rooms.filter(isOpenRoom);
-    const levels = encl.reduce((m, r) => Math.max(m, stOf(r)), 0), segs = [];
+    const levels = encl.reduce((m, r) => Math.max(m, lvOf(r) + stOf(r)), 0), segs = [];
     for (let k = 0; k < levels; k++) {
-      const on = encl.filter(r => stOf(r) > k), groups = new Map();
+      const on = encl.filter(r => onLv(r, k)), groups = new Map();
       const inRoom = (x, y) => on.some(r => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h);
       /* An edge is outside where nothing enclosed lies just beyond it; it is checked piece by piece between other rooms' corners. */
-      const edge = (h, c, a, b, sign) => {
+      const edge = (h, c, a, b, sign, me) => {
         const cuts = [a, b].concat(on.flatMap(r => h ? [r.x, r.x + r.w] : [r.y, r.y + r.h]).filter(v => v > a + 0.5 && v < b - 0.5)).sort((p, q) => p - q);
         for (let i = 0; i < cuts.length - 1; i++) {
           const u = cuts[i], v = cuts[i + 1]; if (v - u < 0.5) continue;
           const mx = h ? (u + v) / 2 : c + sign * 12, my = h ? c + sign * 12 : (u + v) / 2, ext = !inRoom(mx, my);
+          if (!ext && me && me.one) { const bey = on.filter(r => r !== me && mx > r.x && mx < r.x + r.w && my > r.y && my < r.y + r.h); if (bey.every(r => oneRoom(me, r))) continue; } // no wall inside a merged room
           const key = (h ? "h" : "v") + r1(c) + (ext ? "e" + sign : "i");
           if (!groups.has(key)) groups.set(key, { h, c, ext, sign: ext ? sign : -1, iv: [] });
           groups.get(key).iv.push([u, v]);
         }
       };
-      on.forEach(r => { edge(true, r.y, r.x, r.x + r.w, -1); edge(true, r.y + r.h, r.x, r.x + r.w, 1); edge(false, r.x, r.y, r.y + r.h, -1); edge(false, r.x + r.w, r.y, r.y + r.h, 1); });
-      if (k === 0) d.plan.filter(p => p.t === "pwall" && !hid(p)).forEach(p => {
+      on.forEach(r => { edge(true, r.y, r.x, r.x + r.w, -1, r); edge(true, r.y + r.h, r.x, r.x + r.w, 1, r); edge(false, r.x, r.y, r.y + r.h, -1, r); edge(false, r.x + r.w, r.y, r.y + r.h, 1, r); });
+      d.plan.filter(p => p.t === "pwall" && !hid(p) && lvOf(p) === k).forEach(p => {
         if (Math.abs(p.y1 - p.y2) < 0.5) edge(true, p.y1, Math.min(p.x1, p.x2), Math.max(p.x1, p.x2), -1);
         else if (Math.abs(p.x1 - p.x2) < 0.5) edge(false, p.x1, Math.min(p.y1, p.y2), Math.max(p.y1, p.y2), -1);
       });
@@ -2260,8 +2363,19 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       return { p, seg, vert, line, u0, u1, y0, y1: Math.min(y0 + S.oh, B.base + (S.fl + 1) * B.fh - 8), fs: S.fs, fc: S.fc, fl: S.fl, door: p.t === "pdoor" };
     });
     /* Roofs: each part of the house is roofed at its own top, over a few rectangles that together cover its rooms. */
-    const R = B.roof, roofs = [], topLv = Math.max(levels, open.length ? 1 : 0);
-    for (let k = 1; k <= topLv; k++) rectsOf(encl.filter(r => stOf(r) === k).concat(k === 1 ? open : [])).forEach(q => roofs.push(Object.assign(q, { top: B.base + k * B.fh, lv: k })));
+    const R = B.roof, roofs = [], cover = encl.concat(open), topOf = r => lvOf(r) + (isOpenRoom(r) ? 1 : stOf(r));
+    const topLv = cover.reduce((m, r) => Math.max(m, topOf(r)), 0), byTop = {};
+    if (topLv <= 1) byTop[1] = cover;
+    else {
+      /* with upper floors, each patch of the footprint is roofed at the top of whatever stands highest on it */
+      const xs = Array.from(new Set(cover.flatMap(r => [r1(r.x), r1(r.x + r.w)]))).sort((a, b) => a - b), ys = Array.from(new Set(cover.flatMap(r => [r1(r.y), r1(r.y + r.h)]))).sort((a, b) => a - b);
+      for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ys.length - 1; j++) {
+        const cx = (xs[i] + xs[i + 1]) / 2, cy = (ys[j] + ys[j + 1]) / 2;
+        let t = 0; cover.forEach(r => { if (cx > r.x && cx < r.x + r.w && cy > r.y && cy < r.y + r.h) t = Math.max(t, topOf(r)); });
+        if (t) (byTop[t] || (byTop[t] = [])).push({ x: xs[i], y: ys[j], w: xs[i + 1] - xs[i], h: ys[j + 1] - ys[j] });
+      }
+    }
+    for (let k = 1; k <= topLv; k++) rectsOf(byTop[k] || []).forEach(q => roofs.push(Object.assign(q, { top: B.base + k * B.fh, lv: k })));
     const area = q => (q.x1 - q.x0) * (q.y1 - q.y0), main = roofs.slice().sort((a, b) => area(b) - area(a))[0];
     const mainX = main ? (R.style === "side" ? true : R.style === "gable" || R.style === "gambrel" ? false : main.x1 - main.x0 >= main.y1 - main.y0) : true;
     roofs.forEach(q => {
@@ -2345,7 +2459,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
      to the house into plan parts: a window or door placed on a wall, a wall standing on the ground beside the house,
      a wall stacked on top of it (another story), or a roof put over it. Returns the id the selection should move to. */
   function writeBack(d) {
-    const M = model(d), B = M.B, R = B.roof, F = houseFoot(d), topAt = x => { const rs = M.encl.filter(r => x > r.x && x < r.x + r.w); return rs.length ? B.base + Math.max.apply(null, rs.map(stOf)) * B.fh : null; };
+    const M = model(d), B = M.B, R = B.roof, F = houseFoot(d), topAt = x => { const rs = M.encl.filter(r => x > r.x && x < r.x + r.w); return rs.length ? B.base + Math.max.apply(null, rs.map(r => lvOf(r) + stOf(r))) * B.fh : null; };
     const levels = Math.max(1, M.levels);
     let reSel = null; const drop = [];
     const flAt = y => clamp(Math.floor((y - B.base + 30) / B.fh), 0, levels - 1);
@@ -2371,7 +2485,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
           } else if (styled && s0) placeOpeningOn(q, s0, s0.h ? q.x : q.y, s0.h ? q.w : q.h);
         } else if (kind === "w" || kind === "q") {
           if (kind === "w" && restyled) { B.wall.tex = p.tex; B.wall.color = p.color; }
-          if (p.st != null) { const n = clamp(+p.st || 1, 1, 3); M.encl.forEach(r => { if (n > 1) r.st = n; else delete r.st; }); }
+          if (p.st != null) setFloors(d, clamp(+p.st || 1, 1, 3));
         } else if (kind === "r") {
           if (TYPES.roof.styles.indexOf(p.rstyle) >= 0) R.style = p.rstyle;
           R.tex = p.tex; R.color = p.color;
@@ -2400,8 +2514,8 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         }
         if (over.length && top != null && Math.abs(p.y - top) < 45) {
           /* a wall stacked on the house adds stories to the rooms under it */
-          const add = clamp(Math.round(p.h / B.fh), 1, 2);
-          M.encl.filter(r => r.x < p.x + p.w - 5 && r.x + r.w > p.x + 5).forEach(r => { r.st = clamp(stOf(r) + add, 1, 3); });
+          const add = clamp(Math.round(p.h / B.fh), 1, 2), lv = Math.round((top - B.base) / B.fh), gm = {};
+          M.encl.filter(r => r.x < p.x + p.w - 5 && r.x + r.w > p.x + 5 && lvOf(r) + stOf(r) === lv).forEach(r => { for (let k = 0; k < add && lv + k <= 2; k++) { const q = { id: d.next++, t: "room", layer: r.layer, color: r.color, tex: r.tex, x: r.x, y: r.y, w: r.w, h: r.h, fl: lv + k, text: "Upstairs" }; if (r.g && r.one) { q.g = gm[r.g + k] || (gm[r.g + k] = randId(6)); q.one = true; } d.plan.push(q); } });
           drop.push(p); return;
         }
       }
@@ -2414,6 +2528,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       }
     });
     if (drop.length) d.front = d.front.filter(p => drop.indexOf(p) < 0);
+    explodeStories(d);
     return reSel;
   }
   function syncModel() {
@@ -2484,7 +2599,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (lx) d.front.forEach(p => shiftPart(p, -lx, 0));
     d.front.forEach(p => delete p.lk); d.plan.forEach(p => delete p.lk);
     d.lx = 0;
-    regenFront(d);
+    explodeStories(d); regenFront(d);
     return d;
   }
 
@@ -2758,10 +2873,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function lotPill() { const L = D.lot; return L ? "Lot " + fmtLen(L.w) + " × " + fmtLen(L.h) + " · " + fmtArea(L.w * L.h) : ""; }
   function pillText() {
     if (view3d) return "";
-    const L = D.lot, rooms = D.mode === "plan" ? D.plan.filter(q => q.t === "room") : [];
-    if (!rooms.length) return lotPill();
-    const a = rooms.reduce((t, q) => t + q.w * q.h, 0);
-    return rooms.length + (rooms.length === 1 ? " room · " : " rooms · ") + fmtArea(a) + (L ? " · " + Math.round(a / (L.w * L.h) * 100) + "% of lot" : "");
+    const L = D.lot, lv = D.lvl || 0, rooms = D.mode === "plan" ? D.plan.filter(q => q.t === "room" && lvOf(q) === lv) : [];
+    if (!rooms.length) return lv ? "" : lotPill();
+    const a = rooms.reduce((t, q) => t + q.w * q.h, 0), n = rooms.filter(q => !matesOf(q, rooms).some(m => m.id < q.id)).length;
+    return (floorCount(D) > 1 ? "Floor " + (lv + 1) + " · " : "") + n + (n === 1 ? " room · " : " rooms · ") + fmtArea(a) + (L && !lv ? " · " + Math.round(a / (L.w * L.h) * 100) + "% of lot" : "");
   }
   function renderLot() {
     const L = D.lot, F = houseFoot(D);
@@ -2819,7 +2934,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function restore(s) { const o = JSON.parse(s); D.front = o.f; D.plan = o.p; D.next = o.n; if (o.l) D.lot = o.l; else delete D.lot; if (o.b) D.bld = o.b; }
   function pushUndo(before) { undoStack.push(before); if (undoStack.length > 150) undoStack.shift(); redoStack = []; }
   function changed() {
-    D.at = Date.now(); if (D.v2) syncModel(); else syncLinks();
+    D.at = Date.now();
+    const sp = selPart(); if (sp && sp.t === "room") matesOf(sp, D.plan).forEach(q => { q.text = sp.text; q.tex = sp.tex; q.color = sp.color; if (typeof sp.op === "boolean") q.op = sp.op; else delete q.op; });
+    if (D.v2) syncModel(); else syncLinks();
     if (multi.length) { multi = multi.filter(id => D.parts.some(p => p.id === id)); if (multi.length < 2) multi = []; }
     if (sel != null && !selPart()) sel = multi.length ? multi[0] : null;
     save(); render();
@@ -2836,8 +2953,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (S().osnap) {
       if (D.mode !== "plan") ys.push(0);
       projXs().forEach(x => xs.push(x));
-      D.parts.forEach(p => {
-        if (p === skip || (Array.isArray(skip) && skip.indexOf(p) >= 0) || !visible(p)) return;
+      /* on an upper floor the rooms and stairs below are snap targets too, so walls line up */
+      const below = D.mode === "plan" && D.lvl ? D.plan.filter(p => lvOf(p) === D.lvl - 1 && (p.t === "room" || p.t === "stairs") && !D.layers[p.layer].hide) : [];
+      D.parts.concat(below).forEach(p => {
+        if (p === skip || (Array.isArray(skip) && skip.indexOf(p) >= 0) || !(visible(p) || below.indexOf(p) >= 0)) return;
         const k = kindOf(p);
         if (k === "rect" || k === "label") {
           xs.push(p.x, p.x + p.w / 2, p.x + p.w); ys.push(p.y, p.y + p.h / 2, p.y + p.h);
@@ -2870,6 +2989,79 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       guides = { x: [], y: [] };
     }
     return { x: r1(x), y: r1(y) };
+  }
+
+  /* ---------- rooms: merging and any shape ----------
+     Rooms merged into one keep their rectangles but share a group (g) and the one flag, so no wall stands between them:
+     a hallway made of two rooms, an open living and dining room, or an L-shaped room drawn as an outline. */
+  const roomsSel = () => { const L = selList(); return L.length > 1 && L.every(q => q.t === "room") ? L : null; };
+  const isMerged = L => !!L && L.length > 1 && L.every(q => q.t === "room" && q.one && q.g && q.g === L[0].g);
+  function mergeRooms() {
+    const L = roomsSel(); if (!L) return;
+    if (isMerged(L)) { withUndo(() => L.forEach(q => { delete q.g; delete q.one; })); selectIds(L.map(q => q.id)); SFX.tap(); renderDock(); toast("Split back into " + L.length + " rooms, with walls between them."); return; }
+    const touch = (a, b) => { const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y); return (ox > 20 && oy > -1) || (oy > 20 && ox > -1); };
+    const seen = [L[0]]; for (let i = 0; i < seen.length; i++) L.forEach(q => { if (seen.indexOf(q) < 0 && touch(seen[i], q)) seen.push(q); });
+    if (seen.length < L.length) { toast("Those rooms don't touch. Pick rooms that share a wall."); return; }
+    const lead = L.slice().sort((a, b) => b.w * b.h - a.w * a.h)[0], rest = L.filter(q => q !== lead), rs = rectsOf(L);
+    const inner = new Set(model(D).ops.filter(o => o.seg && !o.seg.ext).map(o => o.p));
+    let keep = [], gone = [];
+    withUndo(() => {
+      const gid = rs.length > 1 ? randId(6) : null;
+      rs.forEach((q, i) => {
+        let p = i ? rest[i - 1] : lead;
+        if (!p) { p = JSON.parse(JSON.stringify(lead)); p.id = D.next++; D.plan.push(p); }
+        Object.assign(p, { x: r1(q.x0), y: r1(q.y0), w: r1(q.x1 - q.x0), h: r1(q.y1 - q.y0), text: lead.text, tex: lead.tex, color: lead.color });
+        if (typeof lead.op === "boolean") p.op = lead.op; else delete p.op;
+        if (gid) { p.g = gid; p.one = true; } else { delete p.g; delete p.one; }
+        keep.push(p);
+      });
+      D.plan = D.plan.filter(q => q.t !== "room" || L.indexOf(q) < 0 || keep.indexOf(q) >= 0);
+      /* a door or window on a wall that is gone goes with it */
+      gone = model(D).ops.filter(o => !o.seg && inner.has(o.p)).map(o => o.p);
+      D.plan = D.plan.filter(q => gone.indexOf(q) < 0);
+      selectIds(keep.map(q => q.id));
+    });
+    SFX.place(); renderDock();
+    toast("Merged into one room" + (gone.length ? ", and took out the " + (gone.length === 1 ? "door" : "openings") + " between them" : "") + ". Double-tap it to rename it, like Hallway or Great room.");
+  }
+  const polyOn = () => !!(store.mem.room && store.mem.room.poly);
+  /* A corner of an outline: snapped to the grid or a room corner, square to the last corner, or closing on the first. */
+  function polySnap(w) {
+    const q = snapPoint(w), P = outline ? outline.pts : [], last = P[P.length - 1];
+    if (P.length >= 3 && Math.hypot(P[0].x - q.x, P[0].y - q.y) * view.s < 26) { guides = { x: [], y: [] }; return { x: P[0].x, y: P[0].y, close: true }; }
+    if (last) { if (Math.abs(q.x - last.x) >= Math.abs(q.y - last.y)) q.y = last.y; else q.x = last.x; guides = { x: [], y: [] }; }
+    return q;
+  }
+  function addPolyPt(q) {
+    if (!q) return;
+    if (q.close) { closePoly(); return; }
+    if (!outline) outline = { pts: [] };
+    const P = outline.pts, last = P[P.length - 1];
+    if (last && Math.hypot(q.x - last.x, q.y - last.y) < 5) return;
+    P.push({ x: q.x, y: q.y }); SFX.tap(); renderPlanBar(); queue(true);
+  }
+  /* Fills the outline with as few rectangles as it takes and makes them one room. */
+  function closePoly() {
+    const P = outline && outline.pts; if (!P || P.length < 3) return;
+    const pts = P.slice(), f0 = pts[0], l = pts[pts.length - 1];
+    if (Math.abs(l.x - f0.x) > 0.5 && Math.abs(l.y - f0.y) > 0.5) pts.push({ x: l.x, y: f0.y });
+    const xs = Array.from(new Set(pts.map(q => q.x))).sort((a, b) => a - b), ys = Array.from(new Set(pts.map(q => q.y))).sort((a, b) => a - b);
+    const inside = (x, y) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const a = pts[i], b = pts[j]; if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) c = !c; } return c; };
+    const cells = [];
+    for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ys.length - 1; j++) if (inside((xs[i] + xs[i + 1]) / 2, (ys[j] + ys[j + 1]) / 2)) cells.push({ x: xs[i], y: ys[j], w: xs[i + 1] - xs[i], h: ys[j + 1] - ys[j] });
+    outline = null;
+    const rs = rectsOf(cells).filter(q => q.x1 - q.x0 > 5 && q.y1 - q.y0 > 5);
+    if (!rs.length) { toast("That outline has no room inside. Tap the corners around the room."); renderPlanBar(); queue(true); return; }
+    const ids = [];
+    withUndo(() => {
+      const g = rs.length > 1 ? randId(6) : null, name = mk("room", {}, true).text;
+      rs.forEach(q => { const p = mk("room", { x: r1(q.x0), y: r1(q.y0), w: r1(q.x1 - q.x0), h: r1(q.y1 - q.y0), text: name }); if (g) { p.g = g; p.one = true; } D.parts.push(p); ids.push(p.id); });
+      selectIds(ids);
+    });
+    const L = D.parts.filter(q => ids.indexOf(q.id) >= 0);
+    if (L[0]) { unhideFor(L[0]); }
+    SFX.place(); renderPlanBar(); renderDock();
+    toast("Room added: " + fmtArea(L.reduce((t, q) => t + q.w * q.h, 0)) + ". Double-tap it to name it.");
   }
 
   /* ---------- pointer input ---------- */
@@ -2928,7 +3120,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     act = { sp0: sp, w0: w, moved: false, before: null };
     if (pan) { act.k = "pan"; act.v0 = Object.assign({}, view); return; }
     const p = selPart();
-    const h = p && editable(p) && !fixedGen(p) && (tool === "select" || p.t === curType()) ? hitHandle(sp) : null;
+    const h = p && editable(p) && !fixedGen(p) && !(multiMode && tool === "select") && (tool === "select" || p.t === curType()) ? hitHandle(sp) : null;
     if (h != null) { act.k = "handle"; act.h = h; act.orig = JSON.parse(JSON.stringify(p)); act.tg = snapTargets(p); return; }
     const hit = hitPart(w);
     if (tool === "select") {
@@ -2947,11 +3139,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (tool === "paint") { act.k = "paint"; return; }
     /* With a part tool, pressing the part just placed (same type) drags it into place; anywhere else the tool draws,
        so a wall can be drawn inside a selected room and a window tapped onto a selected wall. */
+    if (tool === "room" && D.mode === "plan" && polyOn()) { act.tg = snapTargets(null); act.k = "outline"; act.cur = polySnap(w); queue(false); return; }
     if (hit && p && selList().some(q => q.id === hit.id) && hit.t === curType() && ["pen", "line", "dim", "pwall"].indexOf(tool) < 0) { sel = hit.id; startMove(hit); return; }
     act.tg = snapTargets(null);
     if (tool === "pen") { act.k = "pen"; act.pts = [r1(w.x), r1(w.y)]; return; }
-    if (tool === "line" || tool === "dim" || tool === "pwall") { act.k = "line"; act.a = snapPoint(w); guides = { x: [], y: [] }; return; }
-    act.k = "draw"; act.a = snapPoint(w); guides = { x: [], y: [] };
+    if (tool === "line" || tool === "dim" || tool === "pwall") { act.k = "line"; act.a = snapPoint(w); act.cur = act.a; guides = { x: [], y: [] }; queue(false); return; }
+    act.k = "draw"; act.a = snapPoint(w); act.cur = act.a; act.snapA = act.tg.pts.some(q => Math.abs(q.x - act.a.x) < 0.5 && Math.abs(q.y - act.a.y) < 0.5); guides = { x: [], y: [] }; queue(false);
   }
   const fixedGen = p => !!(p && p.src && p.src[0] !== "o");
   function startMove(hit) {
@@ -3020,7 +3213,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         queue(true); renderDock(); return;
       }
       case "draw": {
-        const b = snapPoint(w), a = act.a;
+        const b = snapPoint(w), a = act.a; act.cur = b;
         const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), ww = Math.max(5, Math.abs(b.x - a.x)), hh = Math.max(5, Math.abs(b.y - a.y));
         const ct = curType();
         if (ct === "label") { preview = mk("label", { x: b.x, y: b.y }, true); }
@@ -3028,8 +3221,13 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         showReadout(sp, ct === "label" ? "X " + fmtLen(b.x) + "   Y " + fmtLen(b.y) : fmtLen(ww) + " × " + fmtLen(hh));
         queue(true); return;
       }
+      case "outline": {
+        act.cur = polySnap(w); const P = outline ? outline.pts : [], l = P[P.length - 1];
+        showReadout(sp, act.cur.close ? "Close the outline" : l ? fmtLen(Math.hypot(act.cur.x - l.x, act.cur.y - l.y)) : "X " + fmtLen(act.cur.x) + "   Y " + fmtLen(act.cur.y));
+        queue(false); return;
+      }
       case "line": {
-        const b = snapPoint(w, act.a);
+        const b = snapPoint(w, act.a); act.cur = b;
         preview = mk(tool === "dim" || tool === "pwall" ? tool : "line", { x1: act.a.x, y1: act.a.y, x2: b.x, y2: b.y }, true);
         showReadout(sp, lineText(preview));
         queue(true); return;
@@ -3044,6 +3242,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   }
   function lineText(p) { const L = Math.hypot(p.x2 - p.x1, p.y2 - p.y1); let a = Math.round(Math.atan2(p.y2 - p.y1, p.x2 - p.x1) * 180 / Math.PI); return fmtLen(L) + "  " + a + "°"; }
   function endAct(sp) {
+    if (act && act.k === "outline") { const q = act.cur; act = null; $("readout").hidden = true; guides = { x: [], y: [] }; addPolyPt(q); renderUI(); return; }
     const a = act; act = null; $("readout").hidden = true; guides = { x: [], y: [] };
     const w = toW(sp.x, sp.y);
     if (!a.moved) {
@@ -3106,9 +3305,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (T.kind === "rect") Object.assign(p, { x: 0, y: 0, w: T.w, h: T.h });
     const pre = tool === "lib" && libItem && libItem.t === type ? libItem : null;
     if (pre) { if (pre.s) p.style = pre.s; if (pre.ex) Object.assign(p, pre.ex); }
-    if (type === "room" && !p.text) p.text = "Room " + (D.parts.filter(q => q.t === "room").length + 1);
+    if (type === "room" && !p.text) { const rs = D.parts.filter(q => q.t === "room" && lvOf(q) === (D.mode === "plan" ? D.lvl || 0 : 0)); p.text = "Room " + (rs.filter(q => !matesOf(q, rs).some(m => m.id < q.id)).length + 1); }
     if (type === "pwall") p.lw = 15.24;
-    if ((type === "pwindow" || type === "pdoor") && D.lvl) p.fl = D.lvl;
+    if (D.mode === "plan" && D.lvl) p.fl = D.lvl;
     if (type === "label") { p.text = "Label"; p.h = T.h; p.w = labelW(p.text, p.h); }
     if (type === "line") { p.lw = r1(Math.max(0.5, 2 / view.s)); p.color = store.paint.color; }
     if (type === "pen") { p.lw = r1(Math.max(0.5, store.paint.pen / view.s)); p.color = store.paint.color; }
@@ -3178,7 +3377,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (!p) { toast("Tap a part to paint it. Tap Paint again to pick a color."); return; }
     if (pickColor) { pickColor = false; store.paint.color = p.color; if (p.tex && p.tex !== "plain") store.paint.tex = p.tex; save(); renderDock(); SFX.tap(); toast("Picked up " + (p.tex && p.tex !== "plain" ? NAMES[p.tex].toLowerCase() + " in this color" : "this color") + ". Tap parts to paint with it."); return; }
     const T = TYPES[p.t], c = store.paint.color, tx = store.paint.tex;
-    const ok = withUndo(() => { p.color = c; if (tx && T.texs && T.texs.indexOf(tx) >= 0) p.tex = tx; });
+    const ok = withUndo(() => { matesOf(p, D.parts).concat([p]).forEach(q => { q.color = c; if (tx && T.texs && T.texs.indexOf(tx) >= 0) q.tex = tx; }); });
     if (!selList().some(q => q.id === p.id)) selectPart(p); remember(p); SFX.place(); render();
     if (!ok) toast("That part is already this color.");
   }
@@ -3216,7 +3415,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const dx = gsnap(c.x - (U.x + U.w / 2)), dy = gsnap(c.y - (U.y + U.h / 2));
     withUndo(() => {
       const gmap = {}, ids = [];
-      ok.forEach(q => { const p = cleanPart(q, D.next, D.mode); if (!p) return; D.next++; delete p.lk; if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(p, dx, dy); D.parts.push(p); ids.push(p.id); });
+      ok.forEach(q => { const p = cleanPart(q, D.next, D.mode); if (!p) return; D.next++; delete p.lk; if (typeof q.g === "string" && /^[A-Za-z0-9_-]{1,12}$/.test(q.g)) p.g = gmap[q.g] || (gmap[q.g] = randId(6)); shiftPart(p, dx, dy); if (D.mode === "plan") { if (D.lvl) p.fl = D.lvl; else delete p.fl; } D.parts.push(p); ids.push(p.id); });
       tool = "select"; selectIds(ids);
     });
     SFX.place(); if (ok.length < clip.parts.length) toast("Pasted the parts that fit this view.");
@@ -3224,7 +3423,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function groupSel() {
     const list = selList(); if (list.length < 2) return;
     const grouped = list.every(q => q.g && q.g === list[0].g);
-    withUndo(() => { const g = randId(6); list.forEach(q => { if (grouped) delete q.g; else q.g = g; }); });
+    withUndo(() => { const g = randId(6); list.forEach(q => { delete q.one; if (grouped) delete q.g; else q.g = g; }); });
     SFX.tap(); toast(grouped ? "Ungrouped." : "Grouped. Tapping any of them now selects the whole group.");
   }
   function nudge(dx, dy) { const list = selList(); if (!list.length) return; const g = S().grid; withUndo(() => list.forEach(q => shiftPart(q, dx * g, dy * g))); SFX.tap(); }
@@ -3358,7 +3557,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     pen: "Draw freehand. Tap Pen again for color and thickness.",
     paint: "Tap any part to paint it. Tap Paint again to pick a color or texture.",
     dim: "Drag between two points to measure. Snap locks onto corners and centers.",
-    room: "Drag to draw a room, or tap to drop one. Its floor area updates as you size it. Tap it twice to name it.",
+    room: "Drag to draw a room, or tap to drop one. Corners snap to the grid and to other rooms. For an L-shape or any outline, turn on Any shape. Tap a room twice to name it.",
     pwall: "Drag to draw a wall. Ortho keeps it straight.",
     pdoor: "Tap on a wall to place a door. Rotate and Mirror turn its swing. Tap Door again for double and sliding doors.",
     pwindow: "Tap on a wall to place a window. Rotate it for side walls.",
@@ -3377,7 +3576,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       else if (TYPES[t] && (TYPES[t].styles || TYPES[t].texs || TYPES[t].kind !== "label")) { renderToolSheet(t); openSheet("toolSheet"); }
       return;
     }
-    tool = t; SFX.tap(); renderDock();
+    tool = t; if (t !== "room") outline = null; SFX.tap(); renderDock(); renderGrid(); queue(false);
     if (!store.hinted[t]) { store.hinted[t] = true; save(); toast(HINTS[t]); }
   }
   $("tools").addEventListener("click", e => {
@@ -3389,7 +3588,33 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (view3d) { close3D(); render(); fit(); }
     setTool(b.dataset.t);
   });
-  $("lvlSeg").addEventListener("click", e => { const b = e.target.closest("button[data-l]"); if (!b) return; D.lvl = +b.dataset.l; selectPart(null); SFX.tap(); render(); });
+  $("lvlSeg").addEventListener("click", e => {
+    const b = e.target.closest("button[data-l]"); if (!b) return;
+    D.lvl = b.dataset.l === "add" ? Math.min(2, floorCount(D)) : +b.dataset.l; selectPart(null); SFX.tap(); render();
+  });
+  /* An upper floor with nothing on it yet says how to start it. */
+  function renderPlanBar() {
+    const pb = $("planBar"); if (!pb) return;
+    const lv = D.lvl || 0, drawing = D.mode === "plan" && !view3d && tool === "room" && polyOn(), show = D.v2 && D.mode === "plan" && !view3d && lv > 0 && !D.plan.some(q => q.t === "room" && lvOf(q) === lv) && !drawing;
+    let h = "";
+    if (show) {
+      const stairs = D.plan.some(q => q.t === "stairs" && lvOf(q) === lv - 1);
+      h = `<b>Floor ${lv + 1} is empty</b><p>Floor ${lv} shows faintly underneath so rooms line up. Draw rooms with the Room tool, or start with a room over each room below.${stairs ? " Stairs from below show here as the way down." : " Add stairs on Floor " + lv + " with the Stairs tool to connect the floors."}</p><div class="b3row"><button data-pb="copy">Rooms over Floor ${lv}</button><button data-pb="room">Draw rooms</button></div>`;
+    } else if (drawing) {
+      const n = outline ? outline.pts.length : 0;
+      h = `<div class="pline"><b>${n ? n + " corner" + (n === 1 ? "" : "s") : "Tap each corner"}</b><div class="b3row">${n >= 3 ? '<button data-pb="close">Close</button>' : ""}${n ? '<button data-pb="back">Undo corner</button><button data-pb="cancel">Start over</button>' : '<button data-pb="rect">Rectangles instead</button>'}</div></div>`;
+    }
+    pb.hidden = !h; if (h !== pb.dataset.h) { pb.innerHTML = h; pb.dataset.h = h; }
+  }
+  $("planBar").addEventListener("click", e => {
+    const b = e.target.closest("button[data-pb]"); if (!b) return; const k = b.dataset.pb;
+    if (k === "copy") { const lv = D.lvl || 0; withUndo(() => { addFloor(D, lv); }); SFX.place(); toast("Floor " + (lv + 1) + " has a room over each room below. Merge, resize or rename them."); return; }
+    if (k === "room") { setTool("room"); return; }
+    if (k === "close") { closePoly(); return; }
+    if (k === "back") { if (outline) outline.pts.pop(); SFX.tap(); renderPlanBar(); queue(true); return; }
+    if (k === "rect") { $("shapeChip").click(); return; }
+    if (k === "cancel") { outline = null; SFX.tap(); renderPlanBar(); queue(true); }
+  });
   function setMode(m) {
     if (D.mode === m) return;
     cancelAct(); D.mode = m; selectPart(null); tool = "select"; libItem = null;
@@ -3540,9 +3765,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const F = houseFoot(D), PX0 = F.x0, PX1 = F.x1, PY0 = F.y0, PY1 = F.y1;
     /* Floors: each room's finish at floor level, a deck under a raised house, and slabs between stories. */
     TAG3 = null;
-    for (const r of rooms) { const fm = await matFor(r.tex, r.color, { draft: true, rough: 0.7 }); boxW(g, r.x, r.x + r.w, B.base, B.base + 2, -(r.y + r.h), -r.y, fm, fm.userData.tile); }
-    if (B.base > 5) rooms.forEach(r => boxW(g, r.x - 4, r.x + r.w + 4, B.base - 18, B.base, -(r.y + r.h) - 4, -r.y + 4, plaster));
-    for (let k = 1; k < M.levels; k++) encl.filter(r => stOf(r) > k).forEach(r => boxW(g, r.x, r.x + r.w, B.base + k * B.fh - 14, B.base + k * B.fh + 2, -(r.y + r.h), -r.y, plaster));
+    for (const r of rooms) { const fm = await matFor(r.tex, r.color, { draft: true, rough: 0.7 }), y = B.base + lvOf(r) * B.fh + (lvOf(r) ? 2 : 0); boxW(g, r.x, r.x + r.w, y, y + 2, -(r.y + r.h), -r.y, fm, fm.userData.tile); }
+    if (B.base > 5) rooms.filter(r => !lvOf(r)).forEach(r => boxW(g, r.x - 4, r.x + r.w + 4, B.base - 18, B.base, -(r.y + r.h) - 4, -r.y + 4, plaster));
+    for (let k = 1; k < M.levels; k++) rooms.filter(r => onLv(r, k)).forEach(r => boxW(g, r.x, r.x + r.w, B.base + k * B.fh - 14, B.base + k * B.fh + 2, -(r.y + r.h), -r.y, plaster));
     const doorMat = {}, frameMat = solid("#f1efe9", 0.6), glassMat = new THREE.MeshStandardMaterial({ color: D.sky === "night" ? 0xf0c27a : 0xb4c6d2, roughness: 0.08, metalness: 0.35, emissive: D.sky === "night" ? 0x6b4a1c : 0x000000 });
     const grilleQ = [];
     for (let si = 0; si < M.segs.length; si++) {
@@ -3772,9 +3997,10 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     /* Furniture and fixtures, as simple blocks at their real heights. */
     plan.filter(p => (p.t === "furn" || p.t === "fixture" || p.t === "stairs" || p.t === "pplant")).forEach(p => {
       const m = solid(p.color, 0.8);
-      if (p.t === "stairs") { const along = (p.rot || 0) % 2 ? "x" : "y", L = along === "y" ? p.h : p.w, n = Math.max(3, Math.round(L / 28)); for (let i = 0; i < n; i++) { const t0 = L * i / n, t1 = L * (i + 1) / n, hh = wallTop * (n - i) / n; if (along === "y") boxW(g, p.x, p.x + p.w, 0, hh, -(p.y + t1), -(p.y + t0), m); else boxW(g, p.x + t0, p.x + t1, 0, hh, -(p.y + p.h), -p.y, m); } return; }
+      const fy = lvOf(p) * B.fh;
+      if (p.t === "stairs") { const along = (p.rot || 0) % 2 ? "x" : "y", L = along === "y" ? p.h : p.w, n = Math.max(3, Math.round(L / 28)), y0 = fy ? B.base + fy : 0; for (let i = 0; i < n; i++) { const t0 = L * i / n, t1 = L * (i + 1) / n, hh = y0 + (wallTop + fy - y0) * (n - i) / n; if (along === "y") boxW(g, p.x, p.x + p.w, y0, hh, -(p.y + t1), -(p.y + t0), m); else boxW(g, p.x + t0, p.x + t1, y0, hh, -(p.y + p.h), -p.y, m); } return; }
       if (p.t === "pplant") { if (p.style === "tree") tree3(g, p.x + p.w / 2, -(p.y + p.h / 2), p.w * 0.8, 400, p.color, rnd); else shrub3(g, p.x + p.w / 2, -(p.y + p.h / 2), p.w * 0.7, 70, p.color, rnd); return; }
-      boxW(g, p.x + 1, p.x + p.w - 1, B.base + 2, B.base + 2 + (H3[p.style] || 60), -(p.y + p.h) + 1, -p.y - 1, m);
+      boxW(g, p.x + 1, p.x + p.w - 1, B.base + fy + 4, B.base + fy + 4 + (H3[p.style] || 60), -(p.y + p.h) + 1, -p.y - 1, m);
     });
     /* The lot: a greener yard inside the property lines with a low stone edging, then the sidewalk, curb and street out front. */
     if (D.lot) {
@@ -4049,6 +4275,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function renderMulti() {
     const list = selList(), grouped = list.every(q => q.g && q.g === list[0].g);
     let h = `<div class="grab"></div><h2>${grouped ? "Group of " : ""}${list.length} parts</h2><p class="lede">Align and space them, match sizes to the part you tapped last (${esc(selPart() ? partName(selPart()) : "")}), or copy them into the other view or another design.</p>`;
+    if (roomsSel()) h += `<h3>Rooms</h3><div class="acts" style="grid-template-columns:1fr"><button data-a="merge">Merge into one room</button></div><p class="note">Takes out the walls between them, for a hallway or an open living and dining room.</p>`;
     h += `<h3>Align</h3><div class="acts three"><button data-al="left">Left edges</button><button data-al="center">Centers</button><button data-al="right">Right edges</button><button data-al="top">Tops</button><button data-al="middle">Middles</button><button data-al="bottom">Bottoms</button></div>`;
     h += `<h3>Space evenly</h3><div class="acts"><button data-ds="1">Across</button><button data-ds="0">Up and down</button></div>`;
     h += `<h3>Match size</h3><div class="acts"><button data-ms="w">Same width</button><button data-ms="h">Same height</button></div>`;
@@ -4064,6 +4291,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     else if (b.dataset.ms) matchSize(b.dataset.ms);
     else if (b.dataset.n) { const n = b.dataset.n.split(",").map(Number); nudge(n[0], n[1]); }
     else if (b.dataset.a === "group") groupSel();
+    else if (b.dataset.a === "merge") { closeSheets(); mergeRooms(); }
     else if (b.dataset.a === "copy") copySel();
     else if (b.dataset.a === "mirror") mirror();
     else if (b.dataset.a === "dup") duplicate();
@@ -4075,7 +4303,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (selList().length > 1) renderMulti(); else closeSheets();
   });
   function openProps(focusText) {
-    if (selList().length > 1) { renderMulti(); openSheet("multiSheet"); return; } const p = selPart(); if (!p) return; buildProps(p); openSheet("propSheet"); if (focusText) { const i = $("propSheet").querySelector('[data-f="text"]'); if (i) setTimeout(() => { i.focus(); i.select(); }, 60); } }
+    if (selList().length > 1 && !isMerged(selList())) { renderMulti(); openSheet("multiSheet"); return; } const p = selPart(); if (!p) return; buildProps(p); openSheet("propSheet"); if (focusText) { const i = $("propSheet").querySelector('[data-f="text"]'); if (i) setTimeout(() => { i.focus(); i.select(); }, 60); } }
   function refreshProps() { if ($("propSheet").hidden) return; const p = selPart(); if (p) buildProps(p); else closeSheets(); }
   function genProps(p) {
     const B = bldOf(D), M = model(D), kind = p.src[0]; let h = "";
@@ -4100,7 +4328,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     let h = `<div class="grab"></div><h2>${esc(partName(p))}</h2><p class="lede">${esc(sizeText(p))}</p>`;
     if (p.src) h += `<p class="note">This ${p.t} is part of the house: it is in the floor plan and the 3D view too.</p>`;
     if (k === "label" || p.t === "room") h += `<div class="fields">${fld(p.t === "room" ? "Room name" : "Text", "text", p.text, true)}</div>`;
-    if (p.t === "room") h += `<h3>Stories</h3><div class="chips" data-k="st">${[1, 2, 3].map(n => `<button data-v="${n}" aria-pressed="${stOf(p) === n}">${n}</button>`).join("")}</div><div class="row"><div><label>Open to the outside</label><small>A porch, marquesina or terrace: roofed, with no outside walls</small></div><button class="switch" data-sw="op" role="switch" aria-checked="${isOpenRoom(p)}" aria-label="Open to the outside"></button></div>`;
+    const mates = matesOf(p, D.plan);
+    if (p.t === "room") {
+      h += `<div class="row"><div><label>Open to the outside</label><small>${lvOf(p) ? "A balcony or terrace: no outside walls" : "A porch, marquesina or terrace: roofed, with no outside walls"}</small></div><button class="switch" data-sw="op" role="switch" aria-checked="${isOpenRoom(p)}" aria-label="Open to the outside"></button></div>`;
+      if (mates.length) h += `<p class="note">This room is ${mates.length + 1} pieces with no walls between them. Split it to resize a piece, then merge again.</p><div class="acts" style="grid-template-columns:1fr"><button data-a="split">Split into separate rooms</button></div>`;
+      else h += `<p class="note">To make one room from two or more, like a hallway or an open living and dining room, turn on Multi, tap the rooms, then tap Merge.</p>`;
+    }
     if (isOpening(p) && D.v2) {
       const S0 = opSpec(p, bldOf(D)), lv = model(D).levels;
       h += `<h3>Seen from outside</h3>` + chips("fs", p.t === "pdoor" ? TYPES.door.styles : TYPES.window.styles, S0.fs);
@@ -4109,8 +4342,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     if (T.styles) h += `<h3>${isOpening(p) ? "Plan symbol" : "Style"}</h3>` + chips("style", T.styles, p.style);
     if (T.texs) h += `<h3>Texture</h3>` + chips("tex", T.texs, p.tex);
     h += `<h3>Color</h3>` + swatches(p.color);
-    h += `<h3>Size and position</h3><div class="fields">`;
     const plan = D.mode === "plan", yl = plan ? "Bottom edge" : "Height above ground";
+    if (mates.length) { h += `<h3>Arrange</h3><div class="acts"><button data-a="copy">Copy</button><button data-a="dup">Duplicate</button><button data-a="del" class="danger">Delete</button></div><button class="primary" data-close>Done</button>`; const sh = $("propSheet"), top = sh.scrollTop; sh.innerHTML = h; sh.scrollTop = top; return; }
+    h += `<h3>Size and position</h3><div class="fields">`;
     if (k === "rect") h += fld(plan ? "Width (across)" : "Width", "w", fmtIn(p.w)) + fld(plan ? "Depth (up the page)" : "Height", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld(yl, "y", fmtIn(p.y));
     else if (k === "label") h += fld("Letter size", "h", fmtIn(p.h)) + fld("Left edge", "x", fmtIn(p.x)) + fld(yl, "y", fmtIn(p.y), true);
     else if (k === "line" || k === "dim") h += fld("Start, across", "x1", fmtIn(p.x1)) + fld("Start, up", "y1", fmtIn(p.y1)) + fld("End, across", "x2", fmtIn(p.x2)) + fld("End, up", "y2", fmtIn(p.y2)) + fld("Length", "len", fmtIn(Math.hypot(p.x2 - p.x1, p.y2 - p.y1))) + (k === "dim" ? fld("Offset", "off", fmtIn(p.off)) : fld("Thickness", "lw", fmtIn(p.lw)));
@@ -4146,6 +4380,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     const a = b.dataset.a;
     if (a === "center") { centerOnWall(); buildProps(p); }
     else if (a === "rot") { rotate(); buildProps(p); }
+    else if (a === "split") { selectPart(p); mergeRooms(); closeSheets(); }
     else if (a === "dims") { addDims(); closeSheets(); }
     else if (a === "link") { linkOne(p); buildProps(p); }
     else if (a === "unlink") { withUndo(() => { const o = D[D.mode === "plan" ? "front" : "plan"].find(q => q.lk === p.lk); if (o) delete o.lk; delete p.lk; }); SFX.tap(); buildProps(p); toast("Unlinked. The two views now change separately."); }
@@ -4470,6 +4705,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   $("cEdit").addEventListener("click", () => { SFX.tap(); openProps(); });
   $("cCopy").addEventListener("click", duplicate);
   $("cGroup").addEventListener("click", groupSel);
+  $("cMerge").addEventListener("click", mergeRooms);
+  $("shapeChip").addEventListener("click", () => {
+    const m = store.mem.room || (store.mem.room = {}); m.poly = !m.poly; outline = null; save(); SFX.tap(); renderDock(); queue(false);
+    toast(m.poly ? "Tap each corner of the room, then tap the first corner to close it. Corners snap to the grid and to other rooms." : "Drag to draw a rectangular room.");
+  });
   $("pasteBtn").addEventListener("click", paste);
   $("gravChip").addEventListener("click", () => { S().gravity = !S().gravity; save(); renderDock(); toast(S().gravity ? "Gravity on: walls, roofs, doors, steps and plants settle onto the ground or whatever holds them up." : "Gravity off: parts stay where you put them."); });
   $("multiChip").addEventListener("click", () => { multiMode = !multiMode; if (multiMode && tool !== "select") tool = "select"; renderDock(); toast(multiMode ? "Multi on: tap parts to add or remove them from the selection." : "Multi off."); });
