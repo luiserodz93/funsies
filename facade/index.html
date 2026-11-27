@@ -437,9 +437,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     pdoor: { name: "Door", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 91.4, h: 91.4, color: "#2a2a28", style: "swing", styles: ["swing", "pair", "sliding"] },
     pwindow: { name: "Window", kind: "rect", layer: "openings", mode: "plan", rot: true, w: 121.9, h: 15.2, color: "#5d7b91" },
     stairs: { name: "Stairs", kind: "rect", layer: "structure", mode: "plan", rot: true, w: 100, h: 300, color: "#e4dfd5", style: "straight", styles: ["straight", "spiral"] },
-    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#d6cfc3", style: "sofa", styles: ["sofa", "sectional", "armchair", "chair", "coffee", "sidetbl", "table", "rtable", "bench", "bed", "nightstand", "dresser", "wardrobe", "bookcase", "desk", "tv", "tvwall", "rug", "lounger", "grill", "recliner", "chaise", "ottoman", "stool", "bunk", "crib", "piano", "grand", "fan", "car", "suv", "pickup", "person"] },
+    furn: { name: "Furniture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 210, h: 90, color: "#d6cfc3", style: "sofa", styles: ["sofa", "sectional", "armchair", "chair", "coffee", "sidetbl", "table", "rtable", "bench", "bed", "nightstand", "dresser", "wardrobe", "bookcase", "china", "desk", "tv", "tvwall", "rug", "lounger", "grill", "recliner", "chaise", "ottoman", "stool", "bunk", "crib", "piano", "grand", "fan", "chand", "car", "suv", "pickup", "person"] },
     fixture: { name: "Fixture", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 40, h: 70, color: "#f7f6f2", style: "toilet", styles: ["toilet", "sink", "dsink", "bath", "fsbath", "shower", "stove", "fridge", "counter", "dishwasher", "washer", "dryer", "wheater", "bidet", "cbath"] },
-    cabinet: { name: "Cabinet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 91.4, h: 61, color: "#ebe7df", style: "base", styles: ["base", "drawers", "sinkbase", "sinkdw", "dwbase", "upper", "tall", "island", "vanity", "shelf", "corner", "hood", "oven", "wine"] },
+    cabinet: { name: "Cabinet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 91.4, h: 61, color: "#ebe7df", style: "base", styles: ["base", "drawers", "sinkbase", "sinkdw", "dsinkbase", "dsinkdw", "dwbase", "upper", "tall", "island", "vanity", "shelf", "corner", "hood", "oven", "wine"] },
     closet: { name: "Closet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 121.9, h: 61, color: "#e3d6c2", style: "rod", styles: ["rod", "dblrod", "cshelf", "shoes", "cdrawer", "cisland", "hamper"] },
     pplant: { name: "Plant", kind: "rect", layer: "details", mode: "plan", bare: true, w: 60, h: 60, color: "#7d8f6e", style: "pot", styles: ["pot", "fern", "monstera", "snake", "fiddle", "succulent", "areca", "orchid", "shrub", "hedge", "fbed", "grass", "hibiscus", "bougain", "croton", "banana", "bamboo", "cactus", "planter", "palm", "tree", "flamboyan"] },
     column: { name: "Column", kind: "rect", layer: "structure", mode: "plan", bare: true, w: 20.3, h: 20.3, color: "#f1eee8", style: "square", styles: ["square", "round", "tapered", "classic", "steel", "brick"] },
@@ -460,7 +460,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     stairs: { straight: [91.4, 304.8], spiral: [152.4, 152.4] },
     furn: { sofa: [213.4, 91.4], sectional: [274.3, 182.9], armchair: [86.4, 86.4], chair: [45.7, 50.8], coffee: [121.9, 61], sidetbl: [50.8, 50.8], table: [198.1, 162.6], rtable: [167.6, 167.6], bench: [121.9, 40.6], bed: [152.4, 203.2], nightstand: [55.9, 45.7], dresser: [152.4, 50.8], wardrobe: [121.9, 61], bookcase: [91.4, 33], desk: [137.2, 71.1], tv: [182.9, 45.7], rug: [243.8, 167.6], lounger: [71.1, 198.1], grill: [137.2, 61] , recliner: [91.4, 96.5], chaise: [76.2, 165.1], ottoman: [76.2, 61], stool: [40.6, 40.6], bunk: [99.1, 203.2], crib: [76.2, 137.2], piano: [149.9, 61], grand: [149.9, 182.9], fan: [132, 132], car: [182.9, 457.2], suv: [198.1, 487.7], pickup: [203.2, 584.2], person: [55.9, 30.5] },
     fixture: { toilet: [45.7, 71.1], sink: [61, 45.7], dsink: [91.4, 55.9], bath: [152.4, 76.2], fsbath: [167.6, 81.3], shower: [91.4, 91.4], stove: [76.2, 66], fridge: [91.4, 76.2], counter: [243.8, 63.5], dishwasher: [61, 61], washer: [68.6, 76.2], dryer: [68.6, 76.2], wheater: [61, 61], bidet: [38.1, 58.4], cbath: [152.4, 152.4] },
-    cabinet: { base: [91.4, 61], drawers: [45.7, 61], sinkbase: [91.4, 61], sinkdw: [152.4, 61], dwbase: [121.9, 61], upper: [91.4, 33], tall: [61, 61], island: [182.9, 106.7], vanity: [121.9, 55.9], shelf: [91.4, 25.4], corner: [91.4, 91.4], hood: [76.2, 50.8], oven: [76.2, 61], wine: [61, 61] },
+    cabinet: { base: [91.4, 61], drawers: [45.7, 61], sinkbase: [91.4, 61], sinkdw: [152.4, 61], dsinkbase: [121.9, 61], dsinkdw: [182.9, 61], dwbase: [121.9, 61], upper: [91.4, 33], tall: [61, 61], island: [182.9, 106.7], vanity: [121.9, 55.9], shelf: [91.4, 25.4], corner: [91.4, 91.4], hood: [76.2, 50.8], oven: [76.2, 61], wine: [61, 61] },
     closet: { rod: [121.9, 61], dblrod: [121.9, 61], cshelf: [91.4, 40.6], shoes: [91.4, 35.6], cdrawer: [76.2, 50.8], cisland: [121.9, 76.2], hamper: [45.7, 40.6] },
     pplant: { pot: [61, 61], fern: [76.2, 76.2], monstera: [91.4, 91.4], snake: [40.6, 40.6], fiddle: [76.2, 76.2], succulent: [30.5, 30.5], areca: [91.4, 91.4], orchid: [35.6, 35.6], shrub: [91.4, 91.4], hedge: [243.8, 76.2], fbed: [182.9, 76.2], grass: [76.2, 76.2], hibiscus: [121.9, 121.9], bougain: [152.4, 152.4], croton: [76.2, 76.2], banana: [213.4, 213.4], bamboo: [121.9, 121.9], cactus: [61, 61], planter: [121.9, 45.7], palm: [365.8, 365.8], tree: [304.8, 304.8], flamboyan: [609.6, 609.6] },
     column: { square: [20.3, 20.3], round: [25.4, 25.4], tapered: [30.5, 30.5], classic: [30.5, 30.5], steel: [10.2, 10.2], brick: [40.6, 40.6] },
@@ -477,11 +477,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     shrub: "Shrub", tree: "Tree", palm: "Palm", tank: "Water tank", solar: "Solar water heater", ac: "Mini-split AC", hedge: "Hedge", flowers: "Flower box", ivy: "Ivy",
     steps: "Steps", stoop: "Stoop",
     swing: "Swing", pair: "Double", sliding: "Sliding", straight: "Straight", spiral: "Spiral",
-    sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console", tvwall: "Wall TV",
+    sofa: "Sofa", armchair: "Armchair", bed: "Bed", table: "Dining table", desk: "Desk", wardrobe: "Wardrobe", rug: "Rug", tv: "TV console", tvwall: "Wall TV", china: "China cabinet", chand: "Chandelier",
     toilet: "Toilet", sink: "Sink", bath: "Bathtub", shower: "Shower", stove: "Stove", fridge: "Fridge", counter: "Counter", dishwasher: "Dishwasher", washer: "Washer", dryer: "Dryer", pot: "Potted plant",
     sectional: "Sectional", chair: "Chair", coffee: "Coffee table", sidetbl: "Side table", rtable: "Round table", bench: "Bench", nightstand: "Nightstand", dresser: "Dresser", bookcase: "Bookcase", lounger: "Lounge chair", grill: "Grill",
     dsink: "Double sink", fsbath: "Freestanding tub", wheater: "Water heater",
-    base: "Base cabinet", drawers: "Drawer base", sinkbase: "Sink base", sinkdw: "Sink and dishwasher", dwbase: "Cabinets with dishwasher", upper: "Wall cabinet", tall: "Pantry", island: "Island", vanity: "Vanity", shelf: "Open shelf",
+    base: "Base cabinet", drawers: "Drawer base", sinkbase: "Sink base", sinkdw: "Sink and dishwasher", dsinkbase: "Double sink base", dsinkdw: "Double sink and dishwasher", dwbase: "Cabinets with dishwasher", upper: "Wall cabinet", tall: "Pantry", island: "Island", vanity: "Vanity", shelf: "Open shelf",
     rod: "Hanging rod", dblrod: "Double rod", cshelf: "Closet shelves", shoes: "Shoe rack", cdrawer: "Closet drawers", cisland: "Closet island", hamper: "Hamper",
     fern: "Fern", monstera: "Monstera", snake: "Snake plant", fiddle: "Fiddle-leaf fig", succulent: "Succulent", areca: "Areca palm", orchid: "Orchid", fbed: "Flower bed", grass: "Ornamental grass", hibiscus: "Hibiscus", bougain: "Bougainvillea", croton: "Croton", banana: "Banana plant", bamboo: "Bamboo", cactus: "Cactus", planter: "Raised planter", flamboyan: "Flamboyán",
     pavers: "Pavers", flagstone: "Flagstone", stepping: "Stepping stones", gravel: "Gravel", deck: "Wood deck", ptile: "Patio tile", asphalt: "Asphalt", lawn: "Lawn", mulch: "Mulch", pool: "Pool",
@@ -689,7 +689,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   const onFloor = p => D.mode !== "plan" || (p.fl || 0) === (D.lvl || 0);
   const visible = p => !D.layers[p.layer].hide && onFloor(p);
   const editable = p => visible(p) && !D.layers[p.layer].lock;
-  const isRug = p => p.t === "furn" && p.style === "rug", isFan = p => !!p && p.t === "furn" && p.style === "fan";
+  const isRug = p => p.t === "furn" && p.style === "rug", isFan = p => !!p && p.t === "furn" && (p.style === "fan" || p.style === "chand");
   function hitPart(w) {
     const tol = 10 / view.s, n = D.parts.length;
     /* ceiling fans are found first, then doors, windows and furniture, then the rugs and rooms under them, and paving last of all */
@@ -1248,6 +1248,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         for (let i = 0; i < n; i++) s += circ(L * (i + 0.5) / n, Dp - 2, 1.4, e);
         return s + rr(L * 0.08, Dp * 0.2, L * 0.22, Dp * 0.35, 1, lt, stk(dk, 0.5));
       }
+      /* a china cabinet: a buffet with a glass-fronted hutch on it, plates standing on the shelves */
+      case "china": {
+        let s = rr(0, 0, L, Dp, 2, c, st) + rr(2.5, 2.5, L - 5, Dp * 0.62, 1.5, "#e3ecef", stk(dk, 0.6) + ' opacity=".85"') + ln(`M0 ${f(Dp - 3)}H${f(L)}M${f(L / 2)} ${f(Dp * 0.62 + 2.5)}V${f(Dp)}`, dk, 0.7);
+        const n = Math.max(3, Math.round((L - 10) / 16)); for (let i = 0; i < n; i++) s += ell(6 + (i + 0.5) * (L - 12) / n, Dp * 0.18, Math.min(6, (L - 12) / n * 0.4), Dp * 0.07, "#f7f5ef", stk(dk, 0.5));
+        return s;
+      }
       case "wardrobe": return rr(0, 0, L, Dp, 2, c, st) + ln(`M${f(L / 2)} ${f(Dp - 6)}V${f(Dp)}`, e, 0.8) + ln(`M${f(4)} ${f(Dp * 0.48)}H${f(L - 4)}`, dk, 1, 'stroke-dasharray="5 3"') + Array.from({ length: Math.max(3, Math.round(L / 9)) }, (_, i) => ln(`M${f(8 + i * 9)} ${f(Dp * 0.22)}V${f(Dp * 0.74)}`, dk, 0.6, 'opacity=".6"')).filter((_, i) => 8 + i * 9 < L - 6).join("") + circ(L / 2 - 4, Dp - 3, 1.3, e) + circ(L / 2 + 4, Dp - 3, 1.3, e);
       case "bookcase": {
         let s = rr(0, 0, L, Dp, 1.5, c, st), x = 3;
@@ -1305,6 +1311,12 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         let s = `<path d="${body}" fill="#1d1e20" ${st}/>` + `<path d="${body}" fill="none" stroke="#5a5c5f" stroke-width="1" transform="translate(${f(L * 0.04)} ${f(Dp * 0.03)}) scale(.92)"/>` + R(L * 0.02, 0, L * 0.96, kb, "#fbfaf6", stk(e, 0.7));
         for (let i = 1; i < 52; i++) { const x = L * 0.02 + L * 0.96 * i / 52; if ([1, 2, 4, 5, 6].indexOf(i % 7) >= 0) s += R(x - 0.6, 0, 1.2, kb * 0.6, "#1d1e20"); }
         return s;
+      }
+      /* a chandelier seen from below: its reach dashed, curved arms out to six candle cups, a crystal drop in the middle */
+      case "chand": {
+        let s = circ(L / 2, Dp / 2, m * 0.48, "none", stk(e, 0.8) + ' stroke-dasharray="6 4" opacity=".7"') + circ(L / 2, Dp / 2, m * 0.3, "none", stk(c, 1.4));
+        for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + 0.26, x = L / 2 + Math.cos(a) * m * 0.36, y = Dp / 2 + Math.sin(a) * m * 0.36; s += ln(`M${f(L / 2)} ${f(Dp / 2)}Q${f(L / 2 + Math.cos(a - 0.5) * m * 0.22)} ${f(Dp / 2 + Math.sin(a - 0.5) * m * 0.22)} ${f(x)} ${f(y)}`, c, 1.6) + circ(x, y, m * 0.05, "#f3e6c4", stk(e, 0.6)); }
+        return s + circ(L / 2, Dp / 2, m * 0.09, c, st) + circ(L / 2, Dp / 2, m * 0.04, "#eef3f5", stk(e, 0.5));
       }
       case "fan": {
         let s = circ(L / 2, Dp / 2, m * 0.48, "none", stk(e, 0.8) + ' stroke-dasharray="6 4" opacity=".7"');
@@ -1405,14 +1417,16 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       }
       default: {
         /* base, drawer base and sink base */
-        let s = rr(0, 0, L, Dp, 1.5, top, st) + ln(`M0 ${f(Dp - 3)}H${f(L)}`, dk, 0.8) + doors(0, p.style === "sinkdw" || p.style === "dwbase" ? L - Math.min(61, L * 0.5) : L, Dp - 3);
+        let s = rr(0, 0, L, Dp, 1.5, top, st) + ln(`M0 ${f(Dp - 3)}H${f(L)}`, dk, 0.8) + doors(0, p.style === "sinkdw" || p.style === "dsinkdw" || p.style === "dwbase" ? L - Math.min(61, L * 0.5) : L, Dp - 3);
         s += Array.from({ length: Math.max(3, Math.round(L / 25)) }, (_, i) => circ((i + 0.5) * L / Math.max(3, Math.round(L / 25)), Dp * (0.25 + ((i * 37) % 5) * 0.1), 0.7, "#b5aea1")).join("");
         if (p.style === "drawers") for (let i = 1; i < 4; i++) s += ln(`M${f(L * 0.2)} ${f(Dp - 3 + 0)}h${f(L * 0.6)}`, dk, 0.4);
         if (p.style === "drawers") s += circ(L / 2, Dp - 1.5, 1.2, e);
         /* a dishwasher takes the last 24" of the run: a steel front under the same counter */
-        const dw = p.style === "sinkdw" || p.style === "dwbase" ? Math.min(61, L * 0.5) : 0;
+        const dw = p.style === "sinkdw" || p.style === "dsinkdw" || p.style === "dwbase" ? Math.min(61, L * 0.5) : 0;
         if (dw) s += R(L - dw, 0, dw, Dp, top) + R(L - dw + 1.5, Dp - 5, dw - 3, 5, "#c9c9c4", stk(e, 0.6)) + ln(`M${f(L - dw)} 0V${f(Dp)}`, dk, 0.8) + `<text x="${f(L - dw / 2)}" y="${f(Dp * 0.45)}" text-anchor="middle" dominant-baseline="middle" font-size="${f(Math.min(dw, Dp) * 0.24)}" font-family="IBM Plex Mono, ui-monospace, monospace" font-weight="500" fill="${e}">DW</text>`;
         /* the sink sits in the middle of the cabinets beside the dishwasher, no wider than 30" */
+        /* a double sink: two bowls side by side in a 33" to 36" opening, one faucet between them */
+        if (p.style === "dsinkbase" || p.style === "dsinkdw") { const sc = (L - dw) / 2, ow = Math.min((L - dw) * 0.8, 86.4), bw = ow * 0.47; [sc - ow / 2, sc + ow / 2 - bw].forEach(x => { s += rr(x, Dp * 0.18, bw, Dp * 0.62, m * 0.07, "#eceae4", stk(e, 1)) + circ(x + bw / 2, Dp * 0.52, 1.8, e); }); s += rr(sc - 2, 2, 4, Dp * 0.13, 1.5, "#9a9a96", stk(e, 0.5)); }
         if (p.style === "sinkbase" || p.style === "sinkdw") { const sc = (L - dw) / 2, sw = Math.min((L - dw) * 0.68, 76.2); s += rr(sc - sw / 2, Dp * 0.18, sw, Dp * 0.62, m * 0.08, "#eceae4", stk(e, 1)) + circ(sc, Dp * 0.52, 2, e) + rr(sc - 2, 2, 4, Dp * 0.13, 1.5, "#9a9a96", stk(e, 0.5)); }
         return s;
       }
@@ -4052,7 +4066,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
   function resetColumns(r) { D.plan = D.plan.filter(p => p.t !== "column" || p.own !== r.id); delete r.csig; delete r.cman; delete r.cset; }
   /* Things that stand in rooms (furniture, fixtures, cabinets, closet fittings, stairs) and which of them go back to a wall. */
   const ITEM_T = { furn: 1, fixture: 1, cabinet: 1, closet: 1, stairs: 1 };
-  const FREE_ST = { table: 1, rtable: 1, coffee: 1, rug: 1, chair: 1, lounger: 1, grill: 1, island: 1, cisland: 1, fsbath: 1, spiral: 1, ottoman: 1, stool: 1, grand: 1, fan: 1, car: 1, suv: 1, pickup: 1, person: 1, chaise: 1 };
+  const FREE_ST = { table: 1, rtable: 1, coffee: 1, rug: 1, chair: 1, lounger: 1, grill: 1, island: 1, cisland: 1, fsbath: 1, spiral: 1, ottoman: 1, stool: 1, grand: 1, fan: 1, chand: 1, car: 1, suv: 1, pickup: 1, person: 1, chaise: 1 };
   const hugs = (t, st) => ITEM_T[t] && !FREE_ST[st];
   /* The inside faces of a room's walls: where each wall stops, given its thickness at u along it. */
   function innerFace(r, h, sign, u, rooms) { const t = wallTOf(r, h, sign, u, rooms); return (h ? (sign < 0 ? r.y : r.y + r.h) : (sign < 0 ? r.x : r.x + r.w)) - sign * t / 2; }
@@ -4710,6 +4724,16 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         case "sidetbl": { cyl(L / 2, Dp / 2, m * 0.48, m * 0.48, 52, 55, M(c, 0.6), 32); cyl(L / 2, Dp / 2, 3, 3, 0, 52, M(c, 0.6), 10); cyl(L / 2, Dp / 2, m * 0.25, m * 0.25, 0, 2, M(c, 0.6), 24); lamp(L / 2, Dp / 2, 55); break; }
         case "nightstand": { box(0, L, 0, Dp, 8, 60, M(c, 0.6)); [[3, 3], [L - 3, 3], [3, Dp - 3], [L - 3, Dp - 3]].forEach(q => box(q[0] - 2, q[0] + 2, q[1] - 2, q[1] + 2, 0, 8, M(cd, 0.6))); seamY(1, L - 1, 40); pull(L / 2, 50, 10); pull(L / 2, 30, 10); lamp(L * 0.42, Dp * 0.45, 60); break; }
         case "dresser": { box(0, L, 0, Dp, 8, 82, M(c, 0.6)); box(0, L, 0, Dp, 82, 85, M(cd, 0.5)); const n = Math.max(2, Math.round(L / 50)); for (let i = 1; i < n; i++) seamX(L * i / n, 8, 82); [0.33, 0.66].forEach(t => seamY(0.5, L - 0.5, 8 + 74 * t)); for (let i = 0; i < n; i++) [0.18, 0.5, 0.82].forEach(t => pull(L * (i + 0.5) / n, 8 + 74 * t, 12)); break; }
+        case "china": {
+          /* the buffet below with doors, a glass hutch above set back on it, shelves with plates standing behind the glass */
+          const wm = M(c, 0.55), hd = Dp * 0.62, plate = M("#f7f5ef", 0.3);
+          box(0, L, 0, Dp, 0, 8, M(cd, 0.6)); box(0, L, 0, Dp, 8, 84, wm); box(-1, L + 1, -0.5, Dp + 1, 84, 87, M(cd, 0.5)); seamX(L / 2, 12, 80); pull(L / 2 - 4, 60, 12, true); pull(L / 2 + 4, 60, 12, true);
+          box(0, L, 0, 1.5, 87, 200, wm); box(0, 2, 0, hd, 87, 200, wm); box(L - 2, L, 0, hd, 87, 200, wm); box(-1, L + 1, -0.5, hd + 1, 200, 206, M(cd, 0.5));
+          [120, 156].forEach(y => box(2, L - 2, 1.5, hd - 1, y, y + 1.5, wm));
+          [87, 121.5, 157.5].forEach(y => { const n = Math.max(2, Math.round((L - 8) / 26)); for (let i = 0; i < n; i++) { const k = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 0.8, 20), plate); k.rotation.x = Math.PI / 2 - 0.18; const u = 4 + (i + 0.5) * (L - 8) / n; k.position.set(u - L / 2, y + 11, 4 - Dp / 2); G.add(k); } });
+          box(2, L - 2, hd - 1, hd - 0.4, 88, 199, glassM); box(L / 2 - 0.6, L / 2 + 0.6, hd - 1.2, hd, 88, 199, wm);
+          break;
+        }
         case "wardrobe": { box(0, L, 0, Dp, 0, 205, M(c, 0.6)); box(-1, L + 1, -0.5, Dp + 1, 205, 210, M(cd, 0.6)); seamX(L / 2, 6, 203); pull(L / 2 - 4, 110, 24, true); pull(L / 2 + 4, 110, 24, true); seamY(0.5, L - 0.5, 6); break; }
         case "bookcase": {
           const wm = M(c, 0.6), H = 190, cols = ["#8a5444", "#4f6658", "#c9b27a", "#2f5f8f", "#a0705a", "#6e5a4c", "#e6e1d6"];
@@ -4787,6 +4811,19 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
           [[L * 0.08, kb + 6], [L * 0.9, kb + 6], [L * 0.3, Dp * 0.92]].forEach(q => cyl(q[0], q[1], 4, 5, 0, 66, bm, 10));
           const lid = mesh(G, new THREE.BoxGeometry(L * 0.5, 1.5, Dp * 0.6), bm, L * 0.02, 120, 0); lid.rotation.z = 0.5; break;
         }
+        case "chand": {
+          /* hangs from the ceiling on a chain: a center column, a ring of curved arms with candle lights, and crystal drops */
+          const ch = B.fh - (lvOf(p) ? 4 : 2), bm = M(c, 0.3, 0.7), lit = new THREE.MeshStandardMaterial({ color: 0xfbf1d6, roughness: 0.4, emissive: D.sky === "night" ? 0x8a6a30 : 0x2a2418 }), xm = M("#eef3f5", 0.05, 0.2), y0 = ch - Math.min(80, B.fh * 0.3), R0 = m * 0.36;
+          cyl(L / 2, Dp / 2, 8, 8, ch - 2, ch, bm, 16); cyl(L / 2, Dp / 2, 0.8, 0.8, y0 + 30, ch - 2, bm, 6);
+          cyl(L / 2, Dp / 2, 1.6, 2.6, y0, y0 + 28, bm, 14); cyl(L / 2, Dp / 2, 3.2, 1.2, y0 - 3, y0, bm, 14); ico(L / 2, Dp / 2, y0 - 6, 2.6, xm);
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(R0 * 0.55, 0.8, 6, 32), bm); ring.rotation.x = Math.PI / 2; ring.position.set(0, y0 + 6, 0); G.add(ring);
+          for (let i = 0; i < 6; i++) {
+            const a = i / 6 * Math.PI * 2, cx = L / 2 + Math.cos(a) * R0, cz = Dp / 2 + Math.sin(a) * R0, k = mesh(G, new THREE.BoxGeometry(R0, 1, 1), bm, Math.cos(a) * R0 / 2, y0 + 8, Math.sin(a) * R0 / 2); k.rotation.y = -a;
+            cyl(cx, cz, 2.6, 1.6, y0 + 8, y0 + 12, bm, 10); cyl(cx, cz, 1.1, 1.1, y0 + 12, y0 + 22, lit, 8); sph(cx, cz, y0 + 23.5, 2, 2.6, 2, lit);
+            ico(L / 2 + Math.cos(a + 0.5) * R0 * 0.55, Dp / 2 + Math.sin(a + 0.5) * R0 * 0.55, y0 + 2.5, 1.1, xm);
+          }
+          break;
+        }
         case "fan": {
           const ch = B.fh - (lvOf(p) ? 4 : 2), dm = M(shade(c, -0.3), 0.5, 0.3);
           cyl(L / 2, Dp / 2, 1.2, 1.2, ch - 30, ch, dm, 8); cyl(L / 2, Dp / 2, 9, 8, ch - 42, ch - 30, dm, 20); cyl(L / 2, Dp / 2, 6, 6, ch - 2, ch, dm, 16);
@@ -4862,12 +4899,13 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
         case "hood": { const sm = M(STEEL, 0.3, 0.6); box(0, L, 0, Dp, 150, 162, sm); const k = mesh(G, new THREE.CylinderGeometry(Math.min(L, Dp) * 0.18, Math.min(L, Dp) * 0.6, 22, 4), sm, 0, 173, -Dp / 2 + Dp * 0.4); k.rotation.y = Math.PI / 4; k.scale.set(L / Math.min(L, Dp), 1, Dp / Math.min(L, Dp) * 0.8); box(L * 0.35, L * 0.65, 0, Dp * 0.55, 184, 240, sm); box(L * 0.1, L * 0.9, Dp - 1, Dp, 150.5, 152, M("#f6efd9", 0.5)); break; }
         case "oven": { box(0, L, 0, 8, 0, 10, M(DARK, 0.9)); box(0, L, 0, Dp - 2.5, 10, 213, M(c, 0.7)); box(0, L, Dp - 2.5, Dp, 10, 212, M(c, 0.7)); seamY(0.5, L - 0.5, 75); seamY(0.5, L - 0.5, 182); [[80, 128], [132, 178]].forEach(([a, b]) => { box(L * 0.06, L * 0.94, Dp, Dp + 1, a, b, M(STEEL, 0.3, 0.6)); box(L * 0.14, L * 0.86, Dp + 1, Dp + 1.4, a + 8, b - 12, M("#16181a", 0.15, 0.3)); rodX(L * 0.15, L * 0.85, Dp + 3.5, b - 4, 0.9, M("#c9c9c4", 0.3, 0.8)); }); pull(L / 2, 40, 14); break; }
         case "wine": { box(0, L, 0, Dp - 2, 4, 86, M(STEEL, 0.3, 0.6)); box(L * 0.06, L * 0.94, Dp - 2, Dp, 8, 82, M("#22262a", 0.05, 0.4)); for (let h = 15; h < 78; h += 13) for (let u = 8; u < L - 6; u += 9) cyl(u, Dp - 12, 3.4, 3.4, h, h + 6, M(["#3d1520", "#5b4a1e", "#24331f"][Math.floor(rnd() * 3)], 0.2), 10); box(0, L, 0, Dp, 87, 91, M(TOP, 0.35)); break; }
-        case "sinkbase": case "sinkdw": case "dwbase": {
+        case "sinkbase": case "sinkdw": case "dsinkbase": case "dsinkdw": case "dwbase": {
           /* cabinets with the sink set into the counter and, on the sink-and-dishwasher and dishwasher runs, a built-in dishwasher at the end */
-          const dw = st === "sinkbase" ? 0 : Math.min(61, L * 0.5), cu = L - dw;
+          const dw = st === "sinkbase" || st === "dsinkbase" ? 0 : Math.min(61, L * 0.5), cu = L - dw;
           baseRun(0, cu, Dp, 87);
           if (dw) { const sm = M(STEEL, 0.3, 0.6); box(cu, L, 0, Dp - 8, 0, 10, M(DARK, 0.9)); box(cu + 0.3, L, 0, Dp - 2.5, 10, 87, sm); box(cu + 1, L - 1, Dp - 2.5, Dp - 1, 12, 85, sm); rodX(cu + dw * 0.15, L - dw * 0.15, Dp + 1, 80, 1, M("#c9c9c4", 0.3, 0.8)); box(cu, L, 0, Dp, 87, 91, M(TOP, 0.35)); }
-          if (st !== "dwbase") { const sc = cu / 2, sw = Math.min(cu * 0.34, 38); basin(sc, Dp * 0.52, sw, Dp * 0.3, 91.2); faucet(sc, 5, 91); }
+          if (st === "dsinkbase" || st === "dsinkdw") { const sc = cu / 2, ow = Math.min(cu * 0.8, 86.4), bw = ow * 0.47; [sc - ow / 2 + bw / 2, sc + ow / 2 - bw / 2].forEach(u => basin(u, Dp * 0.52, bw * 0.46, Dp * 0.3, 91.2)); faucet(sc, 5, 91); }
+          else if (st !== "dwbase") { const sc = cu / 2, sw = Math.min(cu * 0.34, 38); basin(sc, Dp * 0.52, sw, Dp * 0.3, 91.2); faucet(sc, 5, 91); }
           break;
         }
         default: baseRun(0, L, Dp, 87);
@@ -5395,11 +5433,11 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     ],
     plan: [
       ["Doors and windows", [["pdoor", "swing", 30, 30, "Narrow door"], ["pdoor", "swing", 36, 36, "Door"], ["pdoor", "pair", 60, 30, "Double door"], ["pdoor", "sliding", 72, 6, "Sliding door"], ["pwindow", null, 36, 6, "Small window"], ["pwindow", null, 48, 6, "Window"], ["pwindow", null, 72, 6, "Wide window"], ["pwindow", null, 24, 6, "Bathroom window", { fs: "frosted", sill: 152.4, oh: 61 }], ["pwindow", null, 36, 6, "High frosted window", { fs: "frosted", sill: 167.6, oh: 45.7 }]]],
-      ["Kitchen cabinets", [["cabinet", "base", 36, 24, "Base cabinet"], ["cabinet", "base", 18, 24, "Narrow base"], ["cabinet", "drawers", 18, 24, "Drawer base"], ["cabinet", "sinkbase", 36, 24, "Sink base"], ["cabinet", "sinkbase", 72, 24, "Sink cabinet run"], ["cabinet", "sinkdw", 60, 24, "Sink and dishwasher"], ["cabinet", "dwbase", 48, 24, "Cabinets with dishwasher"], ["cabinet", "upper", 36, 13, "Wall cabinet"], ["cabinet", "upper", 18, 13, "Narrow wall cabinet"], ["cabinet", "upper", 30, 24, "Cabinet over fridge"], ["cabinet", "tall", 24, 24, "Pantry"], ["cabinet", "island", 72, 42, "Island with stools"], ["cabinet", "island", 96, 48, "Large island"], ["cabinet", "shelf", 36, 10, "Open shelf", { color: "#b98a4e" }], ["cabinet", "corner", 36, 36, "Corner cabinet"], ["cabinet", "oven", 30, 24, "Wall oven tower"], ["cabinet", "hood", 30, 20, "Range hood"], ["cabinet", "wine", 24, 24, "Wine fridge"], ["fixture", "counter", 96, 25, "Counter"]]],
+      ["Kitchen cabinets", [["cabinet", "base", 36, 24, "Base cabinet"], ["cabinet", "base", 18, 24, "Narrow base"], ["cabinet", "drawers", 18, 24, "Drawer base"], ["cabinet", "sinkbase", 36, 24, "Sink base"], ["cabinet", "sinkbase", 72, 24, "Sink cabinet run"], ["cabinet", "sinkdw", 60, 24, "Sink and dishwasher"], ["cabinet", "dsinkbase", 48, 24, "Double sink base"], ["cabinet", "dsinkdw", 72, 24, "Double sink and dishwasher"], ["cabinet", "dwbase", 48, 24, "Cabinets with dishwasher"], ["cabinet", "upper", 36, 13, "Wall cabinet"], ["cabinet", "upper", 18, 13, "Narrow wall cabinet"], ["cabinet", "upper", 30, 24, "Cabinet over fridge"], ["cabinet", "tall", 24, 24, "Pantry"], ["cabinet", "island", 72, 42, "Island with stools"], ["cabinet", "island", 96, 48, "Large island"], ["cabinet", "shelf", 36, 10, "Open shelf", { color: "#b98a4e" }], ["cabinet", "corner", 36, 36, "Corner cabinet"], ["cabinet", "oven", 30, 24, "Wall oven tower"], ["cabinet", "hood", 30, 20, "Range hood"], ["cabinet", "wine", 24, 24, "Wine fridge"], ["fixture", "counter", 96, 25, "Counter"]]],
       ["Kitchen appliances", [["fixture", "fridge", 36, 30, "Fridge"], ["fixture", "stove", 30, 26, "Range"], ["fixture", "sink", 33, 22, "Kitchen sink"], ["fixture", "dsink", 36, 22, "Double sink"], ["fixture", "dishwasher", 24, 24, "Dishwasher"]]],
       ["Laundry", [["fixture", "washer", 27, 30, "Washer"], ["fixture", "dryer", 27, 30, "Dryer"], ["fixture", "wheater", 24, 24, "Water heater"], ["cabinet", "upper", 54, 13, "Laundry cabinets"], ["fixture", "sink", 24, 22, "Utility sink"]]],
       ["Bathroom", [["fixture", "toilet", 18, 28, "Toilet"], ["fixture", "sink", 24, 18, "Pedestal basin"], ["cabinet", "vanity", 36, 22, "Vanity"], ["cabinet", "vanity", 60, 22, "Double vanity"], ["fixture", "bath", 60, 30, "Bathtub"], ["fixture", "fsbath", 66, 32, "Freestanding tub"], ["fixture", "shower", 36, 36, "Shower"], ["fixture", "shower", 60, 36, "Walk-in shower"], ["fixture", "cbath", 60, 60, "Corner tub"], ["fixture", "bidet", 15, 23, "Bidet"], ["cabinet", "tall", 18, 18, "Linen tower"]]],
-      ["Living and dining", [["furn", "sofa", 84, 36, "Sofa"], ["furn", "sofa", 60, 34, "Loveseat"], ["furn", "sectional", 108, 72, "Sectional", { color: "#a9a49a" }], ["furn", "armchair", 34, 34, "Armchair"], ["furn", "coffee", 48, 24, "Coffee table", { color: "#b98a4e" }], ["furn", "sidetbl", 20, 20, "Side table with lamp", { color: "#b98a4e" }], ["furn", "table", 56, 60, "Dining set, 4 seats", { color: "#b98a4e" }], ["furn", "table", 78, 64, "Dining set, 6 seats", { color: "#b98a4e" }], ["furn", "table", 114, 64, "Dining set, 8 seats", { color: "#b98a4e" }], ["furn", "table", 144, 66, "Dining set, 10 seats", { color: "#b98a4e" }], ["furn", "rtable", 48, 48, "Round table, 4 seats", { color: "#b98a4e" }], ["furn", "rtable", 66, 66, "Round table, 6 seats", { color: "#b98a4e" }], ["furn", "stool", 16, 16, "Bar stool", { color: "#6e5a4c" }], ["furn", "recliner", 36, 38, "Recliner", { color: "#8a6a4e" }], ["furn", "chaise", 30, 65, "Chaise longue"], ["furn", "ottoman", 30, 24, "Ottoman", { color: "#a9a49a" }], ["furn", "piano", 59, 24, "Upright piano"], ["furn", "grand", 59, 72, "Grand piano"], ["furn", "fan", 52, 52, "Ceiling fan", { color: "#b98a4e" }], ["furn", "chair", 18, 20, "Chair", { color: "#c8b8a2" }], ["furn", "rug", 96, 66, "Rug", { color: "#b8466a" }], ["furn", "tv", 72, 18, "TV console", { color: "#6e5a4c" }], ["furn", "tvwall", 57, 3, "Wall TV", { color: "#16181a" }], ["furn", "bookcase", 36, 13, "Bookcase", { color: "#b98a4e" }], ["furn", "desk", 54, 28, "Desk", { color: "#b98a4e" }], ["furn", "bench", 48, 16, "Bench", { color: "#b98a4e" }]]],
+      ["Living and dining", [["furn", "sofa", 84, 36, "Sofa"], ["furn", "sofa", 60, 34, "Loveseat"], ["furn", "sectional", 108, 72, "Sectional", { color: "#a9a49a" }], ["furn", "armchair", 34, 34, "Armchair"], ["furn", "coffee", 48, 24, "Coffee table", { color: "#b98a4e" }], ["furn", "sidetbl", 20, 20, "Side table with lamp", { color: "#b98a4e" }], ["furn", "table", 56, 60, "Dining set, 4 seats", { color: "#b98a4e" }], ["furn", "table", 78, 64, "Dining set, 6 seats", { color: "#b98a4e" }], ["furn", "table", 114, 64, "Dining set, 8 seats", { color: "#b98a4e" }], ["furn", "table", 144, 66, "Dining set, 10 seats", { color: "#b98a4e" }], ["furn", "rtable", 48, 48, "Round table, 4 seats", { color: "#b98a4e" }], ["furn", "rtable", 66, 66, "Round table, 6 seats", { color: "#b98a4e" }], ["furn", "stool", 16, 16, "Bar stool", { color: "#6e5a4c" }], ["furn", "recliner", 36, 38, "Recliner", { color: "#8a6a4e" }], ["furn", "chaise", 30, 65, "Chaise longue"], ["furn", "ottoman", 30, 24, "Ottoman", { color: "#a9a49a" }], ["furn", "piano", 59, 24, "Upright piano"], ["furn", "grand", 59, 72, "Grand piano"], ["furn", "fan", 52, 52, "Ceiling fan", { color: "#b98a4e" }], ["furn", "chand", 30, 30, "Chandelier", { color: "#b8954f" }], ["furn", "china", 60, 18, "China cabinet", { color: "#6e5a4c" }], ["furn", "chair", 18, 20, "Chair", { color: "#c8b8a2" }], ["furn", "rug", 96, 66, "Rug", { color: "#b8466a" }], ["furn", "tv", 72, 18, "TV console", { color: "#6e5a4c" }], ["furn", "tvwall", 57, 3, "Wall TV", { color: "#16181a" }], ["furn", "bookcase", 36, 13, "Bookcase", { color: "#b98a4e" }], ["furn", "desk", 54, 28, "Desk", { color: "#b98a4e" }], ["furn", "bench", 48, 16, "Bench", { color: "#b98a4e" }]]],
       ["Bedroom", [["furn", "bed", 76, 80, "King bed", { color: "#d8cbb5" }], ["furn", "bed", 60, 80, "Queen bed", { color: "#d8cbb5" }], ["furn", "bed", 54, 75, "Full bed", { color: "#d8cbb5" }], ["furn", "bed", 39, 75, "Twin bed", { color: "#d8cbb5" }], ["furn", "bunk", 43, 80, "Bunk bed", { color: "#8aa0b0" }], ["furn", "crib", 30, 54, "Crib", { color: "#d8cbb5" }], ["furn", "nightstand", 22, 18, "Nightstand", { color: "#b98a4e" }], ["furn", "dresser", 60, 20, "Dresser", { color: "#b98a4e" }], ["furn", "wardrobe", 48, 24, "Wardrobe", { color: "#c8b8a2" }]]],
       ["Closet", [["closet", "rod", 48, 24, "Hanging rod"], ["closet", "rod", 72, 24, "Long hanging rod"], ["closet", "dblrod", 48, 24, "Double rod"], ["closet", "cshelf", 36, 16, "Shelves"], ["closet", "shoes", 36, 14, "Shoe rack"], ["closet", "cdrawer", 30, 20, "Drawers"], ["closet", "cisland", 48, 30, "Closet island"], ["closet", "hamper", 18, 16, "Hamper"]]],
       ["Indoor plants", [["pplant", "pot", 24, 24, "Potted plant"], ["pplant", "monstera", 36, 36, "Monstera"], ["pplant", "fiddle", 30, 30, "Fiddle-leaf fig"], ["pplant", "snake", 16, 16, "Snake plant", { color: "#55704a" }], ["pplant", "fern", 30, 30, "Fern", { color: "#6f8f4f" }], ["pplant", "areca", 36, 36, "Areca palm", { color: "#7a9a5a" }], ["pplant", "orchid", 14, 14, "Orchid"], ["pplant", "succulent", 12, 12, "Succulent", { color: "#8aa38c" }], ["pplant", "cactus", 18, 18, "Cactus", { color: "#6f8a5a" }]]],
