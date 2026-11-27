@@ -443,7 +443,7 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
     closet: { name: "Closet", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 121.9, h: 61, color: "#e3d6c2", style: "rod", styles: ["rod", "dblrod", "cshelf", "shoes", "cdrawer", "cisland", "hamper"] },
     pplant: { name: "Plant", kind: "rect", layer: "details", mode: "plan", bare: true, w: 60, h: 60, color: "#7d8f6e", style: "pot", styles: ["pot", "fern", "monstera", "snake", "fiddle", "succulent", "areca", "orchid", "shrub", "hedge", "fbed", "grass", "hibiscus", "bougain", "croton", "banana", "bamboo", "cactus", "planter", "palm", "tree", "flamboyan"] },
     column: { name: "Column", kind: "rect", layer: "structure", mode: "plan", bare: true, w: 20.3, h: 20.3, color: "#f1eee8", style: "square", styles: ["square", "round", "tapered", "classic", "steel", "brick"] },
-    pave: { name: "Paving", kind: "rect", layer: "details", mode: "plan", bare: true, w: 121.9, h: 121.9, color: "#cfcac0", style: "concrete", styles: ["concrete", "pavers", "brick", "flagstone", "stepping", "gravel", "deck", "ptile", "asphalt", "lawn", "mulch", "pool"] },
+    pave: { name: "Paving", kind: "rect", layer: "details", mode: "plan", rot: true, bare: true, w: 121.9, h: 121.9, color: "#cfcac0", style: "concrete", styles: ["concrete", "pavers", "brick", "flagstone", "stepping", "gravel", "deck", "ptile", "asphalt", "lawn", "mulch", "pool"] },
     label: { name: "Label", kind: "label", layer: "details", mode: "both", w: 200, h: 30, color: "#2a2a28" },
     line: { name: "Line", kind: "line", layer: "sketch", mode: "both", color: "#2a2a28" },
     pen: { name: "Pen stroke", kind: "pen", layer: "sketch", mode: "both", color: "#2a2a28" },
@@ -1506,8 +1506,9 @@ body.is3d .tool:not([data-t="select"]):not([data-t="window"]):not([data-t="door"
       default: return R(X, T, W, H, c, stk(e, 1.4)) + ln(`M${f(X)} ${f(T)}L${f(X + W)} ${f(T + H)}M${f(X + W)} ${f(T)}L${f(X)} ${f(T + H)}`, e, 0.6, 'opacity=".5"');
     }
   }
-  function paveSVG(p, o) {
-    const { X, T, W, H } = bx(p), c = p.color, e = shade(c, -0.4), m = Math.min(W, H), rnd = mulberry(p.id * 53 + 11);
+  /* drawn in its own turned frame (0..L by 0..Dp) when it is rotated, like furniture */
+  function paveSVG(p, o, L, Dp) {
+    const { X, T, W, H } = L == null ? bx(p) : { X: 0, T: 0, W: L, H: Dp }, c = p.color, e = shade(c, -0.4), m = Math.min(W, H), rnd = mulberry(p.id * 53 + 11);
     switch (p.style) {
       case "stepping": {
         const along = H >= W, L = along ? H : W, n = Math.max(1, Math.floor(L / 55)); let s = "";
